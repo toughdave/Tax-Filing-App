@@ -10,7 +10,7 @@ const modeRequirements: Record<FilingMode, string[]> = {
   COMPANY: ["corporationName", "businessNumber", "corporateRevenue"]
 };
 
-function sanitizePayload(payload: Record<string, unknown>) {
+export function sanitizePayload(payload: Record<string, unknown>) {
   const sanitized: Record<string, string | number | boolean | null> = {};
 
   for (const [key, value] of Object.entries(payload)) {
@@ -33,7 +33,7 @@ function sanitizePayload(payload: Record<string, unknown>) {
   return sanitized;
 }
 
-function missingRequiredFields(mode: FilingMode, payload: Record<string, unknown>) {
+export function missingRequiredFields(mode: FilingMode, payload: Record<string, unknown>) {
   return modeRequirements[mode].filter((field) => {
     const value = payload[field];
 

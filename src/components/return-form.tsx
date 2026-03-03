@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { baseFieldGroups, filingModes, modeSpecificFieldGroups, parseFilingMode, type FilingMode } from "@/lib/tax-field-config";
+import { useCallback, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { baseFieldGroups, filingModes, modeSpecificFieldGroups, parseFilingMode, type FilingMode, type TaxField } from "@/lib/tax-field-config";
 import { textFor, type Locale } from "@/lib/i18n";
 
 interface ReturnFormProps {
@@ -19,11 +20,16 @@ interface SaveResponse {
   carryForwardFromYear: number | null;
 }
 
+function htmlInputType(field: TaxField): string {
+  if (field.type === "number") return "number";
+  if (field.type === "date") return "date";
+  return "text";
+}
+
 export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" }: ReturnFormProps) {
   const t = textFor(locale);
   const [taxYear, setTaxYear] = useState(String(defaultTaxYear));
   const [filingMode, setFilingMode] = useState<FilingMode>(defaultMode);
-  const [values, setValues] = useState<Record<string, string>>({});
   const [returnId, setReturnId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
@@ -31,38 +37,39 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [carryForwardYear, setCarryForwardYear] = useState<number | null>(null);
 
+  const { register, getValues, reset } = useForm<Record<string, string>>({
+    mode: "onBlur"
+  });
+
   const activeGroups = useMemo(
     () => [...baseFieldGroups, ...(modeSpecificFieldGroups[filingMode] ?? [])],
     [filingMode]
   );
 
-  function handleValueChange(fieldKey: string, value: string) {
-    setValues((current) => ({ ...current, [fieldKey]: value }));
-  }
-
-  function payloadFromValues() {
+  const payloadFromValues = useCallback(() => {
+    const raw = getValues();
     const payload: Record<string, string | number | null> = {};
 
     for (const group of activeGroups) {
       for (const field of group.fields) {
-        const raw = values[field.key];
-        if (raw === undefined || raw === "") {
+        const value = raw[field.key];
+        if (value === undefined || value === "") {
           payload[field.key] = null;
           continue;
         }
 
         if (field.type === "number") {
-          const numeric = Number(raw);
+          const numeric = Number(value);
           payload[field.key] = Number.isFinite(numeric) ? numeric : null;
           continue;
         }
 
-        payload[field.key] = raw;
+        payload[field.key] = value;
       }
     }
 
     return payload;
-  }
+  }, [activeGroups, getValues]);
 
   async function saveDraft(): Promise<SaveResponse | null> {
     setIsSaving(true);
@@ -142,6 +149,15 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
     }
   }
 
+  function handleModeChange(newMode: FilingMode) {
+    setFilingMode(newMode);
+    reset();
+    setReturnId(null);
+    setCarryForwardYear(null);
+    setInfoMessage(null);
+    setErrorMessage(null);
+  }
+
   return (
     <div className="surface" style={{ padding: "1.2rem", display: "grid", gap: "1.1rem" }}>
       <div>
@@ -169,7 +185,7 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
           <select
             id="filingMode"
             value={filingMode}
-            onChange={(event) => setFilingMode(parseFilingMode(event.target.value))}
+            onChange={(event) => handleModeChange(parseFilingMode(event.target.value))}
           >
             {filingModes.map((mode) => (
               <option key={mode.value} value={mode.value}>
@@ -199,10 +215,8 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
                   </label>
                   <input
                     id={field.key}
-                    name={field.key}
-                    type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
-                    value={values[field.key] ?? ""}
-                    onChange={(event) => handleValueChange(field.key, event.target.value)}
+                    type={htmlInputType(field)}
+                    {...register(field.key)}
                   />
                   <small>{t[field.helpKey]}</small>
                 </div>
