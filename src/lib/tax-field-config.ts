@@ -12,7 +12,7 @@ export interface TaxField {
 
 export interface FieldGroup {
   id: string;
-  title: string;
+  titleKey: string;
   fields: TaxField[];
 }
 
@@ -37,7 +37,7 @@ export const filingModes: { value: FilingMode; labelKey: string; descriptionKey:
 export const baseFieldGroups: FieldGroup[] = [
   {
     id: "identity",
-    title: "Identity",
+    titleKey: "groupIdentity",
     fields: [
       { key: "legalName", labelKey: "fieldLegalName", helpKey: "fieldLegalNameHelp", type: "text", required: true },
       { key: "sinLast4", labelKey: "fieldSinLast4", helpKey: "fieldSinLast4Help", type: "text", required: true },
@@ -46,7 +46,7 @@ export const baseFieldGroups: FieldGroup[] = [
   },
   {
     id: "residency",
-    title: "Residency",
+    titleKey: "groupResidency",
     fields: [
       {
         key: "residencyProvince",
@@ -66,7 +66,7 @@ export const baseFieldGroups: FieldGroup[] = [
   },
   {
     id: "income",
-    title: "Income",
+    titleKey: "groupIncome",
     fields: [
       {
         key: "employmentIncome",
@@ -79,7 +79,7 @@ export const baseFieldGroups: FieldGroup[] = [
   },
   {
     id: "deductions",
-    title: "Deductions",
+    titleKey: "groupDeductions",
     fields: [
       { key: "rrsp", labelKey: "fieldRrsp", helpKey: "fieldRrspHelp", type: "number" },
       { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number" },
@@ -93,7 +93,7 @@ export const modeSpecificFieldGroups: Record<FilingMode, FieldGroup[]> = {
   SELF_EMPLOYED: [
     {
       id: "self-employed",
-      title: "Self-employed",
+      titleKey: "groupSelfEmployed",
       fields: [
         {
           key: "businessIncome",
@@ -122,7 +122,7 @@ export const modeSpecificFieldGroups: Record<FilingMode, FieldGroup[]> = {
   COMPANY: [
     {
       id: "company",
-      title: "Company",
+      titleKey: "groupCompany",
       fields: [
         {
           key: "corporationName",

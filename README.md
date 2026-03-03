@@ -1,6 +1,6 @@
-# NorthBridge Tax (Canada)
+# Canada Tax Filing
 
-NorthBridge Tax is a security-first, bilingual (English/French), Canada-focused tax filing web app built on Next.js fullstack to simplify CRA-aligned filing for **individual**, **self-employed**, and **company** pathways with progressive disclosure.
+A security-first, bilingual (English/French), Canada-focused tax filing web app built on Next.js fullstack to simplify CRA-aligned filing for **individual**, **self-employed**, and **company** pathways with progressive disclosure.
 
 ## Vision
 
@@ -45,13 +45,13 @@ Tax filing should feel structured, understandable, and calm. This project priori
 
 ## Security Highlights
 
-- Session cookies via NextAuth database strategy
+- JWT sessions via NextAuth with Prisma adapter
 - Security headers via `next.config.ts` (CSP/HSTS/frame protections)
 - Audit logging for auth and filing actions
 - PII-aware architecture and clear security documentation
 - No hardcoded secrets, env-based config only
 
-See `SECURITY.md` for full controls and hardening checklist.
+See `SECURITY.md` for vulnerability reporting policy.
 
 ## Local Development
 

@@ -3,7 +3,7 @@ export type Locale = "en" | "fr";
 type TextDictionary = Record<string, string>;
 
 const en: TextDictionary = {
-  appName: "NorthBridge Tax",
+  appName: "Canada Tax Filing",
   navHome: "Home",
   navDashboard: "Dashboard",
   navStartReturn: "Start a return",
@@ -96,6 +96,12 @@ const en: TextDictionary = {
   fieldCorpPayrollHelp: "Total payroll compensation for the tax year.",
   fieldCorpDeductions: "Corporate deductions",
   fieldCorpDeductionsHelp: "Include only eligible, documented deductions.",
+  groupIdentity: "Identity",
+  groupResidency: "Residency",
+  groupIncome: "Income",
+  groupDeductions: "Deductions",
+  groupSelfEmployed: "Self-employed",
+  groupCompany: "Company",
   checklistIdentity: "Identity details verified",
   checklistDocuments: "Supporting slips/statements attached",
   checklistModeSpecific: "Mode-specific fields complete",
@@ -108,7 +114,7 @@ const en: TextDictionary = {
 };
 
 const fr: TextDictionary = {
-  appName: "NorthBridge Tax",
+  appName: "Déclaration fiscale Canada",
   navHome: "Accueil",
   navDashboard: "Tableau de bord",
   navStartReturn: "Commencer une déclaration",
@@ -201,6 +207,12 @@ const fr: TextDictionary = {
   fieldCorpPayrollHelp: "Rémunération totale versée durant l'année.",
   fieldCorpDeductions: "Déductions de la société",
   fieldCorpDeductionsHelp: "Incluez uniquement les déductions admissibles et documentées.",
+  groupIdentity: "Identité",
+  groupResidency: "Résidence",
+  groupIncome: "Revenus",
+  groupDeductions: "Déductions",
+  groupSelfEmployed: "Travailleur autonome",
+  groupCompany: "Entreprise",
   checklistIdentity: "Détails d'identité vérifiés",
   checklistDocuments: "Feuillets et pièces justificatives joints",
   checklistModeSpecific: "Champs spécifiques au mode complétés",

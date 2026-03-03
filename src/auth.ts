@@ -1,4 +1,4 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
+import { type NextAuthOptions } from "next-auth";
 import AppleProvider from "next-auth/providers/apple";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -72,19 +72,25 @@ const providers = [
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database"
+    strategy: "jwt"
   },
   pages: {
     signIn: "/sign-in"
   },
   providers,
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        session.user.role = user.role;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
       }
-
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role ?? "TAXPAYER";
+      }
       return session;
     }
   },
@@ -98,10 +104,10 @@ export const authOptions: NextAuthOptions = {
         }
       });
     },
-    async signOut(message) {
+    async signOut({ token }) {
       await prisma.auditEvent.create({
         data: {
-          userId: message.session?.user?.id ?? message.token?.sub,
+          userId: token?.sub,
           action: "auth.sign_out",
           resource: "UserSession"
         }
@@ -109,5 +115,3 @@ export const authOptions: NextAuthOptions = {
     }
   }
 };
-
-export default NextAuth(authOptions);

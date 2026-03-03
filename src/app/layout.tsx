@@ -15,12 +15,12 @@ const bodyFont = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "NorthBridge Tax | Canada Filing",
+  title: "Canada Tax Filing",
   description:
     "Security-first, Canada-focused tax filing for individual, self-employed, and company workflows.",
-  applicationName: "NorthBridge Tax",
+  applicationName: "Canada Tax Filing",
   keywords: ["Canada tax", "CRA", "tax filing", "self-employed", "company tax", "secure tax app"],
-  metadataBase: new URL("https://localhost:3000")
+  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000")
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

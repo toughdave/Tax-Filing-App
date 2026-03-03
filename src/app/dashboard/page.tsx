@@ -15,7 +15,8 @@ export default async function DashboardPage({
   const t = textFor(locale);
   const session = await getAuthSession();
 
-  const returns = session?.user?.id ? await listReturnsForUser(session.user.id) : [];
+  type TaxReturnRow = Awaited<ReturnType<typeof listReturnsForUser>>[number];
+  const returns: TaxReturnRow[] = session?.user?.id ? await listReturnsForUser(session.user.id) : [];
 
   return (
     <main style={{ paddingBottom: "3rem" }}>
@@ -46,7 +47,7 @@ export default async function DashboardPage({
                     <tr key={taxReturn.id} style={{ borderTop: "1px solid #e2e8f0" }}>
                       <td style={{ padding: "0.9rem" }}>{taxReturn.taxYear}</td>
                       <td style={{ padding: "0.9rem" }}>{taxReturn.filingMode}</td>
-                      <td style={{ padding: "0.9rem" }}>{t[`status_${taxReturn.status}`] ?? taxReturn.status}</td>
+                      <td style={{ padding: "0.9rem" }}>{t[`status${taxReturn.status}`] ?? taxReturn.status}</td>
                       <td style={{ padding: "0.9rem" }}>{formatDate(taxReturn.updatedAt, locale)}</td>
                       <td style={{ padding: "0.9rem" }}>
                         <Link href={withLang("/returns/new", locale)} className="btn btn-secondary" style={{ padding: "0.35rem 0.7rem" }}>

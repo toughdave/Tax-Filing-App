@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-const currentYear = new Date().getFullYear();
-
 export const filingModeSchema = z.enum(["INDIVIDUAL", "SELF_EMPLOYED", "COMPANY"]);
 export const returnStatusSchema = z.enum([
   "DRAFT",
@@ -12,10 +10,9 @@ export const returnStatusSchema = z.enum([
 ]);
 
 export const saveReturnSchema = z.object({
-  taxYear: z.coerce.number().int().min(2010).max(currentYear),
+  taxYear: z.coerce.number().int().min(2010).refine((y) => y <= new Date().getFullYear(), { message: "Tax year cannot be in the future" }),
   filingMode: filingModeSchema,
-  status: returnStatusSchema.optional().default("DRAFT"),
-  payload: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).or(z.record(z.string(), z.any()))
+  payload: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
 });
 
 export const prepareSubmissionSchema = z.object({

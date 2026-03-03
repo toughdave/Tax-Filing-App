@@ -27,3 +27,6 @@ coverage/
 # prisma
 prisma/dev.db
 prisma/dev.db-journal
+
+# internal docs (private security controls, etc.)
+docs/internal-*.md

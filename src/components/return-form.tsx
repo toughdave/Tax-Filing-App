@@ -189,7 +189,7 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
       <div style={{ display: "grid", gap: "1rem" }}>
         {activeGroups.map((group) => (
           <section key={group.id} className="surface" style={{ padding: "0.95rem", display: "grid", gap: "0.8rem" }}>
-            <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{group.title}</h3>
+            <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{t[group.titleKey]}</h3>
             <div className="grid-cards">
               {group.fields.map((field) => (
                 <div key={field.key} className="field">
