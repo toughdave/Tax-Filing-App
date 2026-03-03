@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  TAXPAYER
+  SUPPORT
+  ADMIN
+}
+
+enum FilingMode {
+  INDIVIDUAL
+  SELF_EMPLOYED
+  COMPANY
+}
+
+enum ReturnStatus {
+  DRAFT
+  READY_TO_REVIEW
+  SUBMISSION_PENDING
+  SUBMITTED
+  REJECTED
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole    @default(TAXPAYER)
+  locale        String      @default("en")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  taxProfiles   TaxProfile[]
+  taxReturns    TaxReturn[]
+  auditEvents   AuditEvent[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model TaxProfile {
+  id                 String   @id @default(cuid())
+  userId             String
+  legalFirstName     String?
+  legalLastName      String?
+  dateOfBirth        DateTime?
+  sinLast4           String?
+  residencyProvince  String?
+  maritalStatus      String?
+  dependants         Int      @default(0)
+  isCanadianResident Boolean  @default(true)
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model TaxReturn {
+  id                    String       @id @default(cuid())
+  userId                String
+  taxYear               Int
+  filingMode            FilingMode
+  status                ReturnStatus @default(DRAFT)
+  data                  Json
+  priorYearReturnId     String?
+  externalSubmissionRef String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  submittedAt           DateTime?
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  priorYearReturn       TaxReturn?   @relation("PriorYearReturn", fields: [priorYearReturnId], references: [id])
+  nextYearReturns       TaxReturn[]  @relation("PriorYearReturn")
+
+  @@unique([userId, taxYear, filingMode])
+  @@index([userId, taxYear])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([resource, createdAt])
+}
