@@ -37,6 +37,9 @@ export async function SiteHeader({ locale }: SiteHeaderProps) {
             </Link>
             {session?.user ? (
               <>
+                <Link href={withLang("/account", locale)} className="btn btn-secondary" style={{ padding: "0.45rem 0.8rem" }}>
+                  {t.navAccount}
+                </Link>
                 <span className="muted" style={{ fontSize: "0.9rem" }}>
                   {t.navSignedInAs}: {session.user.email}
                 </span>

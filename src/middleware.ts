@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_PATHS = ["/dashboard", "/returns"];
+const PROTECTED_PATHS = ["/dashboard", "/returns", "/account"];
 
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_PATHS.some(

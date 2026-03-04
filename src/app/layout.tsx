@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Manrope, Space_Grotesk } from "next/font/google";
+import { ConsentBanner } from "@/components/consent-banner";
+import type { Locale } from "@/lib/i18n";
 import "./globals.css";
 
 const titleFont = Space_Grotesk({
@@ -30,7 +32,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${titleFont.variable} ${bodyFont.variable}`}>{children}</body>
+      <body className={`${titleFont.variable} ${bodyFont.variable}`}>
+        {children}
+        <ConsentBanner locale={locale as Locale} />
+      </body>
     </html>
   );
 }

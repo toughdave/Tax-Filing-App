@@ -10,6 +10,7 @@ const en: TextDictionary = {
   navSignIn: "Sign in",
   navSignOut: "Sign out",
   navSignedInAs: "Signed in as",
+  navAccount: "Account",
   homeEyebrow: "Canada-only • CRA-focused",
   homeTitle: "Tax filing that feels clear, calm, and actually manageable.",
   homeSubtitle:
@@ -139,7 +140,23 @@ const en: TextDictionary = {
   errorTitle: "Something went wrong",
   errorReferencePrefix: "Error reference:",
   errorFallback: "An unexpected error occurred.",
-  errorTryAgain: "Try again"
+  errorTryAgain: "Try again",
+  consentBannerTitle: "Privacy & consent",
+  consentBannerBody: "By using this service you agree to our Terms of Service, Privacy Policy, and data processing practices. Your tax data is handled in accordance with Canadian privacy legislation.",
+  consentAcceptAll: "Accept all",
+  consentManage: "Manage preferences",
+  consentTerms: "Terms of Service",
+  consentPrivacy: "Privacy Policy",
+  consentDataProcessing: "Data processing",
+  consentGranted: "Accepted",
+  consentPending: "Pending",
+  accountSettingsTitle: "Account settings",
+  accountDataExport: "Request data export",
+  accountDataExportDesc: "Receive a copy of all your data stored in this service.",
+  accountDataDeletion: "Request account deletion",
+  accountDataDeletionDesc: "Permanently delete your account and all associated data.",
+  accountDataRequestPending: "Request submitted — we will process it shortly.",
+  accountDataRequestExists: "A request is already being processed."
 };
 
 const fr: TextDictionary = {
@@ -150,6 +167,7 @@ const fr: TextDictionary = {
   navSignIn: "Se connecter",
   navSignOut: "Se déconnecter",
   navSignedInAs: "Connecté en tant que",
+  navAccount: "Compte",
   homeEyebrow: "Canada seulement • Axé sur l'ARC",
   homeTitle: "La déclaration d'impôt qui devient claire, simple et gérable.",
   homeSubtitle:
@@ -279,7 +297,23 @@ const fr: TextDictionary = {
   errorTitle: "Un problème est survenu",
   errorReferencePrefix: "Référence d'erreur :",
   errorFallback: "Une erreur inattendue est survenue.",
-  errorTryAgain: "Réessayer"
+  errorTryAgain: "Réessayer",
+  consentBannerTitle: "Confidentialité et consentement",
+  consentBannerBody: "En utilisant ce service, vous acceptez nos conditions d'utilisation, notre politique de confidentialité et nos pratiques de traitement des données. Vos données fiscales sont traitées conformément à la législation canadienne en matière de vie privée.",
+  consentAcceptAll: "Tout accepter",
+  consentManage: "Gérer les préférences",
+  consentTerms: "Conditions d'utilisation",
+  consentPrivacy: "Politique de confidentialité",
+  consentDataProcessing: "Traitement des données",
+  consentGranted: "Accepté",
+  consentPending: "En attente",
+  accountSettingsTitle: "Paramètres du compte",
+  accountDataExport: "Demander l'exportation des données",
+  accountDataExportDesc: "Recevez une copie de toutes vos données stockées dans ce service.",
+  accountDataDeletion: "Demander la suppression du compte",
+  accountDataDeletionDesc: "Supprimez définitivement votre compte et toutes les données associées.",
+  accountDataRequestPending: "Demande soumise — nous la traiterons sous peu.",
+  accountDataRequestExists: "Une demande est déjà en cours de traitement."
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

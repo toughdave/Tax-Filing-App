@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.0] - 2026-03-04
+### Added
+- Consent management system with `ConsentRecord` Prisma model tracking user agreement to Terms of Service, Privacy Policy, and Data Processing.
+- Consent banner component — appears for authenticated users who haven't yet accepted current consent versions.
+- `GET /api/consent` and `POST /api/consent` endpoints for checking and recording consent.
+- Data retention controls with `DataRequest` Prisma model for EXPORT and DELETION requests.
+- `GET /api/account/data-request` and `POST /api/account/data-request` endpoints for submitting data requests.
+- Account settings page (`/account`) showing consent status and data request controls.
+- Account nav link in site header for authenticated users.
+- Bilingual (EN/FR) i18n strings for all consent and account management UI.
+- Consent service with version tracking, grant/revoke logic, and idempotent data request creation.
+- 9 unit tests for consent service covering all CRUD operations.
+- Prisma migration for `ConsentRecord`, `DataRequest`, and related enums.
+
+### Changed
+- `/account` added to protected routes in auth middleware.
+- Root layout now renders `ConsentBanner` globally for all pages.
+
+### Security
+- Consent records include IP address and user-agent for audit trail.
+- Data requests are rate-limited and CSRF-protected via `guardApiRoute`.
+- Duplicate pending data requests are prevented (idempotent).
+
 ## [0.3.0] - 2026-03-04
 ### Added
 - Auth middleware for protected page redirects (`/dashboard`, `/returns/*`) — unauthenticated users are redirected to `/sign-in` with `callbackUrl`.
