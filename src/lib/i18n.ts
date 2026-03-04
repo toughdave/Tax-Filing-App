@@ -322,7 +322,14 @@ const en: TextDictionary = {
   taxSummaryNonRefundableCredits: "Non-refundable tax credits",
   taxSummaryRefundableCredits: "Refundable credits",
   taxSummaryTaxPayable: "Tax payable",
-  taxSummaryBalanceOwing: "Balance owing (or refund)"
+  taxSummaryBalanceOwing: "Balance owing (or refund)",
+  taxSummaryProvincialTax: "Provincial / territorial tax",
+  taxSummaryProvincialBasicCredit: "Provincial basic personal credit",
+  taxSummaryProvincialNonRefundable: "Provincial non-refundable credits",
+  taxSummaryProvincialSurtax: "Provincial surtax",
+  taxSummaryNetProvincialTax: "Net provincial tax",
+  taxSummaryTotalCombinedTax: "Total combined tax (federal + provincial)",
+  taxSummaryProvince: "Province of residence"
 };
 
 const fr: TextDictionary = {
@@ -645,7 +652,14 @@ const fr: TextDictionary = {
   taxSummaryNonRefundableCredits: "Crédits d'impôt non remboursables",
   taxSummaryRefundableCredits: "Crédits remboursables",
   taxSummaryTaxPayable: "Impôt à payer",
-  taxSummaryBalanceOwing: "Solde dû (ou remboursement)"
+  taxSummaryBalanceOwing: "Solde dû (ou remboursement)",
+  taxSummaryProvincialTax: "Impôt provincial / territorial",
+  taxSummaryProvincialBasicCredit: "Crédit personnel de base provincial",
+  taxSummaryProvincialNonRefundable: "Crédits non remboursables provinciaux",
+  taxSummaryProvincialSurtax: "Surtaxe provinciale",
+  taxSummaryNetProvincialTax: "Impôt provincial net",
+  taxSummaryTotalCombinedTax: "Impôt total combiné (fédéral + provincial)",
+  taxSummaryProvince: "Province de résidence"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

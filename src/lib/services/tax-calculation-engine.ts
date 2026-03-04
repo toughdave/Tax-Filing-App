@@ -1,5 +1,6 @@
 import type { FilingMode } from "@/lib/tax-field-config";
 import { getTaxYearParams, type TaxYearParams, type TaxBracket } from "@/lib/tax-year-config";
+import { getProvincialTaxParams, type ProvincialTaxParams } from "@/lib/provincial-tax-config";
 
 // ---------------------------------------------------------------------------
 // Fallback 2024 params used when no versioned config is available
@@ -66,6 +67,16 @@ function calculateFederalTax(taxableIncome: number, brackets: TaxBracket[]): num
   return Math.round(tax * 100) / 100;
 }
 
+export interface ProvincialTaxDetail {
+  provinceCode: string;
+  provinceName: string;
+  provincialTax: number;
+  provincialBasicPersonalCredit: number;
+  provincialNonRefundableCredits: number;
+  netProvincialTax: number;
+  provincialSurtax: number;
+}
+
 export interface TaxSummary {
   totalIncome: number;
   totalDeductions: number;
@@ -75,6 +86,8 @@ export interface TaxSummary {
   basicPersonalCredit: number;
   nonRefundableCredits: number;
   netFederalTax: number;
+  provincial: ProvincialTaxDetail | null;
+  totalTax: number;
   refundableCredits: number;
   totalPayments: number;
   balanceOwing: number;
@@ -87,13 +100,51 @@ export interface TaxSummary {
   };
 }
 
+function computeProvincialTax(
+  taxableIncome: number,
+  totalCreditAmounts: number,
+  provParams: ProvincialTaxParams
+): ProvincialTaxDetail {
+  const provincialTax = calculateFederalTax(taxableIncome, provParams.brackets);
+  const lowestRate = provParams.brackets[0]?.rate ?? 0;
+  const provincialBasicPersonalCredit = round2(provParams.basicPersonalAmount * lowestRate);
+  const provincialNonRefundableCredits = round2(
+    provincialBasicPersonalCredit + totalCreditAmounts * lowestRate
+  );
+  const basicProvTax = Math.max(round2(provincialTax - provincialNonRefundableCredits), 0);
+
+  let provincialSurtax = 0;
+  if (provParams.surtax) {
+    const s = provParams.surtax;
+    if (basicProvTax > s.threshold1) {
+      provincialSurtax += round2((basicProvTax - s.threshold1) * s.rate1);
+    }
+    if (basicProvTax > s.threshold2) {
+      provincialSurtax += round2((basicProvTax - s.threshold2) * s.rate2);
+    }
+  }
+
+  const netProvincialTax = round2(basicProvTax + provincialSurtax);
+
+  return {
+    provinceCode: provParams.provinceCode,
+    provinceName: provParams.provinceName,
+    provincialTax,
+    provincialBasicPersonalCredit,
+    provincialNonRefundableCredits,
+    netProvincialTax,
+    provincialSurtax
+  };
+}
+
 function computePersonalTax(
   incomeItems: Record<string, number>,
   deductionItems: Record<string, number>,
   creditItems: Record<string, number>,
   refundableCreditItems: Record<string, number>,
   paymentItems: Record<string, number>,
-  params: TaxYearParams
+  params: TaxYearParams,
+  provParams: ProvincialTaxParams | null
 ): TaxSummary {
   const totalIncome = Object.values(incomeItems).reduce((a, b) => a + b, 0);
   const totalDeductions = Object.values(deductionItems).reduce((a, b) => a + b, 0);
@@ -108,9 +159,16 @@ function computePersonalTax(
 
   const netFederalTax = Math.max(round2(federalTax - nonRefundableCredits), 0);
 
+  const provincial = provParams
+    ? computeProvincialTax(taxableIncome, totalCreditAmounts, provParams)
+    : null;
+
+  const netProvincialTax = provincial?.netProvincialTax ?? 0;
+  const totalTax = round2(netFederalTax + netProvincialTax);
+
   const refundableCredits = round2(Object.values(refundableCreditItems).reduce((a, b) => a + b, 0));
   const totalPayments = round2(Object.values(paymentItems).reduce((a, b) => a + b, 0));
-  const balanceOwing = round2(netFederalTax - refundableCredits - totalPayments);
+  const balanceOwing = round2(totalTax - refundableCredits - totalPayments);
 
   return {
     totalIncome,
@@ -121,6 +179,8 @@ function computePersonalTax(
     basicPersonalCredit,
     nonRefundableCredits,
     netFederalTax,
+    provincial,
+    totalTax,
     refundableCredits,
     totalPayments,
     balanceOwing,
@@ -187,7 +247,10 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
     totalIncomeTaxDeducted: num(payload.totalIncomeTaxDeducted)
   };
 
-  return computePersonalTax(incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems, params);
+  const province = typeof payload.residencyProvince === "string" ? payload.residencyProvince : "";
+  const provParams = province ? getProvincialTaxParams(taxYear ?? 2024, province) : null;
+
+  return computePersonalTax(incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems, params, provParams);
 }
 
 export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
@@ -248,7 +311,10 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYe
     totalIncomeTaxDeducted: num(payload.totalIncomeTaxDeducted)
   };
 
-  return computePersonalTax(incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems, params);
+  const province = typeof payload.residencyProvince === "string" ? payload.residencyProvince : "";
+  const provParams = province ? getProvincialTaxParams(taxYear ?? 2024, province) : null;
+
+  return computePersonalTax(incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems, params, provParams);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.10.0] - 2026-03-04
+### Added
+- **Provincial / territorial tax calculations** for all 13 Canadian provinces and territories (Form 428 equivalent).
+  - Ontario (with surtax: 20% over $4,991 + 36% over $6,387), British Columbia (7 brackets), Alberta (5 brackets), Saskatchewan, Manitoba, Quebec, New Brunswick, Nova Scotia, Prince Edward Island, Newfoundland & Labrador (7 brackets), Northwest Territories, Nunavut, Yukon.
+  - Provincial basic personal credits computed at each province's lowest marginal rate.
+  - Provincial non-refundable credits applied proportionally.
+- New `provincial-tax-config.ts` module with `ProvincialTaxParams` interface, bracket data for 2024 (2025 inherits until CRA publishes indexed amounts), and `getProvincialTaxParams` / `getSupportedProvinces` helpers.
+- `TaxSummary` expanded with `provincial` (ProvincialTaxDetail | null), `totalTax` (federal + provincial combined).
+- `balanceOwing` now reflects combined federal + provincial tax minus refundable credits and payments.
+- Bilingual EN/FR i18n for all provincial tax summary labels.
+- 9 new provincial tax tests covering ON (with surtax), BC, AB, QC, SK (self-employed), unknown province fallback, and combined balance owing verification.
+- 161 tests total (16 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
 ## [0.9.0] - 2026-03-04
 ### Security
 - **XML escaping** in NETFILE provider: all user-supplied values now escaped with 5 standard XML entities to prevent injection.

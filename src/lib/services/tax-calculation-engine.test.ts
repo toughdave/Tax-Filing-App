@@ -256,6 +256,104 @@ describe("calculateCompanyTax", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Provincial tax calculation
+// ---------------------------------------------------------------------------
+
+describe("provincial tax calculation", () => {
+  it("returns null provincial when no residencyProvince is provided", () => {
+    const result = calculateIndividualTax({ employmentIncome: 80000 }, 2024);
+    expect(result.provincial).toBeNull();
+    expect(result.totalTax).toBe(result.netFederalTax);
+  });
+
+  it("computes Ontario provincial tax for $80k income", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 80000,
+      residencyProvince: "ON"
+    }, 2024);
+    expect(result.provincial).not.toBeNull();
+    expect(result.provincial!.provinceCode).toBe("ON");
+    expect(result.provincial!.provinceName).toBe("Ontario");
+    expect(result.provincial!.provincialTax).toBeGreaterThan(0);
+    expect(result.provincial!.provincialBasicPersonalCredit).toBeCloseTo(11865 * 0.0505, 2);
+    expect(result.provincial!.netProvincialTax).toBeGreaterThan(0);
+    expect(result.totalTax).toBe(
+      Math.round((result.netFederalTax + result.provincial!.netProvincialTax) * 100) / 100
+    );
+  });
+
+  it("computes Ontario surtax for high earners", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 250000,
+      residencyProvince: "ON"
+    }, 2024);
+    expect(result.provincial!.provincialSurtax).toBeGreaterThan(0);
+  });
+
+  it("computes BC provincial tax for $60k income", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 60000,
+      residencyProvince: "BC"
+    }, 2024);
+    expect(result.provincial!.provinceCode).toBe("BC");
+    // First bracket: 47937 * 0.0506, second bracket: (60000-47937) * 0.077
+    expect(result.provincial!.provincialTax).toBeCloseTo(
+      47937 * 0.0506 + (60000 - 47937) * 0.077, 2
+    );
+    expect(result.provincial!.provincialSurtax).toBe(0);
+  });
+
+  it("computes Alberta provincial tax — flat 10% first bracket", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 100000,
+      residencyProvince: "AB"
+    }, 2024);
+    expect(result.provincial!.provinceCode).toBe("AB");
+    // All within first bracket at 10%
+    expect(result.provincial!.provincialTax).toBe(10000);
+  });
+
+  it("computes Quebec provincial tax", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 70000,
+      residencyProvince: "QC"
+    }, 2024);
+    expect(result.provincial!.provinceCode).toBe("QC");
+    expect(result.provincial!.provincialTax).toBeGreaterThan(0);
+  });
+
+  it("balanceOwing includes both federal and provincial tax", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 80000,
+      residencyProvince: "ON",
+      totalIncomeTaxDeducted: 15000
+    }, 2024);
+    expect(result.balanceOwing).toBe(
+      Math.round((result.totalTax - result.refundableCredits - result.totalPayments) * 100) / 100
+    );
+  });
+
+  it("applies provincial tax for self-employed filers", () => {
+    const result = calculateSelfEmployedTax({
+      businessIncome: 100000,
+      businessExpenses: 20000,
+      residencyProvince: "SK"
+    }, 2024);
+    expect(result.provincial).not.toBeNull();
+    expect(result.provincial!.provinceCode).toBe("SK");
+    expect(result.totalTax).toBeGreaterThan(result.netFederalTax);
+  });
+
+  it("returns null provincial for unknown province code", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 50000,
+      residencyProvince: "XX"
+    }, 2024);
+    expect(result.provincial).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Unified calculateTax entry point
 // ---------------------------------------------------------------------------
 
