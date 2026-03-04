@@ -162,6 +162,9 @@ const { mockPrisma } = vi.hoisted(() => ({
       findFirst: vi.fn(),
       upsert: vi.fn(),
       update: vi.fn()
+    },
+    document: {
+      count: vi.fn().mockResolvedValue(0)
     }
   }
 }));
@@ -179,6 +182,10 @@ vi.mock("@/lib/submission-providers", () => ({
       message: "Test submission queued."
     })
   })
+}));
+
+vi.mock("@/lib/services/filing-preflight", () => ({
+  runPreflightChecks: () => ({ passed: true, checks: [] })
 }));
 
 describe("saveReturnForUser", () => {

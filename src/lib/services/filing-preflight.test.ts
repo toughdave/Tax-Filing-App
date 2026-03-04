@@ -42,6 +42,19 @@ describe("filing-preflight", () => {
     expect(result.passed).toBe(false);
   });
 
+  it("passes income check with alternative income sources", () => {
+    const payload = { ...completeIndividualPayload, employmentIncome: 0, interestIncome: 500 };
+    const result = runPreflightChecks(2024, "INDIVIDUAL", payload, true);
+    const incomeCheck = result.checks.find((c) => c.id === "income_reported");
+    expect(incomeCheck?.passed).toBe(true);
+  });
+
+  it("passes income check with pension income", () => {
+    const payload = { ...completeIndividualPayload, employmentIncome: 0, pensionIncome: 12000 };
+    const result = runPreflightChecks(2024, "INDIVIDUAL", payload, true);
+    expect(result.passed).toBe(true);
+  });
+
   it("documents check does not block submission", () => {
     const result = runPreflightChecks(2024, "INDIVIDUAL", completeIndividualPayload, false);
     expect(result.passed).toBe(true);

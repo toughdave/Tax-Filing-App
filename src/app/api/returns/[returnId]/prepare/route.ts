@@ -48,12 +48,26 @@ export async function POST(
     return NextResponse.json(prepared);
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message === "RETURN_NOT_FOUND") {
-        return NextResponse.json({ message: error.message }, { status: 404 });
+      const msg = error.message;
+
+      if (msg === "RETURN_NOT_FOUND") {
+        return NextResponse.json({ message: msg }, { status: 404 });
       }
 
-      if (error.message.startsWith("RETURN_INCOMPLETE")) {
-        return NextResponse.json({ message: error.message }, { status: 409 });
+      if (msg.startsWith("RETURN_INCOMPLETE")) {
+        return NextResponse.json({ message: msg }, { status: 409 });
+      }
+
+      if (msg.startsWith("PREFLIGHT_FAILED")) {
+        return NextResponse.json({ message: msg }, { status: 422 });
+      }
+
+      if (msg === "NETFILE_NOT_CONFIGURED" || msg === "EFILE_NOT_CONFIGURED") {
+        return NextResponse.json({ message: "PROVIDER_NOT_CONFIGURED" }, { status: 503 });
+      }
+
+      if (msg === "NETFILE_INDIVIDUAL_ONLY") {
+        return NextResponse.json({ message: msg }, { status: 422 });
       }
     }
 

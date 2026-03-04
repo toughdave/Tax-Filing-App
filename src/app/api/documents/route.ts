@@ -91,6 +91,9 @@ export async function POST(request: Request) {
     if (message === "UNSUPPORTED_FILE_TYPE" || message === "FILE_TOO_LARGE") {
       return NextResponse.json({ message }, { status: 400 });
     }
+    if (message === "RETURN_NOT_OWNED") {
+      return NextResponse.json({ message: "RETURN_NOT_FOUND" }, { status: 404 });
+    }
     return NextResponse.json({ message: "UPLOAD_FAILED" }, { status: 500 });
   }
 }

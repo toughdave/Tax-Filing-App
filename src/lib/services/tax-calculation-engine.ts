@@ -73,34 +73,44 @@ export interface TaxSummary {
   taxableIncome: number;
   federalTax: number;
   basicPersonalCredit: number;
+  nonRefundableCredits: number;
   netFederalTax: number;
+  refundableCredits: number;
+  totalPayments: number;
+  balanceOwing: number;
   breakdown: {
     incomeItems: Record<string, number>;
     deductionItems: Record<string, number>;
+    creditItems: Record<string, number>;
+    refundableCreditItems: Record<string, number>;
+    paymentItems: Record<string, number>;
   };
 }
 
-export function calculateIndividualTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
-  const params = resolveParams(taxYear);
-  const incomeItems: Record<string, number> = {
-    employmentIncome: num(payload.employmentIncome),
-    otherIncome: num(payload.otherIncome)
-  };
-
-  const deductionItems: Record<string, number> = {
-    rrsp: num(payload.rrsp),
-    tuition: num(payload.tuition),
-    medical: num(payload.medical)
-  };
-
+function computePersonalTax(
+  incomeItems: Record<string, number>,
+  deductionItems: Record<string, number>,
+  creditItems: Record<string, number>,
+  refundableCreditItems: Record<string, number>,
+  paymentItems: Record<string, number>,
+  params: TaxYearParams
+): TaxSummary {
   const totalIncome = Object.values(incomeItems).reduce((a, b) => a + b, 0);
   const totalDeductions = Object.values(deductionItems).reduce((a, b) => a + b, 0);
   const netIncome = Math.max(totalIncome - totalDeductions, 0);
   const taxableIncome = netIncome;
 
   const federalTax = calculateFederalTax(taxableIncome, params.federalBrackets);
-  const basicPersonalCredit = Math.round(params.basicPersonalAmount * 0.15 * 100) / 100;
-  const netFederalTax = Math.max(Math.round((federalTax - basicPersonalCredit) * 100) / 100, 0);
+  const basicPersonalCredit = round2(params.basicPersonalAmount * 0.15);
+
+  const totalCreditAmounts = Object.values(creditItems).reduce((a, b) => a + b, 0);
+  const nonRefundableCredits = round2(basicPersonalCredit + totalCreditAmounts * 0.15);
+
+  const netFederalTax = Math.max(round2(federalTax - nonRefundableCredits), 0);
+
+  const refundableCredits = round2(Object.values(refundableCreditItems).reduce((a, b) => a + b, 0));
+  const totalPayments = round2(Object.values(paymentItems).reduce((a, b) => a + b, 0));
+  const balanceOwing = round2(netFederalTax - refundableCredits - totalPayments);
 
   return {
     totalIncome,
@@ -109,46 +119,136 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
     taxableIncome,
     federalTax,
     basicPersonalCredit,
+    nonRefundableCredits,
     netFederalTax,
-    breakdown: { incomeItems, deductionItems }
+    refundableCredits,
+    totalPayments,
+    balanceOwing,
+    breakdown: { incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems }
   };
+}
+
+function round2(v: number): number {
+  return Math.round(v * 100) / 100;
+}
+
+export function calculateIndividualTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
+  const params = resolveParams(taxYear);
+
+  const capitalGainsRaw = num(payload.capitalGains);
+  const taxableCapitalGains = round2(Math.max(capitalGainsRaw, 0) * 0.5);
+
+  const incomeItems: Record<string, number> = {
+    employmentIncome: num(payload.employmentIncome),
+    otherIncome: num(payload.otherIncome),
+    interestIncome: num(payload.interestIncome),
+    dividendIncome: num(payload.dividendIncome),
+    taxableCapitalGains,
+    rentalIncome: num(payload.rentalIncome),
+    pensionIncome: num(payload.pensionIncome),
+    eiBenefits: num(payload.eiBenefits)
+  };
+
+  const deductionItems: Record<string, number> = {
+    rrsp: num(payload.rrsp),
+    fhsa: num(payload.fhsa),
+    unionDues: num(payload.unionDues),
+    childCareExpenses: num(payload.childCareExpenses),
+    movingExpenses: num(payload.movingExpenses),
+    supportPaymentsMade: num(payload.supportPaymentsMade),
+    carryingCharges: num(payload.carryingCharges),
+    northernResidents: num(payload.northernResidents)
+  };
+
+  const creditItems: Record<string, number> = {
+    tuition: num(payload.tuition),
+    medical: num(payload.medical),
+    donations: num(payload.donations),
+    ageAmount: num(payload.ageAmount),
+    spouseAmount: num(payload.spouseAmount),
+    eligibleDependantAmount: num(payload.eligibleDependantAmount),
+    canadaCaregiverAmount: num(payload.canadaCaregiverAmount),
+    disabilityAmount: num(payload.disabilityAmount),
+    cppEiOverpayment: num(payload.cppEiOverpayment),
+    canadaEmploymentAmount: num(payload.canadaEmploymentAmount),
+    homeBuyersAmount: num(payload.homeBuyersAmount),
+    pensionIncomeAmount: num(payload.pensionIncomeAmount),
+    studentLoanInterest: num(payload.studentLoanInterest)
+  };
+
+  const refundableCreditItems: Record<string, number> = {
+    canadaWorkersAmount: num(payload.canadaWorkersAmount),
+    canadaTrainingCredit: num(payload.canadaTrainingCredit),
+    refundableMedical: num(payload.refundableMedical)
+  };
+
+  const paymentItems: Record<string, number> = {
+    taxPaidByInstalments: num(payload.taxPaidByInstalments),
+    totalIncomeTaxDeducted: num(payload.totalIncomeTaxDeducted)
+  };
+
+  return computePersonalTax(incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems, params);
 }
 
 export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
   const params = resolveParams(taxYear);
+
+  const capitalGainsRaw = num(payload.capitalGains);
+  const taxableCapitalGains = round2(Math.max(capitalGainsRaw, 0) * 0.5);
+
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
     otherIncome: num(payload.otherIncome),
+    interestIncome: num(payload.interestIncome),
+    dividendIncome: num(payload.dividendIncome),
+    taxableCapitalGains,
+    rentalIncome: num(payload.rentalIncome),
+    pensionIncome: num(payload.pensionIncome),
+    eiBenefits: num(payload.eiBenefits),
     businessIncome: num(payload.businessIncome)
   };
 
   const deductionItems: Record<string, number> = {
     rrsp: num(payload.rrsp),
-    tuition: num(payload.tuition),
-    medical: num(payload.medical),
+    fhsa: num(payload.fhsa),
+    unionDues: num(payload.unionDues),
+    childCareExpenses: num(payload.childCareExpenses),
+    movingExpenses: num(payload.movingExpenses),
+    supportPaymentsMade: num(payload.supportPaymentsMade),
+    carryingCharges: num(payload.carryingCharges),
+    northernResidents: num(payload.northernResidents),
     businessExpenses: num(payload.businessExpenses),
     businessUseHome: num(payload.businessUseHome)
   };
 
-  const totalIncome = Object.values(incomeItems).reduce((a, b) => a + b, 0);
-  const totalDeductions = Object.values(deductionItems).reduce((a, b) => a + b, 0);
-  const netIncome = Math.max(totalIncome - totalDeductions, 0);
-  const taxableIncome = netIncome;
-
-  const federalTax = calculateFederalTax(taxableIncome, params.federalBrackets);
-  const basicPersonalCredit = Math.round(params.basicPersonalAmount * 0.15 * 100) / 100;
-  const netFederalTax = Math.max(Math.round((federalTax - basicPersonalCredit) * 100) / 100, 0);
-
-  return {
-    totalIncome,
-    totalDeductions,
-    netIncome,
-    taxableIncome,
-    federalTax,
-    basicPersonalCredit,
-    netFederalTax,
-    breakdown: { incomeItems, deductionItems }
+  const creditItems: Record<string, number> = {
+    tuition: num(payload.tuition),
+    medical: num(payload.medical),
+    donations: num(payload.donations),
+    ageAmount: num(payload.ageAmount),
+    spouseAmount: num(payload.spouseAmount),
+    eligibleDependantAmount: num(payload.eligibleDependantAmount),
+    canadaCaregiverAmount: num(payload.canadaCaregiverAmount),
+    disabilityAmount: num(payload.disabilityAmount),
+    cppEiOverpayment: num(payload.cppEiOverpayment),
+    canadaEmploymentAmount: num(payload.canadaEmploymentAmount),
+    homeBuyersAmount: num(payload.homeBuyersAmount),
+    pensionIncomeAmount: num(payload.pensionIncomeAmount),
+    studentLoanInterest: num(payload.studentLoanInterest)
   };
+
+  const refundableCreditItems: Record<string, number> = {
+    canadaWorkersAmount: num(payload.canadaWorkersAmount),
+    canadaTrainingCredit: num(payload.canadaTrainingCredit),
+    refundableMedical: num(payload.refundableMedical)
+  };
+
+  const paymentItems: Record<string, number> = {
+    taxPaidByInstalments: num(payload.taxPaidByInstalments),
+    totalIncomeTaxDeducted: num(payload.totalIncomeTaxDeducted)
+  };
+
+  return computePersonalTax(incomeItems, deductionItems, creditItems, refundableCreditItems, paymentItems, params);
 }
 
 // ---------------------------------------------------------------------------

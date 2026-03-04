@@ -74,7 +74,13 @@ export const baseFieldGroups: FieldGroup[] = [
         helpKey: "fieldEmploymentIncomeHelp",
         type: "number"
       },
-      { key: "otherIncome", labelKey: "fieldOtherIncome", helpKey: "fieldOtherIncomeHelp", type: "number" }
+      { key: "otherIncome", labelKey: "fieldOtherIncome", helpKey: "fieldOtherIncomeHelp", type: "number" },
+      { key: "interestIncome", labelKey: "fieldInterestIncome", helpKey: "fieldInterestIncomeHelp", type: "number" },
+      { key: "dividendIncome", labelKey: "fieldDividendIncome", helpKey: "fieldDividendIncomeHelp", type: "number" },
+      { key: "capitalGains", labelKey: "fieldCapitalGains", helpKey: "fieldCapitalGainsHelp", type: "number" },
+      { key: "rentalIncome", labelKey: "fieldRentalIncome", helpKey: "fieldRentalIncomeHelp", type: "number" },
+      { key: "pensionIncome", labelKey: "fieldPensionIncome", helpKey: "fieldPensionIncomeHelp", type: "number" },
+      { key: "eiBenefits", labelKey: "fieldEiBenefits", helpKey: "fieldEiBenefitsHelp", type: "number" }
     ]
   },
   {
@@ -82,8 +88,43 @@ export const baseFieldGroups: FieldGroup[] = [
     titleKey: "groupDeductions",
     fields: [
       { key: "rrsp", labelKey: "fieldRrsp", helpKey: "fieldRrspHelp", type: "number" },
+      { key: "fhsa", labelKey: "fieldFhsa", helpKey: "fieldFhsaHelp", type: "number" },
+      { key: "unionDues", labelKey: "fieldUnionDues", helpKey: "fieldUnionDuesHelp", type: "number" },
+      { key: "childCareExpenses", labelKey: "fieldChildCareExpenses", helpKey: "fieldChildCareExpensesHelp", type: "number" },
+      { key: "movingExpenses", labelKey: "fieldMovingExpenses", helpKey: "fieldMovingExpensesHelp", type: "number" },
+      { key: "supportPaymentsMade", labelKey: "fieldSupportPaymentsMade", helpKey: "fieldSupportPaymentsMadeHelp", type: "number" },
+      { key: "carryingCharges", labelKey: "fieldCarryingCharges", helpKey: "fieldCarryingChargesHelp", type: "number" },
+      { key: "northernResidents", labelKey: "fieldNorthernResidents", helpKey: "fieldNorthernResidentsHelp", type: "number" }
+    ]
+  },
+  {
+    id: "credits",
+    titleKey: "groupCredits",
+    fields: [
       { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number" },
-      { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number" }
+      { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number" },
+      { key: "donations", labelKey: "fieldDonations", helpKey: "fieldDonationsHelp", type: "number" },
+      { key: "ageAmount", labelKey: "fieldAgeAmount", helpKey: "fieldAgeAmountHelp", type: "number" },
+      { key: "spouseAmount", labelKey: "fieldSpouseAmount", helpKey: "fieldSpouseAmountHelp", type: "number" },
+      { key: "eligibleDependantAmount", labelKey: "fieldEligibleDependantAmount", helpKey: "fieldEligibleDependantAmountHelp", type: "number" },
+      { key: "canadaCaregiverAmount", labelKey: "fieldCanadaCaregiverAmount", helpKey: "fieldCanadaCaregiverAmountHelp", type: "number" },
+      { key: "disabilityAmount", labelKey: "fieldDisabilityAmount", helpKey: "fieldDisabilityAmountHelp", type: "number" },
+      { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number" },
+      { key: "canadaEmploymentAmount", labelKey: "fieldCanadaEmploymentAmount", helpKey: "fieldCanadaEmploymentAmountHelp", type: "number" },
+      { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number" },
+      { key: "pensionIncomeAmount", labelKey: "fieldPensionIncomeAmount", helpKey: "fieldPensionIncomeAmountHelp", type: "number" },
+      { key: "studentLoanInterest", labelKey: "fieldStudentLoanInterest", helpKey: "fieldStudentLoanInterestHelp", type: "number" }
+    ]
+  },
+  {
+    id: "refundable-credits",
+    titleKey: "groupRefundableCredits",
+    fields: [
+      { key: "canadaWorkersAmount", labelKey: "fieldCanadaWorkersAmount", helpKey: "fieldCanadaWorkersAmountHelp", type: "number" },
+      { key: "canadaTrainingCredit", labelKey: "fieldCanadaTrainingCredit", helpKey: "fieldCanadaTrainingCreditHelp", type: "number" },
+      { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number" },
+      { key: "taxPaidByInstalments", labelKey: "fieldTaxPaidByInstalments", helpKey: "fieldTaxPaidByInstalmentsHelp", type: "number" },
+      { key: "totalIncomeTaxDeducted", labelKey: "fieldTotalIncomeTaxDeducted", helpKey: "fieldTotalIncomeTaxDeductedHelp", type: "number" }
     ]
   }
 ];

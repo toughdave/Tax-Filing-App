@@ -72,7 +72,11 @@ export function runPreflightChecks(
   });
 
   // 6. Income reported (at least one source > 0)
-  const incomeKeys = ["employmentIncome", "otherIncome", "businessIncome", "corporateRevenue"];
+  const incomeKeys = [
+    "employmentIncome", "otherIncome", "interestIncome", "dividendIncome",
+    "capitalGains", "rentalIncome", "pensionIncome", "eiBenefits",
+    "businessIncome", "corporateRevenue"
+  ];
   const hasIncome = incomeKeys.some((k) => {
     const v = payload[k];
     return typeof v === "number" && v > 0;

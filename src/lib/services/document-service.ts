@@ -50,9 +50,22 @@ export function validateUpload(mimeType: string, sizeBytes: number): string | nu
   return null;
 }
 
+export async function verifyReturnOwnership(returnId: string, userId: string): Promise<boolean> {
+  const taxReturn = await prisma.taxReturn.findFirst({
+    where: { id: returnId, userId },
+    select: { id: true }
+  });
+  return taxReturn !== null;
+}
+
 export async function uploadDocument(input: UploadInput): Promise<DocumentRecord> {
   const error = validateUpload(input.mimeType, input.data.length);
   if (error) throw new Error(error);
+
+  if (input.returnId) {
+    const owned = await verifyReturnOwnership(input.returnId, input.userId);
+    if (!owned) throw new Error("RETURN_NOT_OWNED");
+  }
 
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
 

@@ -1,6 +1,31 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.9.0] - 2026-03-04
+### Security
+- **XML escaping** in NETFILE provider: all user-supplied values now escaped with 5 standard XML entities to prevent injection.
+- **Document upload ownership verification**: `returnId` is now validated against the authenticated user before document attachment, preventing cross-user document linking.
+- Preflight checks now integrated into `prepareSubmissionForUser` flow — submissions cannot bypass validation.
+
+### Added
+- **Comprehensive CRA T1 field coverage** for maximizing refund opportunities:
+  - **Income sources**: interest/investment (12100), dividends (12000), capital gains with 50% inclusion (12700), rental (12600), pension (11300–11600), EI benefits (11900).
+  - **Deductions**: FHSA (20805), union/professional dues (21200), child care (21400), moving expenses (21900), support payments (22000), carrying charges (22100), northern residents (25500).
+  - **Non-refundable credits**: age amount (30100), spouse/partner (30300), eligible dependant (30400), Canada caregiver (30450), disability (31600), CPP/EI overpayment (Sched 8), Canada employment (31260), home buyers' (31270), pension income (31400), student loan interest (31900), donations (34900).
+  - **Refundable credits & payments**: Canada workers benefit (45300), Canada training credit (45350), refundable medical supplement (45200), tax paid by instalments (47600), total income tax deducted (43700).
+- Tax calculation engine expanded with `nonRefundableCredits`, `refundableCredits`, `totalPayments`, and `balanceOwing` fields.
+- CRA form-line mappings expanded to 44 individual field mappings per tax year, with Schedule 3, 6, 9, 11 forms added.
+- Provider-specific error mapping: preflight failures (422), provider not configured (503), mode mismatch (422).
+- UI handles REJECTED submission status with specific error message display.
+- Bilingual EN/FR i18n for all new fields, credits, error messages, and group titles.
+- Preflight income check now recognizes all 10 income source types.
+- 152 tests total (16 files) — new tests for XML escaping (5), expanded calculation engine (7), preflight income sources (2).
+
+### Changed
+- `TaxSummary` breakdown now includes `creditItems`, `refundableCreditItems`, and `paymentItems`.
+- `medical` and `tuition` moved from deductions to non-refundable credit items (matching CRA T1 structure).
+- Preflight checks run automatically before provider.prepare() — no longer optional.
+
 
 ## [0.8.0] - 2026-03-04
 ### Added
@@ -152,6 +177,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.

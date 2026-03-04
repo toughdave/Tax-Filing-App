@@ -37,6 +37,16 @@ export class SandboxCraProvider implements FilingSubmissionProvider {
 // NETFILE provider — for individual/self-employed T1 filings via CRA NETFILE
 // ---------------------------------------------------------------------------
 
+export function escapeXml(value: unknown): string {
+  const str = String(value ?? "");
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export class NetfileCraProvider implements FilingSubmissionProvider {
   name = "netfile-cra-provider";
 
@@ -90,29 +100,29 @@ export class NetfileCraProvider implements FilingSubmissionProvider {
     const p = packageData.payload;
     return [
       '<?xml version="1.0" encoding="UTF-8"?>',
-      `<T1Return taxYear="${packageData.taxYear}" filingMode="${packageData.filingMode}">`,
-      `  <ReturnId>${packageData.returnId}</ReturnId>`,
-      `  <GeneratedAt>${packageData.generatedAt}</GeneratedAt>`,
+      `<T1Return taxYear="${escapeXml(packageData.taxYear)}" filingMode="${escapeXml(packageData.filingMode)}">`,
+      `  <ReturnId>${escapeXml(packageData.returnId)}</ReturnId>`,
+      `  <GeneratedAt>${escapeXml(packageData.generatedAt)}</GeneratedAt>`,
       "  <Identification>",
-      `    <LegalName>${p.legalName ?? ""}</LegalName>`,
-      `    <SINLast4>${p.sinLast4 ?? ""}</SINLast4>`,
-      `    <BirthDate>${p.birthDate ?? ""}</BirthDate>`,
-      `    <Province>${p.residencyProvince ?? ""}</Province>`,
+      `    <LegalName>${escapeXml(p.legalName)}</LegalName>`,
+      `    <SINLast4>${escapeXml(p.sinLast4)}</SINLast4>`,
+      `    <BirthDate>${escapeXml(p.birthDate)}</BirthDate>`,
+      `    <Province>${escapeXml(p.residencyProvince)}</Province>`,
       "  </Identification>",
       "  <Income>",
-      `    <Line10100>${p.employmentIncome ?? 0}</Line10100>`,
-      `    <Line13000>${p.otherIncome ?? 0}</Line13000>`,
+      `    <Line10100>${escapeXml(p.employmentIncome ?? 0)}</Line10100>`,
+      `    <Line13000>${escapeXml(p.otherIncome ?? 0)}</Line13000>`,
       ...(packageData.filingMode === "SELF_EMPLOYED" ? [
-        `    <Line8299>${p.businessIncome ?? 0}</Line8299>`
+        `    <Line8299>${escapeXml(p.businessIncome ?? 0)}</Line8299>`
       ] : []),
       "  </Income>",
       "  <Deductions>",
-      `    <Line20800>${p.rrsp ?? 0}</Line20800>`,
-      `    <Line32300>${p.tuition ?? 0}</Line32300>`,
-      `    <Line33099>${p.medical ?? 0}</Line33099>`,
+      `    <Line20800>${escapeXml(p.rrsp ?? 0)}</Line20800>`,
+      `    <Line32300>${escapeXml(p.tuition ?? 0)}</Line32300>`,
+      `    <Line33099>${escapeXml(p.medical ?? 0)}</Line33099>`,
       ...(packageData.filingMode === "SELF_EMPLOYED" ? [
-        `    <Line9369>${p.businessExpenses ?? 0}</Line9369>`,
-        `    <Line9945>${p.businessUseHome ?? 0}</Line9945>`
+        `    <Line9369>${escapeXml(p.businessExpenses ?? 0)}</Line9369>`,
+        `    <Line9945>${escapeXml(p.businessUseHome ?? 0)}</Line9945>`
       ] : []),
       "  </Deductions>",
       "</T1Return>"

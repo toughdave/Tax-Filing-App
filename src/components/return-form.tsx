@@ -174,11 +174,23 @@ export function ReturnForm({
         throw new Error(error?.message ?? "PREPARE_FAILED");
       }
 
-      setInfoMessage(t.filingSubmitReady);
+      const result = (await response.json()) as { status?: string; message?: string };
+
+      if (result.status === "REJECTED") {
+        setErrorMessage(result.message ?? t.filingSubmitRejected);
+      } else {
+        setInfoMessage(t.filingSubmitReady);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
       if (message.startsWith("RETURN_INCOMPLETE")) {
         setErrorMessage(t.filingMissingForMode);
+      } else if (message.startsWith("PREFLIGHT_FAILED")) {
+        setErrorMessage(t.filingPreflightFailed);
+      } else if (message === "PROVIDER_NOT_CONFIGURED") {
+        setErrorMessage(t.filingProviderUnavailable);
+      } else if (message === "NETFILE_INDIVIDUAL_ONLY") {
+        setErrorMessage(t.filingNetfileIndividualOnly);
       } else {
         setErrorMessage(t.filingSubmitError);
       }

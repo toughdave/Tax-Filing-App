@@ -32,7 +32,7 @@ describe("calculateIndividualTax", () => {
     const result = calculateIndividualTax({
       employmentIncome: 80000,
       rrsp: 10000,
-      medical: 2000
+      unionDues: 2000
     });
     expect(result.totalDeductions).toBe(12000);
     expect(result.netIncome).toBe(68000);
@@ -57,19 +57,67 @@ describe("calculateIndividualTax", () => {
     const result = calculateIndividualTax({
       employmentIncome: 40000,
       otherIncome: 3000,
+      rrsp: 5000
+    });
+    expect(result.breakdown.incomeItems.employmentIncome).toBe(40000);
+    expect(result.breakdown.incomeItems.otherIncome).toBe(3000);
+    expect(result.breakdown.deductionItems.rrsp).toBe(5000);
+    expect(result.breakdown).toHaveProperty("creditItems");
+    expect(result.breakdown).toHaveProperty("refundableCreditItems");
+    expect(result.breakdown).toHaveProperty("paymentItems");
+  });
+
+  it("applies 50% inclusion rate to capital gains", () => {
+    const result = calculateIndividualTax({ capitalGains: 20000 });
+    expect(result.breakdown.incomeItems.taxableCapitalGains).toBe(10000);
+    expect(result.totalIncome).toBe(10000);
+  });
+
+  it("includes expanded income sources in total", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 50000,
+      interestIncome: 2000,
+      dividendIncome: 1000,
+      rentalIncome: 5000,
+      pensionIncome: 3000,
+      eiBenefits: 4000
+    });
+    expect(result.totalIncome).toBe(65000);
+  });
+
+  it("includes expanded deductions", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 80000,
       rrsp: 5000,
-      tuition: 1000,
-      medical: 500
+      fhsa: 8000,
+      unionDues: 600,
+      childCareExpenses: 4000
     });
-    expect(result.breakdown.incomeItems).toEqual({
-      employmentIncome: 40000,
-      otherIncome: 3000
+    expect(result.totalDeductions).toBe(17600);
+    expect(result.netIncome).toBe(62400);
+  });
+
+  it("applies non-refundable credits to reduce federal tax", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 80000,
+      tuition: 5000,
+      donations: 1000
     });
-    expect(result.breakdown.deductionItems).toEqual({
-      rrsp: 5000,
-      tuition: 1000,
-      medical: 500
+    expect(result.nonRefundableCredits).toBeGreaterThan(result.basicPersonalCredit);
+    expect(result.netFederalTax).toBeLessThan(result.federalTax);
+  });
+
+  it("computes refundable credits and balance owing", () => {
+    const result = calculateIndividualTax({
+      employmentIncome: 30000,
+      canadaWorkersAmount: 500,
+      totalIncomeTaxDeducted: 3000
     });
+    expect(result.refundableCredits).toBe(500);
+    expect(result.totalPayments).toBe(3000);
+    expect(result.balanceOwing).toBe(
+      Math.round((result.netFederalTax - 500 - 3000) * 100) / 100
+    );
   });
 
   it("handles string values by parsing them as numbers", () => {
@@ -142,6 +190,19 @@ describe("calculateSelfEmployedTax", () => {
     expect(result.breakdown.incomeItems.businessIncome).toBe(60000);
     expect(result.breakdown.deductionItems.businessExpenses).toBe(15000);
     expect(result.breakdown.deductionItems.businessUseHome).toBe(3000);
+  });
+
+  it("includes expanded income and credits for self-employed", () => {
+    const result = calculateSelfEmployedTax({
+      businessIncome: 80000,
+      interestIncome: 1000,
+      businessExpenses: 20000,
+      tuition: 2000,
+      canadaWorkersAmount: 300
+    });
+    expect(result.totalIncome).toBe(81000);
+    expect(result.breakdown.creditItems.tuition).toBe(2000);
+    expect(result.refundableCredits).toBe(300);
   });
 });
 

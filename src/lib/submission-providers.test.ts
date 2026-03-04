@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   getSubmissionProvider,
   NetfileCraProvider,
-  EfileCraProvider
+  EfileCraProvider,
+  escapeXml
 } from "@/lib/submission-providers";
 
 describe("submission provider", () => {
@@ -87,5 +88,47 @@ describe("submission provider", () => {
         generatedAt: new Date().toISOString()
       })
     ).rejects.toThrow("EFILE_NOT_CONFIGURED");
+  });
+
+  it("sandbox escapes XML-unsafe characters in payload values", async () => {
+    const provider = getSubmissionProvider();
+    const prepared = await provider.prepare({
+      returnId: "ret-xml-test",
+      taxYear: 2024,
+      filingMode: "INDIVIDUAL",
+      payload: {
+        legalName: 'John <script>alert("xss")</script> Doe & Sons',
+        sinLast4: '1234"',
+        employmentIncome: 50000
+      },
+      generatedAt: new Date().toISOString()
+    });
+    expect(prepared.status).toBe("SUBMISSION_PENDING");
+  });
+});
+
+describe("escapeXml", () => {
+  it("escapes all five XML entities", () => {
+    expect(escapeXml('A & B < C > D "E" \'F\'')).toBe(
+      "A &amp; B &lt; C &gt; D &quot;E&quot; &apos;F&apos;"
+    );
+  });
+
+  it("handles null/undefined gracefully", () => {
+    expect(escapeXml(null)).toBe("");
+    expect(escapeXml(undefined)).toBe("");
+  });
+
+  it("converts numbers to string", () => {
+    expect(escapeXml(12345)).toBe("12345");
+    expect(escapeXml(0)).toBe("0");
+  });
+
+  it("returns empty string for empty input", () => {
+    expect(escapeXml("")).toBe("");
+  });
+
+  it("leaves safe strings unchanged", () => {
+    expect(escapeXml("Jane Doe")).toBe("Jane Doe");
   });
 });

@@ -3,6 +3,7 @@ import type { SaveReturnInput } from "@/lib/validation/tax-return";
 import { getSubmissionProvider } from "@/lib/submission-providers";
 import { requiredFieldsForMode, type FilingMode } from "@/lib/tax-field-config";
 import { calculateTax, type CalculationResult } from "@/lib/services/tax-calculation-engine";
+import { runPreflightChecks } from "@/lib/services/filing-preflight";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
 
 export function sanitizePayload(payload: Record<string, unknown>) {
@@ -158,10 +159,26 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
     throw new Error("RETURN_NOT_FOUND");
   }
 
-  const missing = missingRequiredFields(taxReturn.filingMode, taxReturn.data as Record<string, unknown>);
+  const payload = taxReturn.data as Record<string, unknown>;
+
+  const missing = missingRequiredFields(taxReturn.filingMode, payload);
   if (missing.length > 0) {
     const fields = missing.join(",");
     throw new Error(`RETURN_INCOMPLETE:${fields}`);
+  }
+
+  const docCount = await prisma.document.count({
+    where: { returnId: taxReturn.id, userId }
+  });
+  const preflight = runPreflightChecks(
+    taxReturn.taxYear,
+    taxReturn.filingMode,
+    payload,
+    docCount > 0
+  );
+  if (!preflight.passed) {
+    const failedIds = preflight.checks.filter((c) => !c.passed).map((c) => c.id);
+    throw new Error(`PREFLIGHT_FAILED:${failedIds.join(",")}`);
   }
 
   const provider = getSubmissionProvider();
@@ -169,7 +186,7 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
     returnId: taxReturn.id,
     taxYear: taxReturn.taxYear,
     filingMode: taxReturn.filingMode,
-    payload: taxReturn.data as Record<string, unknown>,
+    payload,
     generatedAt: new Date().toISOString()
   });
 
