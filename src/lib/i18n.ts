@@ -169,7 +169,21 @@ const en: TextDictionary = {
   recoveryExists: "A recovery request for this email is already being reviewed.",
   recoveryError: "Could not submit your request. Please try again later.",
   recoveryNote: "For security, recovery requests are manually reviewed. Please allow 1–3 business days.",
-  recoveryLink: "Lost access to your account?"
+  recoveryLink: "Lost access to your account?",
+  adminTitle: "Support dashboard",
+  adminSubtitle: "View recovery requests, data requests, and audit events. All PII is masked.",
+  adminForbidden: "You do not have permission to access this page.",
+  adminRecoveryRequests: "Recovery requests",
+  adminDataRequests: "Data requests",
+  adminAuditLog: "Audit log",
+  adminNoResults: "No records found.",
+  adminEmail: "Email",
+  adminStatus: "Status",
+  adminType: "Type",
+  adminDate: "Date",
+  adminAction: "Action",
+  adminResource: "Resource",
+  adminIp: "IP"
 };
 
 const fr: TextDictionary = {
@@ -339,7 +353,21 @@ const fr: TextDictionary = {
   recoveryExists: "Une demande de récupération pour ce courriel est déjà en cours d'examen.",
   recoveryError: "Impossible de soumettre votre demande. Veuillez réessayer plus tard.",
   recoveryNote: "Pour des raisons de sécurité, les demandes sont examinées manuellement. Prévoyez 1 à 3 jours ouvrables.",
-  recoveryLink: "Vous avez perdu l'accès à votre compte?"
+  recoveryLink: "Vous avez perdu l'accès à votre compte?",
+  adminTitle: "Tableau de bord support",
+  adminSubtitle: "Consultez les demandes de récupération, les demandes de données et les événements d'audit. Toutes les données personnelles sont masquées.",
+  adminForbidden: "Vous n'avez pas la permission d'accéder à cette page.",
+  adminRecoveryRequests: "Demandes de récupération",
+  adminDataRequests: "Demandes de données",
+  adminAuditLog: "Journal d'audit",
+  adminNoResults: "Aucun enregistrement trouvé.",
+  adminEmail: "Courriel",
+  adminStatus: "Statut",
+  adminType: "Type",
+  adminDate: "Date",
+  adminAction: "Action",
+  adminResource: "Ressource",
+  adminIp: "IP"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

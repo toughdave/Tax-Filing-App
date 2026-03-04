@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.6.0] - 2026-03-04
+### Added
+- Admin/operator support dashboard (`/admin`) with role-based access control (SUPPORT/ADMIN roles only).
+- PII masking utility (`pii-mask.ts`) — masks emails, names, and IP addresses in admin views.
+- Admin guard utility (`admin-guard.ts`) — reusable session + role check returning 401/403 for unauthorized access.
+- `GET /api/admin/recovery-requests` — lists recovery requests with masked PII.
+- `GET /api/admin/data-requests` — lists data export/deletion requests with masked user emails.
+- `GET /api/admin/audit-log` — lists recent audit events with masked emails and IPs.
+- Tabbed admin dashboard UI (Recovery requests, Data requests, Audit log) with bilingual i18n.
+- 10 unit tests for PII masking utility.
+- `/admin` added to protected routes in auth middleware.
+
+### Security
+- All admin API endpoints enforce SUPPORT/ADMIN role check via `requireAdminSession()`.
+- PII is never exposed in admin views — emails, names, and IPs are masked by default.
+- Admin API endpoints are rate-limited and CSRF-protected via `guardApiRoute`.
+
 ## [0.5.0] - 2026-03-04
 ### Added
 - Account recovery flow for users who lose access to their OAuth provider.
