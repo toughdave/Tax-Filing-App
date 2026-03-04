@@ -2,13 +2,9 @@ import { FilingMode, ReturnStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { SaveReturnInput } from "@/lib/validation/tax-return";
 import { getSubmissionProvider } from "@/lib/submission-providers";
+import { requiredFieldsForMode } from "@/lib/tax-field-config";
+import { calculateTax, type CalculationResult } from "@/lib/services/tax-calculation-engine";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
-
-const modeRequirements: Record<FilingMode, string[]> = {
-  INDIVIDUAL: ["legalName", "sinLast4", "birthDate", "residencyProvince"],
-  SELF_EMPLOYED: ["legalName", "sinLast4", "birthDate", "residencyProvince", "businessIncome", "businessExpenses"],
-  COMPANY: ["corporationName", "businessNumber", "corporateRevenue"]
-};
 
 export function sanitizePayload(payload: Record<string, unknown>) {
   const sanitized: Record<string, string | number | boolean | null> = {};
@@ -34,7 +30,7 @@ export function sanitizePayload(payload: Record<string, unknown>) {
 }
 
 export function missingRequiredFields(mode: FilingMode, payload: Record<string, unknown>) {
-  return modeRequirements[mode].filter((field) => {
+  return requiredFieldsForMode(mode).filter((field) => {
     const value = payload[field];
 
     if (value === undefined || value === null) {
@@ -119,10 +115,13 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
     }
   });
 
+  const taxSummary: CalculationResult = calculateTax(mode, mergedData);
+
   return {
     record,
     missingRequired: missing,
-    carryForwardFromYear: carryForwardSource?.taxYear ?? null
+    carryForwardFromYear: carryForwardSource?.taxYear ?? null,
+    taxSummary
   };
 }
 

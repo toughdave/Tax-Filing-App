@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { saveReturnSchema } from "@/lib/validation/tax-return";
 import { getAuthSession } from "@/lib/session";
 import { saveReturnForUser, listReturnsForUser } from "@/lib/services/tax-return-service";
-import { writeAuditEvent } from "@/lib/audit";
+import { writeAuditEvent, extractRequestMeta } from "@/lib/audit";
 
 export async function GET() {
   const session = await getAuthSession();
@@ -44,7 +44,8 @@ export async function POST(request: Request) {
       returnId: result.record.id,
       taxYear: result.record.taxYear,
       filingMode: result.record.filingMode
-    }
+    },
+    ...extractRequestMeta(request)
   });
 
   return NextResponse.json(result);

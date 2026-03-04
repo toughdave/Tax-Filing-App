@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { allowedKeysForMode } from "@/lib/validation/payload-schema";
+import { allowedKeysForMode, payloadSchemaForMode } from "@/lib/validation/payload-schema";
 import type { FilingMode } from "@/lib/tax-field-config";
 
 export const filingModeSchema = z.enum(["INDIVIDUAL", "SELF_EMPLOYED", "COMPANY"]);
@@ -35,6 +35,17 @@ export const saveReturnSchema = z
     },
     {
       message: "Payload contains fields not allowed for this filing mode",
+      path: ["payload"]
+    }
+  )
+  .refine(
+    (data) => {
+      const schema = payloadSchemaForMode(data.filingMode as FilingMode);
+      const result = schema.safeParse(data.payload);
+      return result.success;
+    },
+    {
+      message: "Payload field types do not match the expected schema for this filing mode",
       path: ["payload"]
     }
   );

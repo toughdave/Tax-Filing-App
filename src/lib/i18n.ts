@@ -110,7 +110,29 @@ const en: TextDictionary = {
   statusREADY_TO_REVIEW: "Ready to review",
   statusSUBMISSION_PENDING: "Submission pending",
   statusSUBMITTED: "Submitted",
-  statusREJECTED: "Needs correction"
+  statusREJECTED: "Needs correction",
+  filingMissingCount: "required field(s) still need values.",
+  filingMissingForMode: "Required fields are still missing for this filing mode.",
+  taxSummaryTitle: "Tax estimate",
+  taxSummaryTotalIncome: "Total income",
+  taxSummaryTotalDeductions: "Total deductions",
+  taxSummaryNetIncome: "Net income",
+  taxSummaryFederalTax: "Federal tax",
+  taxSummaryPersonalCredit: "Basic personal credit",
+  taxSummaryNetFederalTax: "Net federal tax",
+  taxSummaryCorporateRevenue: "Corporate revenue",
+  taxSummarySmallBusinessTax: "Small business tax",
+  taxSummaryGeneralTax: "General corporate tax",
+  taxSummaryTotalCorporateTax: "Total corporate tax",
+  taxSummaryNotice: "This is a simplified estimate based on federal rates only.",
+  signInPanelTitle: "Sign in with your preferred method",
+  signInPanelOAuth: "Use OAuth",
+  signInPanelCredentials: "Use demo credentials",
+  signInPanelEmail: "Email",
+  signInPanelPasscode: "Passcode",
+  signInPanelSubmit: "Continue",
+  signInPanelPending: "Signing in...",
+  signInPanelSecurity: "Security note: OAuth is recommended for production usage."
 };
 
 const fr: TextDictionary = {
@@ -221,7 +243,29 @@ const fr: TextDictionary = {
   statusREADY_TO_REVIEW: "Prêt pour révision",
   statusSUBMISSION_PENDING: "Soumission en attente",
   statusSUBMITTED: "Soumis",
-  statusREJECTED: "Correction requise"
+  statusREJECTED: "Correction requise",
+  filingMissingCount: "champ(s) requis doivent encore être remplis.",
+  filingMissingForMode: "Des champs requis sont encore manquants pour ce mode de déclaration.",
+  taxSummaryTitle: "Estimation fiscale",
+  taxSummaryTotalIncome: "Revenu total",
+  taxSummaryTotalDeductions: "Déductions totales",
+  taxSummaryNetIncome: "Revenu net",
+  taxSummaryFederalTax: "Impôt fédéral",
+  taxSummaryPersonalCredit: "Crédit personnel de base",
+  taxSummaryNetFederalTax: "Impôt fédéral net",
+  taxSummaryCorporateRevenue: "Revenus de la société",
+  taxSummarySmallBusinessTax: "Impôt petite entreprise",
+  taxSummaryGeneralTax: "Impôt général",
+  taxSummaryTotalCorporateTax: "Impôt total de la société",
+  taxSummaryNotice: "Estimation simplifiée basée sur les taux fédéraux uniquement.",
+  signInPanelTitle: "Connectez-vous avec votre méthode préférée",
+  signInPanelOAuth: "Utiliser OAuth",
+  signInPanelCredentials: "Utiliser les identifiants démo",
+  signInPanelEmail: "Courriel",
+  signInPanelPasscode: "Code d'accès",
+  signInPanelSubmit: "Continuer",
+  signInPanelPending: "Connexion...",
+  signInPanelSecurity: "Note sécurité : OAuth est recommandé en production."
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

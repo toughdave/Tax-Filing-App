@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { baseFieldGroups, filingModes, modeSpecificFieldGroups, parseFilingMode, type FilingMode, type TaxField } from "@/lib/tax-field-config";
 import { textFor, type Locale } from "@/lib/i18n";
+import { formatCurrency } from "@/lib/format";
+import type { TaxSummary, CorporateTaxSummary, CalculationResult } from "@/lib/services/tax-calculation-engine";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -18,6 +20,7 @@ interface SaveResponse {
   };
   missingRequired: string[];
   carryForwardFromYear: number | null;
+  taxSummary: CalculationResult;
 }
 
 function htmlInputType(field: TaxField): string {
@@ -36,6 +39,7 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [carryForwardYear, setCarryForwardYear] = useState<number | null>(null);
+  const [taxSummary, setTaxSummary] = useState<CalculationResult | null>(null);
 
   const { register, getValues, reset } = useForm<Record<string, string>>({
     mode: "onBlur"
@@ -94,9 +98,10 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
       const data = (await response.json()) as SaveResponse;
       setReturnId(data.record.id);
       setCarryForwardYear(data.carryForwardFromYear);
+      setTaxSummary(data.taxSummary);
 
       if (data.missingRequired.length > 0) {
-        setInfoMessage(`${t.filingSaved} ${data.missingRequired.length} required field(s) still need values.`);
+        setInfoMessage(`${t.filingSaved} ${data.missingRequired.length} ${t.filingMissingCount}`);
       } else {
         setInfoMessage(t.filingSaved);
       }
@@ -140,7 +145,7 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
       if (message.startsWith("RETURN_INCOMPLETE")) {
-        setErrorMessage("Required fields are still missing for this filing mode.");
+        setErrorMessage(t.filingMissingForMode);
       } else {
         setErrorMessage(t.filingSubmitError);
       }
@@ -154,8 +159,58 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
     reset();
     setReturnId(null);
     setCarryForwardYear(null);
+    setTaxSummary(null);
     setInfoMessage(null);
     setErrorMessage(null);
+  }
+
+  function renderIndividualSummary(s: TaxSummary) {
+    return (
+      <div style={{ display: "grid", gap: "0.4rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryTotalIncome}</span><strong>{formatCurrency(s.totalIncome, locale)}</strong>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryTotalDeductions}</span><strong>{formatCurrency(s.totalDeductions, locale)}</strong>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryNetIncome}</span><strong>{formatCurrency(s.netIncome, locale)}</strong>
+        </div>
+        <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "0.3rem 0" }} />
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryFederalTax}</span><span>{formatCurrency(s.federalTax, locale)}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryPersonalCredit}</span><span>−{formatCurrency(s.basicPersonalCredit, locale)}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: "1.05rem" }}>
+          <span>{t.taxSummaryNetFederalTax}</span><span>{formatCurrency(s.netFederalTax, locale)}</span>
+        </div>
+      </div>
+    );
+  }
+
+  function renderCorporateSummary(s: CorporateTaxSummary) {
+    return (
+      <div style={{ display: "grid", gap: "0.4rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryCorporateRevenue}</span><strong>{formatCurrency(s.corporateRevenue, locale)}</strong>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryTotalDeductions}</span><strong>{formatCurrency(s.totalDeductions, locale)}</strong>
+        </div>
+        <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "0.3rem 0" }} />
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummarySmallBusinessTax}</span><span>{formatCurrency(s.smallBusinessTax, locale)}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{t.taxSummaryGeneralTax}</span><span>{formatCurrency(s.generalTax, locale)}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: "1.05rem" }}>
+          <span>{t.taxSummaryTotalCorporateTax}</span><span>{formatCurrency(s.totalCorporateTax, locale)}</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -243,6 +298,16 @@ export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" 
           </label>
         </div>
       </section>
+
+      {taxSummary ? (
+        <section className="surface" style={{ padding: "1rem", display: "grid", gap: "0.6rem" }}>
+          <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{t.taxSummaryTitle}</h3>
+          {taxSummary.mode === "COMPANY"
+            ? renderCorporateSummary(taxSummary.summary as CorporateTaxSummary)
+            : renderIndividualSummary(taxSummary.summary as TaxSummary)}
+          <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>{t.taxSummaryNotice}</p>
+        </section>
+      ) : null}
 
       <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
         <button className="btn btn-secondary" onClick={() => void saveDraft()} disabled={isSaving || isPreparing} type="button">

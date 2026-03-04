@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/session";
 import { prepareSubmissionForUser } from "@/lib/services/tax-return-service";
-import { writeAuditEvent } from "@/lib/audit";
+import { writeAuditEvent, extractRequestMeta } from "@/lib/audit";
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ returnId: string }> }
 ) {
   const session = await getAuthSession();
@@ -25,7 +25,8 @@ export async function POST(
         returnId,
         provider: prepared.provider,
         status: prepared.status
-      }
+      },
+      ...extractRequestMeta(request)
     });
 
     return NextResponse.json(prepared);

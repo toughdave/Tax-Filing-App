@@ -127,13 +127,20 @@ describe("missingRequiredFields", () => {
   describe("COMPANY mode", () => {
     const mode = "COMPANY" as const;
 
-    it("requires company-specific fields only", () => {
+    it("requires base identity + company-specific fields", () => {
       const missing = missingRequiredFields(mode, {});
-      expect(missing).toEqual(["corporationName", "businessNumber", "corporateRevenue"]);
+      expect(missing).toEqual([
+        "legalName", "sinLast4", "birthDate", "residencyProvince",
+        "corporationName", "businessNumber", "corporateRevenue"
+      ]);
     });
 
-    it("returns empty when all company fields are present", () => {
+    it("returns empty when all required fields are present", () => {
       const payload = {
+        legalName: "Jane Smith",
+        sinLast4: "1234",
+        birthDate: "1985-06-15",
+        residencyProvince: "ON",
         corporationName: "Acme Corp",
         businessNumber: "BN123456",
         corporateRevenue: 1000000

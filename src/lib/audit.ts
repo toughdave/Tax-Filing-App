@@ -10,6 +10,13 @@ interface AuditInput {
   userAgent?: string | null;
 }
 
+export function extractRequestMeta(request: Request): Pick<AuditInput, "ipAddress" | "userAgent"> {
+  return {
+    ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    userAgent: request.headers.get("user-agent") ?? null
+  };
+}
+
 export async function writeAuditEvent(input: AuditInput) {
   const session = await getAuthSession();
 

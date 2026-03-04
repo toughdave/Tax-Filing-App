@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
-import type { Locale } from "@/lib/i18n";
+import { textFor, type Locale } from "@/lib/i18n";
 
 interface SignInPanelProps {
   locale: Locale;
@@ -14,31 +14,8 @@ interface SignInPanelProps {
   };
 }
 
-const labelsByLocale = {
-  en: {
-    title: "Sign in with your preferred method",
-    oauth: "Use OAuth",
-    credentials: "Use demo credentials",
-    email: "Email",
-    passcode: "Passcode",
-    submit: "Continue",
-    pending: "Signing in...",
-    security: "Security note: OAuth is recommended for production usage."
-  },
-  fr: {
-    title: "Connectez-vous avec votre méthode préférée",
-    oauth: "Utiliser OAuth",
-    credentials: "Utiliser les identifiants démo",
-    email: "Courriel",
-    passcode: "Code d'accès",
-    submit: "Continuer",
-    pending: "Connexion...",
-    security: "Note sécurité : OAuth est recommandé en production."
-  }
-} as const;
-
 export function SignInPanel({ locale, callbackUrl, providers }: SignInPanelProps) {
-  const labels = labelsByLocale[locale];
+  const t = textFor(locale);
   const [email, setEmail] = useState("");
   const [passcode, setPasscode] = useState("");
   const [pending, setPending] = useState(false);
@@ -66,11 +43,11 @@ export function SignInPanel({ locale, callbackUrl, providers }: SignInPanelProps
 
   return (
     <div className="surface" style={{ padding: "1.1rem", display: "grid", gap: "1rem" }}>
-      <h2 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.2rem" }}>{labels.title}</h2>
+      <h2 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.2rem" }}>{t.signInPanelTitle}</h2>
 
       {availableOAuth.length > 0 ? (
         <div style={{ display: "grid", gap: "0.5rem" }}>
-          <strong>{labels.oauth}</strong>
+          <strong>{t.signInPanelOAuth}</strong>
           <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
             {availableOAuth.map((provider) => (
               <button
@@ -87,23 +64,23 @@ export function SignInPanel({ locale, callbackUrl, providers }: SignInPanelProps
       ) : null}
 
       <form style={{ display: "grid", gap: "0.6rem" }} onSubmit={handleCredentialSignIn}>
-        <strong>{labels.credentials}</strong>
+        <strong>{t.signInPanelCredentials}</strong>
         <div className="field">
-          <label htmlFor="email">{labels.email}</label>
+          <label htmlFor="email">{t.signInPanelEmail}</label>
           <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
         </div>
         <div className="field">
-          <label htmlFor="passcode">{labels.passcode}</label>
+          <label htmlFor="passcode">{t.signInPanelPasscode}</label>
           <input id="passcode" type="password" value={passcode} onChange={(event) => setPasscode(event.target.value)} required />
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={pending}>
-          {pending ? labels.pending : labels.submit}
+          {pending ? t.signInPanelPending : t.signInPanelSubmit}
         </button>
       </form>
 
       <p className="muted" style={{ margin: 0 }}>
-        {labels.security}
+        {t.signInPanelSecurity}
       </p>
     </div>
   );

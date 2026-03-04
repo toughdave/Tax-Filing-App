@@ -162,6 +162,11 @@ export const modeSpecificFieldGroups: Record<FilingMode, FieldGroup[]> = {
   ]
 };
 
+export function requiredFieldsForMode(mode: FilingMode): string[] {
+  const allGroups = [...baseFieldGroups, ...(modeSpecificFieldGroups[mode] ?? [])];
+  return allGroups.flatMap((g) => g.fields).filter((f) => f.required).map((f) => f.key);
+}
+
 export function parseFilingMode(raw: string | undefined): FilingMode {
   if (raw === "SELF_EMPLOYED" || raw === "COMPANY" || raw === "INDIVIDUAL") {
     return raw;
