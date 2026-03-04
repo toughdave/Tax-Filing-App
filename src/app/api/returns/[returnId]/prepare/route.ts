@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/session";
 import { prepareSubmissionForUser } from "@/lib/services/tax-return-service";
 import { writeAuditEvent, extractRequestMeta } from "@/lib/audit";
+import { prepareSubmissionSchema } from "@/lib/validation/tax-return";
 
 export async function POST(
   request: Request,
@@ -14,15 +15,26 @@ export async function POST(
   }
 
   const { returnId } = await params;
+  const parsedParams = prepareSubmissionSchema.safeParse({ returnId });
+
+  if (!parsedParams.success) {
+    return NextResponse.json(
+      {
+        message: "INVALID_RETURN_ID",
+        issues: parsedParams.error.flatten()
+      },
+      { status: 400 }
+    );
+  }
 
   try {
-    const prepared = await prepareSubmissionForUser(session.user.id, returnId);
+    const prepared = await prepareSubmissionForUser(session.user.id, parsedParams.data.returnId);
 
     await writeAuditEvent({
       action: "tax_return.prepared_submission",
       resource: "TaxReturn",
       metadata: {
-        returnId,
+        returnId: parsedParams.data.returnId,
         provider: prepared.provider,
         status: prepared.status
       },

@@ -132,7 +132,14 @@ const en: TextDictionary = {
   signInPanelPasscode: "Passcode",
   signInPanelSubmit: "Continue",
   signInPanelPending: "Signing in...",
-  signInPanelSecurity: "Security note: OAuth is recommended for production usage."
+  signInPanelSecurity: "Security note: OAuth is recommended for production usage.",
+  notFoundTitle: "Page not found",
+  notFoundBody: "The page you are looking for does not exist.",
+  notFoundReturnHome: "Return home",
+  errorTitle: "Something went wrong",
+  errorReferencePrefix: "Error reference:",
+  errorFallback: "An unexpected error occurred.",
+  errorTryAgain: "Try again"
 };
 
 const fr: TextDictionary = {
@@ -265,7 +272,14 @@ const fr: TextDictionary = {
   signInPanelPasscode: "Code d'accès",
   signInPanelSubmit: "Continuer",
   signInPanelPending: "Connexion...",
-  signInPanelSecurity: "Note sécurité : OAuth est recommandé en production."
+  signInPanelSecurity: "Note sécurité : OAuth est recommandé en production.",
+  notFoundTitle: "Page introuvable",
+  notFoundBody: "La page que vous recherchez n'existe pas.",
+  notFoundReturnHome: "Retour à l'accueil",
+  errorTitle: "Un problème est survenu",
+  errorReferencePrefix: "Référence d'erreur :",
+  errorFallback: "Une erreur inattendue est survenue.",
+  errorTryAgain: "Réessayer"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

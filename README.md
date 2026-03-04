@@ -46,8 +46,10 @@ Tax filing should feel structured, understandable, and calm. This project priori
 ## Security Highlights
 
 - JWT sessions via NextAuth with Prisma adapter
-- Security headers via `next.config.ts` (CSP/HSTS/frame protections)
+- Security headers via `next.config.ts` plus nonce-based CSP via `middleware.ts`
 - Audit logging for auth and filing actions
+- Request metadata capture (IP/User-Agent) for filing and auth-route boundary events
+- Demo credentials provider disabled in production by default (explicit opt-in only)
 - PII-aware architecture and clear security documentation
 - No hardcoded secrets, env-based config only
 
@@ -74,6 +76,10 @@ Set at minimum:
 - `NEXTAUTH_SECRET`
 - `DEMO_EMAIL`
 - `DEMO_PASSCODE`
+
+Optional hardening toggle:
+
+- `ENABLE_DEMO_AUTH` (defaults to disabled in production unless explicitly set to a truthy value)
 
 (Optional) add OAuth provider credentials.
 
@@ -110,9 +116,30 @@ npm run build
 
 - `GET /api/health`
 - `GET /api/returns` (authenticated)
+- `GET /api/returns/:returnId` (authenticated)
 - `POST /api/returns` (authenticated)
 - `POST /api/returns/:returnId/prepare` (authenticated)
 - `GET|POST /api/auth/[...nextauth]`
+
+## Deployment Strategy
+
+### Vercel (recommended)
+
+- Use Vercel for preview and eventual production deployment of this fullstack Next.js app.
+- This app depends on server-side routes (`/api/*`), auth callbacks, and database access, which are all first-class on Vercel.
+
+### GitHub Pages (not recommended for this app)
+
+- GitHub Pages is static hosting only and cannot run Next.js API routes, NextAuth handlers, or server-side DB access required by this project.
+
+### Domain strategy for safe live testing
+
+- Keep `www.davidoncloud.com` unchanged.
+- For live testing, use either:
+  1. Vercel preview URLs, or
+  2. a dedicated subdomain (example: `tax-preview.davidoncloud.com`) pointed to Vercel via DNS.
+
+This preserves your existing static site/CMS while allowing isolated app testing.
 
 ## CI/CD
 

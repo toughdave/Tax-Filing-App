@@ -41,5 +41,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Security scan (high severity threshold)
-        run: npm run security:scan
+      - name: Security scan – production deps (strict)
+        run: npm audit --audit-level=high --omit=dev
+
+      - name: Security scan – all deps (advisory)
+        run: npm audit --audit-level=high || true

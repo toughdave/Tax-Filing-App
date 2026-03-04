@@ -1,8 +1,7 @@
-import { FilingMode, ReturnStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { SaveReturnInput } from "@/lib/validation/tax-return";
 import { getSubmissionProvider } from "@/lib/submission-providers";
-import { requiredFieldsForMode } from "@/lib/tax-field-config";
+import { requiredFieldsForMode, type FilingMode } from "@/lib/tax-field-config";
 import { calculateTax, type CalculationResult } from "@/lib/services/tax-calculation-engine";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
 
@@ -54,6 +53,25 @@ export async function listReturnsForUser(userId: string) {
       taxYear: true,
       filingMode: true,
       status: true,
+      updatedAt: true,
+      createdAt: true,
+      submittedAt: true,
+      externalSubmissionRef: true
+    }
+  });
+}
+
+export async function getReturnForUser(userId: string, returnId: string) {
+  return prisma.taxReturn.findFirst({
+    where: {
+      userId,
+      id: returnId
+    },
+    select: {
+      id: true,
+      taxYear: true,
+      filingMode: true,
+      status: true,
       data: true,
       updatedAt: true,
       createdAt: true,
@@ -65,7 +83,7 @@ export async function listReturnsForUser(userId: string) {
 
 export async function saveReturnForUser(userId: string, input: SaveReturnInput) {
   const sanitizedPayload = sanitizePayload(input.payload);
-  const mode = input.filingMode as FilingMode;
+  const mode = input.filingMode;
 
   const carryForwardSource = await prisma.taxReturn.findFirst({
     where: {
@@ -82,7 +100,7 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
   };
 
   const missing = missingRequiredFields(mode, mergedData);
-  const nextStatus: ReturnStatus = missing.length === 0 ? "READY_TO_REVIEW" : "DRAFT";
+  const nextStatus = missing.length === 0 ? "READY_TO_REVIEW" : "DRAFT";
 
   const record = await prisma.taxReturn.upsert({
     where: {

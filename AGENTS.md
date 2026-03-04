@@ -48,9 +48,17 @@ Build and maintain a clean, secure, bilingual Canada-focused tax filing platform
 - Keep `.github/workflows` green for merge readiness.
 - Preserve semantic versioning pipeline behavior.
 - Do not bypass failing checks in PRs.
+- Every set of meaningful changes must include a version bump (`patch` for fixes, `minor` for features, `major` for breaking changes) via `npm run version:bump -- --type <patch|minor|major>` before pushing.
 
 ## 8) Documentation Rules
 
 - Update `README.md` for setup, architecture, or workflow changes.
 - Update `CHANGELOG.md` for release-impacting changes.
 - Keep `SECURITY.md` aligned with implemented controls.
+
+## 9) Deployment & Testing Workflow Rules
+
+- Use Vercel as the default deployment platform for preview/production planning.
+- Keep production-domain changes isolated behind explicit DNS/domain approval.
+- Prefer preview deployments and temporary test domains/subdomains before production cutover.
+- During UI/UX verification phases, include browser-based review (system browser or IDE preview) and capture regressions before merge.

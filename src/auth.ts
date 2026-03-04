@@ -5,13 +5,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
+import { availableProviders } from "@/lib/auth-policy";
 
-const hasGoogle = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
-const hasMicrosoft = Boolean(process.env.AZURE_AD_CLIENT_ID && process.env.AZURE_AD_CLIENT_SECRET);
-const hasApple = Boolean(process.env.APPLE_ID && process.env.APPLE_SECRET);
+const providerAvailability = availableProviders();
 
 const providers = [
-  ...(hasGoogle
+  ...(providerAvailability.google
     ? [
         GoogleProvider({
           clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -19,7 +18,7 @@ const providers = [
         })
       ]
     : []),
-  ...(hasMicrosoft
+  ...(providerAvailability.azureAd
     ? [
         AzureADProvider({
           clientId: process.env.AZURE_AD_CLIENT_ID ?? "",
@@ -28,7 +27,7 @@ const providers = [
         })
       ]
     : []),
-  ...(hasApple
+  ...(providerAvailability.apple
     ? [
         AppleProvider({
           clientId: process.env.APPLE_ID ?? "",
@@ -36,37 +35,41 @@ const providers = [
         })
       ]
     : []),
-  CredentialsProvider({
-    name: "Demo credentials",
-    credentials: {
-      email: { label: "Email", type: "email" },
-      passcode: { label: "Passcode", type: "password" }
-    },
-    authorize: async (credentials) => {
-      const email = typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : "";
-      const passcode = typeof credentials?.passcode === "string" ? credentials.passcode : "";
+  ...(providerAvailability.demoCredentials
+    ? [
+        CredentialsProvider({
+          name: "Demo credentials",
+          credentials: {
+            email: { label: "Email", type: "email" },
+            passcode: { label: "Passcode", type: "password" }
+          },
+          authorize: async (credentials) => {
+            const email = typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : "";
+            const passcode = typeof credentials?.passcode === "string" ? credentials.passcode : "";
 
-      const demoEmail = process.env.DEMO_EMAIL?.trim().toLowerCase();
-      const demoPasscode = process.env.DEMO_PASSCODE;
+            const demoEmail = process.env.DEMO_EMAIL?.trim().toLowerCase();
+            const demoPasscode = process.env.DEMO_PASSCODE;
 
-      if (!demoEmail || !demoPasscode || email !== demoEmail || passcode !== demoPasscode) {
-        return null;
-      }
+            if (!demoEmail || !demoPasscode || email !== demoEmail || passcode !== demoPasscode) {
+              return null;
+            }
 
-      const existing = await prisma.user.findUnique({ where: { email } });
-      if (existing) {
-        return existing;
-      }
+            const existing = await prisma.user.findUnique({ where: { email } });
+            if (existing) {
+              return existing;
+            }
 
-      return prisma.user.create({
-        data: {
-          email,
-          name: "Demo filer",
-          locale: "en"
-        }
-      });
-    }
-  })
+            return prisma.user.create({
+              data: {
+                email,
+                name: "Demo filer",
+                locale: "en"
+              }
+            });
+          }
+        })
+      ]
+    : [])
 ];
 
 export const authOptions: NextAuthOptions = {
@@ -95,21 +98,28 @@ export const authOptions: NextAuthOptions = {
     }
   },
   events: {
-    async signIn({ user }) {
+    async signIn({ user, account, isNewUser }) {
       await prisma.auditEvent.create({
         data: {
           userId: user.id,
           action: "auth.sign_in",
-          resource: "UserSession"
+          resource: "UserSession",
+          metadata: {
+            provider: account?.provider ?? "unknown",
+            isNewUser
+          }
         }
       });
     },
-    async signOut({ token }) {
+    async signOut({ token, session }) {
       await prisma.auditEvent.create({
         data: {
-          userId: token?.sub,
+          userId: token?.sub ?? session?.user?.id,
           action: "auth.sign_out",
-          resource: "UserSession"
+          resource: "UserSession",
+          metadata: {
+            signOutSource: token ? "jwt" : "session"
+          }
         }
       });
     }

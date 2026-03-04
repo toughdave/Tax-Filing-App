@@ -1,14 +1,7 @@
 import { SiteHeader } from "@/components/site-header";
 import { SignInPanel } from "@/components/sign-in-panel";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
-
-function availableProviders() {
-  return {
-    google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-    azureAd: Boolean(process.env.AZURE_AD_CLIENT_ID && process.env.AZURE_AD_CLIENT_SECRET),
-    apple: Boolean(process.env.APPLE_ID && process.env.APPLE_SECRET)
-  };
-}
+import { availableProviders } from "@/lib/auth-policy";
 
 export default async function SignInPage({
   searchParams

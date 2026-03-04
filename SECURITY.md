@@ -15,6 +15,12 @@ We aim to acknowledge reports within 48 hours and coordinate a patch promptly.
 
 This application handles sensitive personal and financial data for Canadian tax filing. Security is treated as a core design requirement. Environment-variable-only configuration is enforced — no secrets are stored in code.
 
+Implemented control highlights include:
+
+- Security headers with nonce-based Content Security Policy (CSP)
+- Structured audit events for auth and filing routes with request metadata capture
+- Demo credentials auth path disabled in production by default unless explicitly enabled
+
 ## Secret Handling
 
 - Never commit `.env` files.

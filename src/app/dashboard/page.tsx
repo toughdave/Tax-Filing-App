@@ -50,7 +50,7 @@ export default async function DashboardPage({
                       <td style={{ padding: "0.9rem" }}>{t[`status${taxReturn.status}`] ?? taxReturn.status}</td>
                       <td style={{ padding: "0.9rem" }}>{formatDate(taxReturn.updatedAt, locale)}</td>
                       <td style={{ padding: "0.9rem" }}>
-                        <Link href={withLang("/returns/new", locale)} className="btn btn-secondary" style={{ padding: "0.35rem 0.7rem" }}>
+                        <Link href={withLang(`/returns/${taxReturn.id}`, locale)} className="btn btn-secondary" style={{ padding: "0.35rem 0.7rem" }}>
                           {t.dashboardOpen}
                         </Link>
                       </td>

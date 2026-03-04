@@ -11,6 +11,7 @@ interface SignInPanelProps {
     google: boolean;
     azureAd: boolean;
     apple: boolean;
+    demoCredentials: boolean;
   };
 }
 
@@ -63,21 +64,23 @@ export function SignInPanel({ locale, callbackUrl, providers }: SignInPanelProps
         </div>
       ) : null}
 
-      <form style={{ display: "grid", gap: "0.6rem" }} onSubmit={handleCredentialSignIn}>
-        <strong>{t.signInPanelCredentials}</strong>
-        <div className="field">
-          <label htmlFor="email">{t.signInPanelEmail}</label>
-          <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-        </div>
-        <div className="field">
-          <label htmlFor="passcode">{t.signInPanelPasscode}</label>
-          <input id="passcode" type="password" value={passcode} onChange={(event) => setPasscode(event.target.value)} required />
-        </div>
+      {providers.demoCredentials ? (
+        <form style={{ display: "grid", gap: "0.6rem" }} onSubmit={handleCredentialSignIn}>
+          <strong>{t.signInPanelCredentials}</strong>
+          <div className="field">
+            <label htmlFor="email">{t.signInPanelEmail}</label>
+            <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          </div>
+          <div className="field">
+            <label htmlFor="passcode">{t.signInPanelPasscode}</label>
+            <input id="passcode" type="password" value={passcode} onChange={(event) => setPasscode(event.target.value)} required />
+          </div>
 
-        <button className="btn btn-primary" type="submit" disabled={pending}>
-          {pending ? t.signInPanelPending : t.signInPanelSubmit}
-        </button>
-      </form>
+          <button className="btn btn-primary" type="submit" disabled={pending}>
+            {pending ? t.signInPanelPending : t.signInPanelSubmit}
+          </button>
+        </form>
+      ) : null}
 
       <p className="muted" style={{ margin: 0 }}>
         {t.signInPanelSecurity}

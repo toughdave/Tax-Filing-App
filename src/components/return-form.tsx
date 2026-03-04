@@ -11,6 +11,9 @@ interface ReturnFormProps {
   locale: Locale;
   defaultTaxYear: number;
   defaultMode?: FilingMode;
+  initialReturnId?: string;
+  initialPayload?: Record<string, unknown>;
+  initialTaxSummary?: CalculationResult | null;
 }
 
 interface SaveResponse {
@@ -29,20 +32,50 @@ function htmlInputType(field: TaxField): string {
   return "text";
 }
 
-export function ReturnForm({ locale, defaultTaxYear, defaultMode = "INDIVIDUAL" }: ReturnFormProps) {
+function formDefaultsFromPayload(payload: Record<string, unknown> | undefined): Record<string, string> {
+  if (!payload) {
+    return {};
+  }
+
+  const defaults: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (typeof value === "string") {
+      defaults[key] = value;
+      continue;
+    }
+
+    if (typeof value === "number" || typeof value === "boolean") {
+      defaults[key] = String(value);
+    }
+  }
+
+  return defaults;
+}
+
+export function ReturnForm({
+  locale,
+  defaultTaxYear,
+  defaultMode = "INDIVIDUAL",
+  initialReturnId,
+  initialPayload,
+  initialTaxSummary = null
+}: ReturnFormProps) {
   const t = textFor(locale);
+  const formDefaults = useMemo(() => formDefaultsFromPayload(initialPayload), [initialPayload]);
   const [taxYear, setTaxYear] = useState(String(defaultTaxYear));
   const [filingMode, setFilingMode] = useState<FilingMode>(defaultMode);
-  const [returnId, setReturnId] = useState<string | null>(null);
+  const [returnId, setReturnId] = useState<string | null>(initialReturnId ?? null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [carryForwardYear, setCarryForwardYear] = useState<number | null>(null);
-  const [taxSummary, setTaxSummary] = useState<CalculationResult | null>(null);
+  const [taxSummary, setTaxSummary] = useState<CalculationResult | null>(initialTaxSummary);
 
   const { register, getValues, reset } = useForm<Record<string, string>>({
-    mode: "onBlur"
+    mode: "onBlur",
+    defaultValues: formDefaults
   });
 
   const activeGroups = useMemo(
