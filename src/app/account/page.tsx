@@ -3,6 +3,7 @@ import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
 import { getUserConsentStatus } from "@/lib/services/consent-service";
 import { AccountActions } from "@/components/account-actions";
+import { MfaSetup } from "@/components/mfa-setup";
 import Link from "next/link";
 
 export default async function AccountPage({
@@ -69,6 +70,8 @@ export default async function AccountPage({
             </div>
           </div>
         </div>
+
+        <MfaSetup locale={locale} />
 
         <AccountActions locale={locale} />
       </section>

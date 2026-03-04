@@ -1,6 +1,6 @@
 {
   "name": "canada-tax-filing-app",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "description": "Security-first CRA-oriented filing app for individual, self-employed, and company workflows.",
   "scripts": {
@@ -29,6 +29,8 @@
     "@prisma/client": "^6.3.1",
     "next": "^15.1.6",
     "next-auth": "^4.24.11",
+    "otpauth": "^9.5.0",
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",

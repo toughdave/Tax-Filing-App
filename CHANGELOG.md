@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.0] - 2026-03-04
+### Added
+- Two-factor authentication (TOTP) support via authenticator apps (Google Authenticator, Authy, etc.).
+- `TotpDevice` Prisma model with AES-256-GCM encrypted secrets and recovery codes.
+- MFA enrollment flow: QR code generation, manual secret entry, 6-digit verification.
+- 8 single-use recovery codes generated per enrollment for backup access.
+- `POST /api/account/mfa/enroll` — starts TOTP enrollment with QR code.
+- `POST /api/account/mfa/verify` — confirms enrollment with a valid TOTP token.
+- `POST /api/account/mfa/disable` — disables MFA with audit logging.
+- `GET /api/account/mfa/challenge` — checks if MFA is enabled for current user.
+- `POST /api/account/mfa/challenge` — verifies TOTP token or recovery code.
+- MFA setup component integrated into account settings page.
+- Bilingual (EN/FR) i18n strings for all MFA UI elements.
+- TOTP utility with secret generation, URI building, token verification, AES-256-GCM encryption/decryption.
+- 8 unit tests for TOTP utility (encryption roundtrip, secret generation, recovery codes).
+- 11 unit tests for MFA service (enrollment, confirmation, disable, challenge, recovery codes).
+- Prisma migration for `TotpDevice` table.
+
+### Security
+- TOTP secrets encrypted at rest using AES-256-GCM derived from NEXTAUTH_SECRET.
+- Recovery codes are single-use and removed from the database after consumption.
+- MFA disable action generates an audit event with request metadata.
+- All MFA endpoints are rate-limited and CSRF-protected.
+
 ## [0.6.0] - 2026-03-04
 ### Added
 - Admin/operator support dashboard (`/admin`) with role-based access control (SUPPORT/ADMIN roles only).

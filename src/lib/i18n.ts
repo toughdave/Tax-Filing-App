@@ -183,7 +183,20 @@ const en: TextDictionary = {
   adminDate: "Date",
   adminAction: "Action",
   adminResource: "Resource",
-  adminIp: "IP"
+  adminIp: "IP",
+  mfaTitle: "Two-factor authentication",
+  mfaDescription: "Add an extra layer of security by requiring a one-time code from an authenticator app when you sign in.",
+  mfaEnable: "Set up two-factor authentication",
+  mfaDisable: "Disable two-factor authentication",
+  mfaEnabled: "Two-factor authentication is enabled",
+  mfaScanQr: "Scan this QR code with your authenticator app (e.g. Google Authenticator, Authy).",
+  mfaManualEntry: "Or enter this secret manually:",
+  mfaEnterCode: "Enter the 6-digit code from your app",
+  mfaVerify: "Verify and enable",
+  mfaInvalidCode: "Invalid code. Please try again.",
+  mfaEnrollError: "Could not start enrollment. Please try again.",
+  mfaRecoveryCodesLabel: "Save these recovery codes in a safe place:",
+  mfaRecoveryCodesWarning: "Each recovery code can only be used once. Store them securely — they will not be shown again."
 };
 
 const fr: TextDictionary = {
@@ -367,7 +380,20 @@ const fr: TextDictionary = {
   adminDate: "Date",
   adminAction: "Action",
   adminResource: "Ressource",
-  adminIp: "IP"
+  adminIp: "IP",
+  mfaTitle: "Authentification à deux facteurs",
+  mfaDescription: "Ajoutez une couche de sécurité supplémentaire en exigeant un code unique d'une application d'authentification lors de la connexion.",
+  mfaEnable: "Configurer l'authentification à deux facteurs",
+  mfaDisable: "Désactiver l'authentification à deux facteurs",
+  mfaEnabled: "L'authentification à deux facteurs est activée",
+  mfaScanQr: "Scannez ce code QR avec votre application d'authentification (ex. Google Authenticator, Authy).",
+  mfaManualEntry: "Ou entrez ce secret manuellement :",
+  mfaEnterCode: "Entrez le code à 6 chiffres de votre application",
+  mfaVerify: "Vérifier et activer",
+  mfaInvalidCode: "Code invalide. Veuillez réessayer.",
+  mfaEnrollError: "Impossible de démarrer l'inscription. Veuillez réessayer.",
+  mfaRecoveryCodesLabel: "Sauvegardez ces codes de récupération en lieu sûr :",
+  mfaRecoveryCodesWarning: "Chaque code de récupération ne peut être utilisé qu'une seule fois. Conservez-les en sécurité — ils ne seront plus affichés."
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };
