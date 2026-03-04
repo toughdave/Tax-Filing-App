@@ -3,8 +3,12 @@ import { saveReturnSchema } from "@/lib/validation/tax-return";
 import { getAuthSession } from "@/lib/session";
 import { saveReturnForUser, listReturnsForUser } from "@/lib/services/tax-return-service";
 import { writeAuditEvent, extractRequestMeta } from "@/lib/audit";
+import { guardApiRoute } from "@/lib/api-guard";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const blocked = guardApiRoute(request);
+  if (blocked) return blocked;
+
   const session = await getAuthSession();
 
   if (!session?.user?.id) {
@@ -16,6 +20,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const blocked = guardApiRoute(request);
+  if (blocked) return blocked;
+
   const session = await getAuthSession();
 
   if (!session?.user?.id) {

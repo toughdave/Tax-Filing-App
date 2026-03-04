@@ -1,6 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const PROTECTED_PATHS = ["/dashboard", "/returns"];
+
+function isProtectedRoute(pathname: string): boolean {
+  return PROTECTED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+}
+
+function hasSessionToken(request: NextRequest): boolean {
+  return Boolean(
+    request.cookies.get("next-auth.session-token")?.value ||
+    request.cookies.get("__Secure-next-auth.session-token")?.value
+  );
+}
+
 function cspForNonce(nonce: string): string {
   return [
     "default-src 'self'",
@@ -17,9 +32,19 @@ function cspForNonce(nonce: string): string {
 }
 
 export function middleware(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
   const lang = searchParams.get("lang");
   const locale = lang === "fr" ? "fr" : "en";
+
+  if (isProtectedRoute(pathname) && !hasSessionToken(request)) {
+    const signInUrl = new URL("/sign-in", request.url);
+    signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname + request.nextUrl.search);
+    if (locale === "fr") {
+      signInUrl.searchParams.set("lang", "fr");
+    }
+    return NextResponse.redirect(signInUrl);
+  }
+
   const nonce = crypto.randomUUID().replaceAll("-", "");
 
   const requestHeaders = new Headers(request.headers);

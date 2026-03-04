@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.0] - 2026-03-04
+### Added
+- Auth middleware for protected page redirects (`/dashboard`, `/returns/*`) — unauthenticated users are redirected to `/sign-in` with `callbackUrl`.
+- In-memory rate limiting on all API routes (30 req/min per IP) with `Retry-After` header on 429 responses.
+- CSRF origin validation on mutating API requests (POST/PUT/PATCH/DELETE).
+- Shared `guardApiRoute` helper combining rate limit + CSRF checks for DRY route protection.
+- Unit tests for rate limiter (4 tests) and CSRF validator (7 tests).
+
+### Changed
+- All `/api/returns` routes now run rate limit and CSRF checks before auth/business logic.
+- Middleware matcher unchanged; auth check runs before CSP/nonce generation for protected routes.
+
+### Security
+- Protected routes no longer render for unauthenticated users — immediate redirect at edge.
+- API abuse surface reduced via per-IP sliding-window rate limiter.
+- Cross-origin mutating requests blocked by origin header validation.
+
 ## [0.2.0] - 2026-03-04
 ### Added
 - Return detail retrieval endpoint: `GET /api/returns/:returnId`.

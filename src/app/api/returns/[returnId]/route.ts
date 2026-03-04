@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/session";
 import { prepareSubmissionSchema } from "@/lib/validation/tax-return";
 import { getReturnForUser } from "@/lib/services/tax-return-service";
+import { guardApiRoute } from "@/lib/api-guard";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ returnId: string }> }
 ) {
+  const blocked = guardApiRoute(request);
+  if (blocked) return blocked;
+
   const session = await getAuthSession();
 
   if (!session?.user?.id) {

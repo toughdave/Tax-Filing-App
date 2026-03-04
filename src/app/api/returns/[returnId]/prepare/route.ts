@@ -3,11 +3,15 @@ import { getAuthSession } from "@/lib/session";
 import { prepareSubmissionForUser } from "@/lib/services/tax-return-service";
 import { writeAuditEvent, extractRequestMeta } from "@/lib/audit";
 import { prepareSubmissionSchema } from "@/lib/validation/tax-return";
+import { guardApiRoute } from "@/lib/api-guard";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ returnId: string }> }
 ) {
+  const blocked = guardApiRoute(request);
+  if (blocked) return blocked;
+
   const session = await getAuthSession();
 
   if (!session?.user?.id) {
