@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.0] - 2026-03-04
+### Added
+- **Phase 3 — E-filing integration**
+  - CRA form-line mapping system (`cra-form-mapping.ts`) for T1, T2125, T2 forms, versioned by tax year (2024/2025).
+  - Tax-year-versioned field configuration (`tax-year-config.ts`) with federal brackets, BPA, RRSP/TFSA limits, CPP/EI thresholds for 2023–2025.
+  - Tax calculation engine refactored to use dynamic year-based parameters instead of hardcoded 2024 values.
+  - Document attachment system: Prisma `Document` model, `DocumentCategory` enum, upload/list/download/delete service and API endpoints (`/api/documents`, `/api/documents/[docId]`).
+  - Production e-filing provider interfaces: `NetfileCraProvider` (NETFILE XML for T1 filings) and `EfileCraProvider` (EFILE JSON for all filing modes).
+  - Provider factory (`getSubmissionProvider`) selects sandbox/netfile/efile via `EFILING_PROVIDER` env var or explicit override.
+  - Filing preflight check system (`filing-preflight.ts`) with 8 pre-submission validations: tax year support, form mapping, required fields, identity, province, income, documents, and company-specific checks.
+- **Phase 4 — Company depth expansion**
+  - Corporate field groups expanded: fiscal year-end (required), capital cost allowance, retained earnings.
+  - Payroll reconciliation field group: employee count, CPP contributions, EI premiums, income tax withheld.
+  - GST/HST remittance field group: collected, paid (ITCs), net remittance.
+  - Tax calculation engine expanded with `PayrollSummary` and `GstHstSummary` in corporate calculations.
+  - CCA included as a corporate deduction item.
+- Bilingual (EN/FR) i18n strings for all new fields, groups, document UI, preflight, payroll, and GST/HST summaries.
+- 22 new unit tests: CRA form mapping (9), tax year config (7), filing preflight (6).
+- Expanded submission provider tests (7 total): sandbox, netfile, efile factory and config checks.
+- Prisma migration for `Document` table with user/return foreign keys and category index.
+
+### Security
+- Document uploads validated: 10 MB max size, restricted MIME types (PDF, JPEG, PNG, WebP, CSV).
+- Document API endpoints protected with auth, rate limiting, CSRF, and audit logging.
+- E-filing provider credentials read from env vars only — never hardcoded.
+- NETFILE provider rejects COMPANY mode filings (T1 individual/self-employed only).
+
 ## [0.7.0] - 2026-03-04
 ### Added
 - Two-factor authentication (TOTP) support via authenticator apps (Google Authenticator, Authy, etc.).

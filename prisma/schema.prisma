@@ -46,6 +46,7 @@ model User {
   consentRecords ConsentRecord[]
   dataRequests   DataRequest[]
   totpDevices    TotpDevice[]
+  documents      Document[]
 }
 
 model Account {
@@ -117,6 +118,7 @@ model TaxReturn {
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
   submittedAt           DateTime?
+  documents             Document[]
   user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   priorYearReturn       TaxReturn?   @relation("PriorYearReturn", fields: [priorYearReturnId], references: [id])
   nextYearReturns       TaxReturn[]  @relation("PriorYearReturn")
@@ -184,6 +186,33 @@ model DataRequest {
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, requestType])
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  userId       String
+  returnId     String?
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  storagePath  String
+  category     DocumentCategory
+  uploadedAt   DateTime @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taxReturn    TaxReturn? @relation(fields: [returnId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([returnId])
+  @@index([category])
+}
+
+enum DocumentCategory {
+  T4_SLIP
+  T5_SLIP
+  RECEIPT
+  BUSINESS_STATEMENT
+  NOTICE_OF_ASSESSMENT
+  OTHER
 }
 
 model TotpDevice {

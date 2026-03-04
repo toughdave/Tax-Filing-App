@@ -139,6 +139,13 @@ export const modeSpecificFieldGroups: Record<FilingMode, FieldGroup[]> = {
           required: true
         },
         {
+          key: "fiscalYearEnd",
+          labelKey: "fieldFiscalYearEnd",
+          helpKey: "fieldFiscalYearEndHelp",
+          type: "date",
+          required: true
+        },
+        {
           key: "corporateRevenue",
           labelKey: "fieldCorpRevenue",
           helpKey: "fieldCorpRevenueHelp",
@@ -146,15 +153,81 @@ export const modeSpecificFieldGroups: Record<FilingMode, FieldGroup[]> = {
           required: true
         },
         {
+          key: "corporateDeductions",
+          labelKey: "fieldCorpDeductions",
+          helpKey: "fieldCorpDeductionsHelp",
+          type: "number"
+        },
+        {
+          key: "capitalCostAllowance",
+          labelKey: "fieldCapitalCostAllowance",
+          helpKey: "fieldCapitalCostAllowanceHelp",
+          type: "number"
+        },
+        {
+          key: "retainedEarnings",
+          labelKey: "fieldRetainedEarnings",
+          helpKey: "fieldRetainedEarningsHelp",
+          type: "number"
+        }
+      ]
+    },
+    {
+      id: "payroll",
+      titleKey: "groupPayroll",
+      fields: [
+        {
           key: "corporatePayroll",
           labelKey: "fieldCorpPayroll",
           helpKey: "fieldCorpPayrollHelp",
           type: "number"
         },
         {
-          key: "corporateDeductions",
-          labelKey: "fieldCorpDeductions",
-          helpKey: "fieldCorpDeductionsHelp",
+          key: "employeeCount",
+          labelKey: "fieldEmployeeCount",
+          helpKey: "fieldEmployeeCountHelp",
+          type: "number"
+        },
+        {
+          key: "cppContributions",
+          labelKey: "fieldCppContributions",
+          helpKey: "fieldCppContributionsHelp",
+          type: "number"
+        },
+        {
+          key: "eiPremiums",
+          labelKey: "fieldEiPremiums",
+          helpKey: "fieldEiPremiumsHelp",
+          type: "number"
+        },
+        {
+          key: "incomeTaxWithheld",
+          labelKey: "fieldIncomeTaxWithheld",
+          helpKey: "fieldIncomeTaxWithheldHelp",
+          type: "number"
+        }
+      ]
+    },
+    {
+      id: "gst-hst",
+      titleKey: "groupGstHst",
+      fields: [
+        {
+          key: "gstHstCollected",
+          labelKey: "fieldGstHstCollected",
+          helpKey: "fieldGstHstCollectedHelp",
+          type: "number"
+        },
+        {
+          key: "gstHstPaid",
+          labelKey: "fieldGstHstPaid",
+          helpKey: "fieldGstHstPaidHelp",
+          type: "number"
+        },
+        {
+          key: "gstHstNetRemittance",
+          labelKey: "fieldGstHstNetRemittance",
+          helpKey: "fieldGstHstNetRemittanceHelp",
           type: "number"
         }
       ]

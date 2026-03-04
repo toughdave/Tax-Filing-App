@@ -1,10 +1,10 @@
 import type { FilingMode } from "@/lib/tax-field-config";
+import { getTaxYearParams, type TaxYearParams, type TaxBracket } from "@/lib/tax-year-config";
 
 // ---------------------------------------------------------------------------
-// 2024 Canadian federal tax brackets (individual / self-employed)
-// Source: CRA — these are simplified for the MVP engine.
+// Fallback 2024 params used when no versioned config is available
 // ---------------------------------------------------------------------------
-const FEDERAL_BRACKETS_2024 = [
+const FALLBACK_BRACKETS: TaxBracket[] = [
   { upTo: 55867, rate: 0.15 },
   { upTo: 111733, rate: 0.205 },
   { upTo: 154906, rate: 0.26 },
@@ -12,12 +12,23 @@ const FEDERAL_BRACKETS_2024 = [
   { upTo: Infinity, rate: 0.33 }
 ];
 
-const BASIC_PERSONAL_AMOUNT_2024 = 15705;
+const FALLBACK_PARAMS: TaxYearParams = {
+  taxYear: 2024,
+  federalBrackets: FALLBACK_BRACKETS,
+  basicPersonalAmount: 15705,
+  smallBusinessRate: 0.09,
+  generalCorporateRate: 0.15,
+  smallBusinessLimit: 500000,
+  rrspLimit: 31560,
+  tfsaLimit: 7000,
+  cpp2MaxPensionableEarnings: 68500,
+  eiMaxInsurableEarnings: 63200
+};
 
-// Small business deduction rate for eligible Canadian-Controlled Private Corps
-const SMALL_BUSINESS_RATE = 0.09;
-const GENERAL_CORPORATE_RATE = 0.15;
-const SMALL_BUSINESS_LIMIT = 500000;
+function resolveParams(taxYear?: number): TaxYearParams {
+  if (!taxYear) return FALLBACK_PARAMS;
+  return getTaxYearParams(taxYear) ?? FALLBACK_PARAMS;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -36,14 +47,14 @@ function num(value: unknown): number {
 // Individual / Self-Employed calculation
 // ---------------------------------------------------------------------------
 
-function calculateFederalTax(taxableIncome: number): number {
+function calculateFederalTax(taxableIncome: number, brackets: TaxBracket[]): number {
   if (taxableIncome <= 0) return 0;
 
   let remaining = taxableIncome;
   let tax = 0;
   let prevLimit = 0;
 
-  for (const bracket of FEDERAL_BRACKETS_2024) {
+  for (const bracket of brackets) {
     const bracketWidth = bracket.upTo - prevLimit;
     const amountInBracket = Math.min(remaining, bracketWidth);
     tax += amountInBracket * bracket.rate;
@@ -69,7 +80,8 @@ export interface TaxSummary {
   };
 }
 
-export function calculateIndividualTax(payload: Record<string, unknown>): TaxSummary {
+export function calculateIndividualTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
+  const params = resolveParams(taxYear);
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
     otherIncome: num(payload.otherIncome)
@@ -86,8 +98,8 @@ export function calculateIndividualTax(payload: Record<string, unknown>): TaxSum
   const netIncome = Math.max(totalIncome - totalDeductions, 0);
   const taxableIncome = netIncome;
 
-  const federalTax = calculateFederalTax(taxableIncome);
-  const basicPersonalCredit = Math.round(BASIC_PERSONAL_AMOUNT_2024 * 0.15 * 100) / 100;
+  const federalTax = calculateFederalTax(taxableIncome, params.federalBrackets);
+  const basicPersonalCredit = Math.round(params.basicPersonalAmount * 0.15 * 100) / 100;
   const netFederalTax = Math.max(Math.round((federalTax - basicPersonalCredit) * 100) / 100, 0);
 
   return {
@@ -102,7 +114,8 @@ export function calculateIndividualTax(payload: Record<string, unknown>): TaxSum
   };
 }
 
-export function calculateSelfEmployedTax(payload: Record<string, unknown>): TaxSummary {
+export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
+  const params = resolveParams(taxYear);
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
     otherIncome: num(payload.otherIncome),
@@ -122,8 +135,8 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>): TaxS
   const netIncome = Math.max(totalIncome - totalDeductions, 0);
   const taxableIncome = netIncome;
 
-  const federalTax = calculateFederalTax(taxableIncome);
-  const basicPersonalCredit = Math.round(BASIC_PERSONAL_AMOUNT_2024 * 0.15 * 100) / 100;
+  const federalTax = calculateFederalTax(taxableIncome, params.federalBrackets);
+  const basicPersonalCredit = Math.round(params.basicPersonalAmount * 0.15 * 100) / 100;
   const netFederalTax = Math.max(Math.round((federalTax - basicPersonalCredit) * 100) / 100, 0);
 
   return {
@@ -142,6 +155,21 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>): TaxS
 // Company calculation (simplified corporate tax)
 // ---------------------------------------------------------------------------
 
+export interface PayrollSummary {
+  totalPayroll: number;
+  employeeCount: number;
+  cppContributions: number;
+  eiPremiums: number;
+  incomeTaxWithheld: number;
+  totalRemittances: number;
+}
+
+export interface GstHstSummary {
+  collected: number;
+  paid: number;
+  netRemittance: number;
+}
+
 export interface CorporateTaxSummary {
   corporateRevenue: number;
   totalDeductions: number;
@@ -149,28 +177,59 @@ export interface CorporateTaxSummary {
   smallBusinessTax: number;
   generalTax: number;
   totalCorporateTax: number;
+  capitalCostAllowance: number;
+  retainedEarnings: number;
+  payroll: PayrollSummary;
+  gstHst: GstHstSummary;
   breakdown: {
     deductionItems: Record<string, number>;
   };
 }
 
-export function calculateCompanyTax(payload: Record<string, unknown>): CorporateTaxSummary {
+export function calculateCompanyTax(payload: Record<string, unknown>, taxYear?: number): CorporateTaxSummary {
+  const params = resolveParams(taxYear);
   const corporateRevenue = num(payload.corporateRevenue);
+  const capitalCostAllowance = num(payload.capitalCostAllowance);
+  const retainedEarnings = num(payload.retainedEarnings);
 
   const deductionItems: Record<string, number> = {
     corporatePayroll: num(payload.corporatePayroll),
-    corporateDeductions: num(payload.corporateDeductions)
+    corporateDeductions: num(payload.corporateDeductions),
+    capitalCostAllowance
   };
 
   const totalDeductions = Object.values(deductionItems).reduce((a, b) => a + b, 0);
   const taxableIncome = Math.max(corporateRevenue - totalDeductions, 0);
 
-  const smallBusinessPortion = Math.min(taxableIncome, SMALL_BUSINESS_LIMIT);
-  const generalPortion = Math.max(taxableIncome - SMALL_BUSINESS_LIMIT, 0);
+  const smallBusinessPortion = Math.min(taxableIncome, params.smallBusinessLimit);
+  const generalPortion = Math.max(taxableIncome - params.smallBusinessLimit, 0);
 
-  const smallBusinessTax = Math.round(smallBusinessPortion * SMALL_BUSINESS_RATE * 100) / 100;
-  const generalTax = Math.round(generalPortion * GENERAL_CORPORATE_RATE * 100) / 100;
+  const smallBusinessTax = Math.round(smallBusinessPortion * params.smallBusinessRate * 100) / 100;
+  const generalTax = Math.round(generalPortion * params.generalCorporateRate * 100) / 100;
   const totalCorporateTax = Math.round((smallBusinessTax + generalTax) * 100) / 100;
+
+  // Payroll reconciliation
+  const cppContributions = num(payload.cppContributions);
+  const eiPremiums = num(payload.eiPremiums);
+  const incomeTaxWithheld = num(payload.incomeTaxWithheld);
+  const payroll: PayrollSummary = {
+    totalPayroll: num(payload.corporatePayroll),
+    employeeCount: num(payload.employeeCount),
+    cppContributions,
+    eiPremiums,
+    incomeTaxWithheld,
+    totalRemittances: Math.round((cppContributions + eiPremiums + incomeTaxWithheld) * 100) / 100
+  };
+
+  // GST/HST
+  const gstHstCollected = num(payload.gstHstCollected);
+  const gstHstPaid = num(payload.gstHstPaid);
+  const gstHstNetRemittance = num(payload.gstHstNetRemittance) || Math.round((gstHstCollected - gstHstPaid) * 100) / 100;
+  const gstHst: GstHstSummary = {
+    collected: gstHstCollected,
+    paid: gstHstPaid,
+    netRemittance: gstHstNetRemittance
+  };
 
   return {
     corporateRevenue,
@@ -179,6 +238,10 @@ export function calculateCompanyTax(payload: Record<string, unknown>): Corporate
     smallBusinessTax,
     generalTax,
     totalCorporateTax,
+    capitalCostAllowance,
+    retainedEarnings,
+    payroll,
+    gstHst,
     breakdown: { deductionItems }
   };
 }
@@ -191,13 +254,13 @@ export type CalculationResult =
   | { mode: "INDIVIDUAL" | "SELF_EMPLOYED"; summary: TaxSummary }
   | { mode: "COMPANY"; summary: CorporateTaxSummary };
 
-export function calculateTax(mode: FilingMode, payload: Record<string, unknown>): CalculationResult {
+export function calculateTax(mode: FilingMode, payload: Record<string, unknown>, taxYear?: number): CalculationResult {
   switch (mode) {
     case "INDIVIDUAL":
-      return { mode, summary: calculateIndividualTax(payload) };
+      return { mode, summary: calculateIndividualTax(payload, taxYear) };
     case "SELF_EMPLOYED":
-      return { mode, summary: calculateSelfEmployedTax(payload) };
+      return { mode, summary: calculateSelfEmployedTax(payload, taxYear) };
     case "COMPANY":
-      return { mode, summary: calculateCompanyTax(payload) };
+      return { mode, summary: calculateCompanyTax(payload, taxYear) };
   }
 }

@@ -131,7 +131,7 @@ describe("missingRequiredFields", () => {
       const missing = missingRequiredFields(mode, {});
       expect(missing).toEqual([
         "legalName", "sinLast4", "birthDate", "residencyProvince",
-        "corporationName", "businessNumber", "corporateRevenue"
+        "corporationName", "businessNumber", "fiscalYearEnd", "corporateRevenue"
       ]);
     });
 
@@ -143,6 +143,7 @@ describe("missingRequiredFields", () => {
         residencyProvince: "ON",
         corporationName: "Acme Corp",
         businessNumber: "BN123456",
+        fiscalYearEnd: "2024-12-31",
         corporateRevenue: 1000000
       };
       expect(missingRequiredFields(mode, payload)).toEqual([]);
