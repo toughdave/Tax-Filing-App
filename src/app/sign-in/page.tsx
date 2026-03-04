@@ -27,6 +27,12 @@ export default async function SignInPage({
         </div>
 
         <SignInPanel locale={locale} callbackUrl={withLang("/dashboard", locale)} providers={availableProviders()} />
+
+        <div style={{ textAlign: "center", marginTop: "0.3rem" }}>
+          <a href={withLang("/recovery", locale)} className="muted" style={{ fontSize: "0.9rem" }}>
+            {t.recoveryLink}
+          </a>
+        </div>
       </section>
     </main>
   );

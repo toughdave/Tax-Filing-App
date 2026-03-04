@@ -184,3 +184,27 @@ model DataRequest {
 
   @@index([userId, requestType])
 }
+
+enum RecoveryStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  DENIED
+}
+
+model RecoveryRequest {
+  id              String         @id @default(cuid())
+  email           String
+  fullName        String
+  reason          String
+  status          RecoveryStatus @default(SUBMITTED)
+  adminNotes      String?
+  ipAddress       String?
+  userAgent       String?
+  reviewedAt      DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([email, status])
+  @@index([status, createdAt])
+}

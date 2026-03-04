@@ -156,7 +156,20 @@ const en: TextDictionary = {
   accountDataDeletion: "Request account deletion",
   accountDataDeletionDesc: "Permanently delete your account and all associated data.",
   accountDataRequestPending: "Request submitted — we will process it shortly.",
-  accountDataRequestExists: "A request is already being processed."
+  accountDataRequestExists: "A request is already being processed.",
+  recoveryTitle: "Account recovery",
+  recoverySubtitle: "Lost access to your sign-in provider? Submit a recovery request and our team will verify your identity and restore access.",
+  recoveryEmail: "Email address on file",
+  recoveryFullName: "Full legal name",
+  recoveryReason: "Describe what happened",
+  recoveryReasonPlaceholder: "E.g. I lost access to my Google account and need to link a new provider...",
+  recoverySubmit: "Submit recovery request",
+  recoverySubmitting: "Submitting...",
+  recoverySuccess: "Your recovery request has been submitted. Our team will review it and contact you at the email provided.",
+  recoveryExists: "A recovery request for this email is already being reviewed.",
+  recoveryError: "Could not submit your request. Please try again later.",
+  recoveryNote: "For security, recovery requests are manually reviewed. Please allow 1–3 business days.",
+  recoveryLink: "Lost access to your account?"
 };
 
 const fr: TextDictionary = {
@@ -313,7 +326,20 @@ const fr: TextDictionary = {
   accountDataDeletion: "Demander la suppression du compte",
   accountDataDeletionDesc: "Supprimez définitivement votre compte et toutes les données associées.",
   accountDataRequestPending: "Demande soumise — nous la traiterons sous peu.",
-  accountDataRequestExists: "Une demande est déjà en cours de traitement."
+  accountDataRequestExists: "Une demande est déjà en cours de traitement.",
+  recoveryTitle: "Récupération de compte",
+  recoverySubtitle: "Vous avez perdu l'accès à votre fournisseur de connexion? Soumettez une demande de récupération et notre équipe vérifiera votre identité.",
+  recoveryEmail: "Adresse courriel au dossier",
+  recoveryFullName: "Nom légal complet",
+  recoveryReason: "Décrivez ce qui s'est passé",
+  recoveryReasonPlaceholder: "Ex. J'ai perdu l'accès à mon compte Google et je dois lier un nouveau fournisseur...",
+  recoverySubmit: "Soumettre la demande",
+  recoverySubmitting: "Envoi en cours...",
+  recoverySuccess: "Votre demande de récupération a été soumise. Notre équipe l'examinera et vous contactera à l'adresse fournie.",
+  recoveryExists: "Une demande de récupération pour ce courriel est déjà en cours d'examen.",
+  recoveryError: "Impossible de soumettre votre demande. Veuillez réessayer plus tard.",
+  recoveryNote: "Pour des raisons de sécurité, les demandes sont examinées manuellement. Prévoyez 1 à 3 jours ouvrables.",
+  recoveryLink: "Vous avez perdu l'accès à votre compte?"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

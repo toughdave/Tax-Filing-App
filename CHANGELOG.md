@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.0] - 2026-03-04
+### Added
+- Account recovery flow for users who lose access to their OAuth provider.
+- `RecoveryRequest` Prisma model with status tracking (SUBMITTED → UNDER_REVIEW → APPROVED/DENIED).
+- `POST /api/account/recovery` endpoint with strict rate limiting (3 req/5 min per IP) and CSRF protection.
+- Public `/recovery` page with bilingual form (email, full name, reason).
+- Recovery form component with status feedback (success, already exists, error).
+- "Lost access to your account?" link on sign-in page pointing to recovery.
+- Recovery service with idempotent request creation and email normalization.
+- 5 unit tests for recovery service.
+- Prisma migration for `RecoveryRequest` table and indexes.
+
+### Security
+- Recovery endpoint has tighter rate limits than standard API routes (3 req/5 min vs 30 req/min).
+- Recovery requests log IP address and user-agent for audit trail.
+- Duplicate pending recovery requests are prevented per email.
+
 ## [0.4.0] - 2026-03-04
 ### Added
 - Consent management system with `ConsentRecord` Prisma model tracking user agreement to Terms of Service, Privacy Policy, and Data Processing.
