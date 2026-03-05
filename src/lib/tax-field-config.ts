@@ -16,6 +16,7 @@ export interface TaxField {
   options?: SelectOption[];
   craLine?: string;
   friendlyLabelKey?: string;
+  promptType?: "yesno";
 }
 
 export interface FieldGroup {
@@ -375,7 +376,7 @@ export const individualWizardSections: WizardSection[] = [
     icon: "home",
     craFormRef: "T1-Step1",
     fields: [
-      { key: "residencyProvince", labelKey: "fieldResidencyProvince", helpKey: "fieldResidencyProvinceHelp", type: "select", required: true, friendlyLabelKey: "friendlyProvince" },
+      { key: "residencyProvince", labelKey: "fieldResidencyProvince", helpKey: "fieldResidencyProvinceHelp", type: "select", required: true, options: PROVINCES, friendlyLabelKey: "friendlyProvince" },
       { key: "maritalStatus", labelKey: "fieldMaritalStatus", helpKey: "fieldMaritalStatusHelp", type: "select", options: MARITAL_STATUSES, friendlyLabelKey: "friendlyMaritalStatus" },
       { key: "dependants", labelKey: "fieldDependants", helpKey: "fieldDependantsHelp", type: "number", friendlyLabelKey: "friendlyDependants" }
     ]
@@ -388,8 +389,8 @@ export const individualWizardSections: WizardSection[] = [
     craFormRef: "T1-Step2",
     fields: [
       { key: "employmentIncome", labelKey: "fieldEmploymentIncome", helpKey: "fieldEmploymentIncomeHelp", type: "number", required: true, craLine: "10100", friendlyLabelKey: "friendlyEmploymentIncome" },
-      { key: "eiBenefits", labelKey: "fieldEiBenefits", helpKey: "fieldEiBenefitsHelp", type: "number", craLine: "11900", friendlyLabelKey: "friendlyEiBenefits" },
-      { key: "otherIncome", labelKey: "fieldOtherIncome", helpKey: "fieldOtherIncomeHelp", type: "number", craLine: "13000", friendlyLabelKey: "friendlyOtherIncome" }
+      { key: "eiBenefits", labelKey: "fieldEiBenefits", helpKey: "fieldEiBenefitsHelp", type: "number", craLine: "11900", friendlyLabelKey: "friendlyEiBenefits", promptType: "yesno" },
+      { key: "otherIncome", labelKey: "fieldOtherIncome", helpKey: "fieldOtherIncomeHelp", type: "number", craLine: "13000", friendlyLabelKey: "friendlyOtherIncome", promptType: "yesno" }
     ]
   },
   {
@@ -400,9 +401,9 @@ export const individualWizardSections: WizardSection[] = [
     craFormRef: "T1-Step2",
     profileFlag: "hasInvestments",
     fields: [
-      { key: "interestIncome", labelKey: "fieldInterestIncome", helpKey: "fieldInterestIncomeHelp", type: "number", craLine: "12100", friendlyLabelKey: "friendlyInterestIncome" },
-      { key: "dividendIncome", labelKey: "fieldDividendIncome", helpKey: "fieldDividendIncomeHelp", type: "number", craLine: "12000", friendlyLabelKey: "friendlyDividendIncome" },
-      { key: "capitalGains", labelKey: "fieldCapitalGains", helpKey: "fieldCapitalGainsHelp", type: "number", craLine: "12700", friendlyLabelKey: "friendlyCapitalGains" }
+      { key: "interestIncome", labelKey: "fieldInterestIncome", helpKey: "fieldInterestIncomeHelp", type: "number", craLine: "12100", friendlyLabelKey: "friendlyInterestIncome", promptType: "yesno" },
+      { key: "dividendIncome", labelKey: "fieldDividendIncome", helpKey: "fieldDividendIncomeHelp", type: "number", craLine: "12000", friendlyLabelKey: "friendlyDividendIncome", promptType: "yesno" },
+      { key: "capitalGains", labelKey: "fieldCapitalGains", helpKey: "fieldCapitalGainsHelp", type: "number", craLine: "12700", friendlyLabelKey: "friendlyCapitalGains", promptType: "yesno" }
     ]
   },
   {
@@ -425,8 +426,8 @@ export const individualWizardSections: WizardSection[] = [
     profileFlag: "isRetired",
     fields: [
       { key: "pensionIncome", labelKey: "fieldPensionIncome", helpKey: "fieldPensionIncomeHelp", type: "number", required: true, craLine: "11500", friendlyLabelKey: "friendlyPensionIncome" },
-      { key: "ageAmount", labelKey: "fieldAgeAmount", helpKey: "fieldAgeAmountHelp", type: "number", craLine: "30100" },
-      { key: "pensionIncomeAmount", labelKey: "fieldPensionIncomeAmount", helpKey: "fieldPensionIncomeAmountHelp", type: "number", craLine: "31400" }
+      { key: "ageAmount", labelKey: "fieldAgeAmount", helpKey: "fieldAgeAmountHelp", type: "number", craLine: "30100", friendlyLabelKey: "friendlyAgeAmount" },
+      { key: "pensionIncomeAmount", labelKey: "fieldPensionIncomeAmount", helpKey: "fieldPensionIncomeAmountHelp", type: "number", craLine: "31400", friendlyLabelKey: "friendlyPensionIncomeAmount" }
     ]
   },
   {
@@ -453,11 +454,11 @@ export const individualWizardSections: WizardSection[] = [
       { key: "rrsp", labelKey: "fieldRrsp", helpKey: "fieldRrspHelp", type: "number", craLine: "20800", friendlyLabelKey: "friendlyRrsp" },
       { key: "fhsa", labelKey: "fieldFhsa", helpKey: "fieldFhsaHelp", type: "number", craLine: "20805", friendlyLabelKey: "friendlyFhsa" },
       { key: "unionDues", labelKey: "fieldUnionDues", helpKey: "fieldUnionDuesHelp", type: "number", craLine: "21200", friendlyLabelKey: "friendlyUnionDues" },
-      { key: "childCareExpenses", labelKey: "fieldChildCareExpenses", helpKey: "fieldChildCareExpensesHelp", type: "number", craLine: "21400", friendlyLabelKey: "friendlyChildCare" },
-      { key: "movingExpenses", labelKey: "fieldMovingExpenses", helpKey: "fieldMovingExpensesHelp", type: "number", craLine: "21900", friendlyLabelKey: "friendlyMovingExpenses" },
-      { key: "supportPaymentsMade", labelKey: "fieldSupportPaymentsMade", helpKey: "fieldSupportPaymentsMadeHelp", type: "number", craLine: "22000", friendlyLabelKey: "friendlySupportPayments" },
-      { key: "carryingCharges", labelKey: "fieldCarryingCharges", helpKey: "fieldCarryingChargesHelp", type: "number", craLine: "22100", friendlyLabelKey: "friendlyCarryingCharges" },
-      { key: "northernResidents", labelKey: "fieldNorthernResidents", helpKey: "fieldNorthernResidentsHelp", type: "number", craLine: "25500", friendlyLabelKey: "friendlyNorthernResidents" }
+      { key: "childCareExpenses", labelKey: "fieldChildCareExpenses", helpKey: "fieldChildCareExpensesHelp", type: "number", craLine: "21400", friendlyLabelKey: "friendlyChildCare", promptType: "yesno" },
+      { key: "movingExpenses", labelKey: "fieldMovingExpenses", helpKey: "fieldMovingExpensesHelp", type: "number", craLine: "21900", friendlyLabelKey: "friendlyMovingExpenses", promptType: "yesno" },
+      { key: "supportPaymentsMade", labelKey: "fieldSupportPaymentsMade", helpKey: "fieldSupportPaymentsMadeHelp", type: "number", craLine: "22000", friendlyLabelKey: "friendlySupportPayments", promptType: "yesno" },
+      { key: "carryingCharges", labelKey: "fieldCarryingCharges", helpKey: "fieldCarryingChargesHelp", type: "number", craLine: "22100", friendlyLabelKey: "friendlyCarryingCharges", promptType: "yesno" },
+      { key: "northernResidents", labelKey: "fieldNorthernResidents", helpKey: "fieldNorthernResidentsHelp", type: "number", craLine: "25500", friendlyLabelKey: "friendlyNorthernResidents", promptType: "yesno" }
     ]
   },
   {
@@ -480,10 +481,10 @@ export const individualWizardSections: WizardSection[] = [
     icon: "heart",
     craFormRef: "T1-Step5B",
     fields: [
-      { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number", craLine: "33099", friendlyLabelKey: "friendlyMedical" },
-      { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number", craLine: "45200" },
-      { key: "donations", labelKey: "fieldDonations", helpKey: "fieldDonationsHelp", type: "number", craLine: "34900", friendlyLabelKey: "friendlyDonations" },
-      { key: "disabilityAmount", labelKey: "fieldDisabilityAmount", helpKey: "fieldDisabilityAmountHelp", type: "number", craLine: "31600", friendlyLabelKey: "friendlyDisability" }
+      { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number", craLine: "33099", friendlyLabelKey: "friendlyMedical", promptType: "yesno" },
+      { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number", craLine: "45200", friendlyLabelKey: "friendlyRefundableMedical", promptType: "yesno" },
+      { key: "donations", labelKey: "fieldDonations", helpKey: "fieldDonationsHelp", type: "number", craLine: "34900", friendlyLabelKey: "friendlyDonations", promptType: "yesno" },
+      { key: "disabilityAmount", labelKey: "fieldDisabilityAmount", helpKey: "fieldDisabilityAmountHelp", type: "number", craLine: "31600", friendlyLabelKey: "friendlyDisability", promptType: "yesno" }
     ]
   },
   {
@@ -493,13 +494,13 @@ export const individualWizardSections: WizardSection[] = [
     icon: "sparkles",
     craFormRef: "T1-Step5B",
     fields: [
-      { key: "spouseAmount", labelKey: "fieldSpouseAmount", helpKey: "fieldSpouseAmountHelp", type: "number", craLine: "30300" },
-      { key: "eligibleDependantAmount", labelKey: "fieldEligibleDependantAmount", helpKey: "fieldEligibleDependantAmountHelp", type: "number", craLine: "30400" },
-      { key: "canadaCaregiverAmount", labelKey: "fieldCanadaCaregiverAmount", helpKey: "fieldCanadaCaregiverAmountHelp", type: "number", craLine: "30450" },
-      { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number", craLine: "44800" },
+      { key: "spouseAmount", labelKey: "fieldSpouseAmount", helpKey: "fieldSpouseAmountHelp", type: "number", craLine: "30300", friendlyLabelKey: "friendlySpouseAmount", promptType: "yesno" },
+      { key: "eligibleDependantAmount", labelKey: "fieldEligibleDependantAmount", helpKey: "fieldEligibleDependantAmountHelp", type: "number", craLine: "30400", friendlyLabelKey: "friendlyEligibleDependant", promptType: "yesno" },
+      { key: "canadaCaregiverAmount", labelKey: "fieldCanadaCaregiverAmount", helpKey: "fieldCanadaCaregiverAmountHelp", type: "number", craLine: "30450", friendlyLabelKey: "friendlyCanadaCaregiver", promptType: "yesno" },
+      { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number", craLine: "44800", friendlyLabelKey: "friendlyCppEiOverpayment", promptType: "yesno" },
       { key: "canadaEmploymentAmount", labelKey: "fieldCanadaEmploymentAmount", helpKey: "fieldCanadaEmploymentAmountHelp", type: "number", craLine: "31260", friendlyLabelKey: "friendlyCanadaEmployment" },
-      { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number", craLine: "31270", friendlyLabelKey: "friendlyHomeBuyers" },
-      { key: "canadaWorkersAmount", labelKey: "fieldCanadaWorkersAmount", helpKey: "fieldCanadaWorkersAmountHelp", type: "number", craLine: "45300" }
+      { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number", craLine: "31270", friendlyLabelKey: "friendlyHomeBuyers", promptType: "yesno" },
+      { key: "canadaWorkersAmount", labelKey: "fieldCanadaWorkersAmount", helpKey: "fieldCanadaWorkersAmountHelp", type: "number", craLine: "45300", friendlyLabelKey: "friendlyCanadaWorkers", promptType: "yesno" }
     ]
   },
   {
@@ -509,7 +510,7 @@ export const individualWizardSections: WizardSection[] = [
     icon: "credit-card",
     craFormRef: "T1-Step6",
     fields: [
-      { key: "taxPaidByInstalments", labelKey: "fieldTaxPaidByInstalments", helpKey: "fieldTaxPaidByInstalmentsHelp", type: "number", craLine: "47600", friendlyLabelKey: "friendlyInstalments" },
+      { key: "taxPaidByInstalments", labelKey: "fieldTaxPaidByInstalments", helpKey: "fieldTaxPaidByInstalmentsHelp", type: "number", craLine: "47600", friendlyLabelKey: "friendlyInstalments", promptType: "yesno" },
       { key: "totalIncomeTaxDeducted", labelKey: "fieldTotalIncomeTaxDeducted", helpKey: "fieldTotalIncomeTaxDeductedHelp", type: "number", required: true, craLine: "43700", friendlyLabelKey: "friendlyTaxDeducted" }
     ]
   }

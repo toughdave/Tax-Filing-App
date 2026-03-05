@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.18.0] - 2026-03-05
+### Fixed
+- **Responsive header navigation**: Desktop nav and mobile nav no longer display simultaneously. Added CSS media queries to toggle `.desktop-nav` / `.mobile-nav` visibility at 640px breakpoint.
+- **Yes/No radio toggle fields**: Fields that ask yes/no questions (EI benefits, donations, medical expenses, child care, etc.) now render as radio button toggles instead of bare number inputs. Selecting "Yes" reveals the amount input with a branded left-border accent; "No" hides it. 24 fields converted to `promptType: "yesno"`.
+- **Missing friendly labels**: Added conversational question-style labels to 8 fields that were still showing generic CRA form labels (`ageAmount`, `pensionIncomeAmount`, `refundableMedical`, `spouseAmount`, `eligibleDependantAmount`, `canadaCaregiverAmount`, `cppEiOverpayment`, `canadaWorkersAmount`).
+- **Province selector missing options**: `residencyProvince` field in wizard now correctly includes `PROVINCES` options array.
+
+### Added
+- `promptType` property on `TaxField` interface for conditional field rendering patterns.
+- `yesNoState` React state in `ReturnForm` to track toggle state, initialized from existing payload values.
+- 11 new bilingual i18n keys (EN/FR): 8 friendly labels + 3 yes/no UI strings. Total: 522/522 parity.
+
 ## [0.17.2] - 2026-03-05
 ### Fixed
 - **Single-column vertical field layout**: All form fields now stack vertically in a single column instead of the previous multi-column grid. Improves readability and scrollability on both mobile and desktop.
@@ -366,6 +378,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.

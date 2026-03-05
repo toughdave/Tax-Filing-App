@@ -443,6 +443,10 @@ html[data-theme="dark"] body {
   background: rgba(52, 211, 153, 0.1);
 }
 
+/* Nav responsive visibility */
+.desktop-nav { display: flex; }
+.mobile-nav { display: none; }
+
 /* Legacy horizontal stepper kept for backwards compat */
 .wizard-stepper { display: none; }
 
@@ -472,6 +476,9 @@ html[data-theme="dark"] body {
   .grid-cards {
     grid-template-columns: 1fr;
   }
+
+  .desktop-nav { display: none !important; }
+  .mobile-nav { display: flex !important; }
 
   table {
     font-size: 0.85rem;

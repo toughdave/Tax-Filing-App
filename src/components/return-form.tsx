@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import {
   filingModes, parseFilingMode, getWizardSections,
   PROFILE_FLAGS, TAX_YEARS,
+  individualWizardSections, companyWizardSections,
   type FilingMode, type TaxField, type WizardSection
 } from "@/lib/tax-field-config";
 import { textFor, type Locale } from "@/lib/i18n";
@@ -95,6 +96,21 @@ export function ReturnForm({
     return flags;
   });
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [yesNoState, setYesNoState] = useState<Record<string, boolean>>(() => {
+    if (!initialPayload) return {};
+    const state: Record<string, boolean> = {};
+    for (const section of [...individualWizardSections, ...companyWizardSections]) {
+      for (const field of section.fields) {
+        if (field.promptType === "yesno" && initialPayload[field.key]) {
+          const v = initialPayload[field.key];
+          if (v !== null && v !== undefined && v !== "" && v !== "0" && v !== 0) {
+            state[field.key] = true;
+          }
+        }
+      }
+    }
+    return state;
+  });
 
   const { register, getValues, reset, watch, trigger, formState: { errors } } = useForm<Record<string, string>>({
     mode: "onBlur",
@@ -284,6 +300,99 @@ export function ReturnForm({
     const officialLabel = t[field.labelKey];
     const displayLabel = friendlyLabel || officialLabel;
     const craRef = field.craLine ? `Line ${field.craLine}` : null;
+
+    if (field.promptType === "yesno") {
+      const isYes = yesNoState[field.key] ?? false;
+      return (
+        <div key={field.key} style={{ display: "grid", gap: "0.6rem" }}>
+          <div style={{
+            padding: "0.9rem 1rem",
+            borderRadius: "12px",
+            border: `1px solid ${isYes ? "var(--brand)" : "var(--line)"}`,
+            background: isYes ? "rgba(31, 107, 87, 0.04)" : "transparent",
+            transition: "border-color 0.15s, background 0.15s"
+          }}>
+            <div style={{ fontWeight: 600, fontSize: "0.95rem", marginBottom: "0.5rem" }}>
+              {displayLabel}
+            </div>
+            {friendlyLabel && (
+              <small className="muted" style={{ display: "block", marginBottom: "0.5rem" }}>
+                {officialLabel}{craRef ? ` · ${craRef}` : ""}
+              </small>
+            )}
+            {!friendlyLabel && craRef && (
+              <small className="muted" style={{ display: "block", marginBottom: "0.5rem" }}>{craRef}</small>
+            )}
+            <div style={{ display: "flex", gap: "0.6rem" }}>
+              <label style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                padding: "0.4rem 1rem", borderRadius: "8px", cursor: "pointer",
+                border: `1.5px solid ${isYes ? "var(--brand)" : "var(--line)"}`,
+                background: isYes ? "rgba(31, 107, 87, 0.08)" : "transparent",
+                fontWeight: isYes ? 700 : 500, fontSize: "0.9rem",
+                transition: "all 0.15s"
+              }}>
+                <input
+                  type="radio"
+                  name={`${field.key}_yesno`}
+                  checked={isYes}
+                  onChange={() => setYesNoState((prev) => ({ ...prev, [field.key]: true }))}
+                  style={{ accentColor: "var(--brand)" }}
+                />
+                {t.yesnoYes}
+              </label>
+              <label style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                padding: "0.4rem 1rem", borderRadius: "8px", cursor: "pointer",
+                border: `1.5px solid ${!isYes ? "var(--line)" : "var(--line)"}`,
+                background: !isYes ? "rgba(0,0,0,0.02)" : "transparent",
+                fontWeight: !isYes ? 700 : 500, fontSize: "0.9rem",
+                transition: "all 0.15s"
+              }}>
+                <input
+                  type="radio"
+                  name={`${field.key}_yesno`}
+                  checked={!isYes}
+                  onChange={() => {
+                    setYesNoState((prev) => ({ ...prev, [field.key]: false }));
+                  }}
+                  style={{ accentColor: "var(--brand)" }}
+                />
+                {t.yesnoNo}
+              </label>
+            </div>
+          </div>
+          {isYes && (
+            <div className="field" style={{ paddingLeft: "1rem", borderLeft: "2px solid var(--brand)" }}>
+              <label htmlFor={field.key} style={{ fontSize: "0.88rem" }}>
+                {t.yesnoEnterAmount}{field.required ? " *" : ""}
+              </label>
+              <input
+                id={field.key}
+                type="number"
+                aria-invalid={!!errors[field.key]}
+                aria-describedby={errors[field.key] ? `${field.key}-error` : `${field.key}-help`}
+                style={errors[field.key] ? { borderColor: "var(--error, #ef4444)" } : undefined}
+                {...register(field.key, {
+                  ...(field.required ? { required: t.validationRequired } : {}),
+                  validate: (v: string) => {
+                    if (!v || v.trim() === "") return true;
+                    return Number.isFinite(Number(v)) || t.validationNumber;
+                  }
+                })}
+              />
+              {errors[field.key] ? (
+                <small id={`${field.key}-error`} style={{ color: "var(--error, #ef4444)" }} role="alert">
+                  {errors[field.key]?.message as string}
+                </small>
+              ) : (
+                <small id={`${field.key}-help`}>{t[field.helpKey]}</small>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
 
     if (field.type === "select" && field.options) {
       return (

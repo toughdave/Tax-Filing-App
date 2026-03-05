@@ -99,7 +99,7 @@ export async function SiteHeader({ locale }: SiteHeaderProps) {
           </div>
         </div>
 
-        <nav className="mobile-nav" aria-label="Mobile navigation" style={{ marginTop: "0.9rem", display: "flex", gap: "0.25rem", overflowX: "auto" }}>
+        <nav className="mobile-nav" aria-label="Mobile navigation" style={{ marginTop: "0.9rem", gap: "0.25rem", overflowX: "auto" }}>
           {navLinks.map((link) => (
             <Link
               key={link.href}

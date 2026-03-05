@@ -517,7 +517,18 @@ const en: TextDictionary = {
   friendlyCanadaEmployment: "Canada employment amount",
   friendlyHomeBuyers: "Did you buy your first home this year?",
   friendlyInstalments: "Did you pay tax by instalments?",
-  friendlyTaxDeducted: "How much income tax was deducted from your pay?"
+  friendlyTaxDeducted: "How much income tax was deducted from your pay?",
+  friendlyAgeAmount: "Are you claiming the age amount credit?",
+  friendlyPensionIncomeAmount: "Are you claiming the pension income amount?",
+  friendlyRefundableMedical: "Do you qualify for the refundable medical expense supplement?",
+  friendlySpouseAmount: "Are you claiming an amount for your spouse or partner?",
+  friendlyEligibleDependant: "Are you claiming for an eligible dependant?",
+  friendlyCanadaCaregiver: "Are you a caregiver for a family member with a disability?",
+  friendlyCppEiOverpayment: "Did you overpay CPP or EI premiums this year?",
+  friendlyCanadaWorkers: "Are you claiming the Canada workers benefit?",
+  yesnoYes: "Yes",
+  yesnoNo: "No",
+  yesnoEnterAmount: "Enter the amount"
 };
 
 const fr: TextDictionary = {
@@ -1035,7 +1046,18 @@ const fr: TextDictionary = {
   friendlyCanadaEmployment: "Montant canadien pour emploi",
   friendlyHomeBuyers: "Avez-vous acheté votre première maison cette année?",
   friendlyInstalments: "Avez-vous payé des acomptes provisionnels?",
-  friendlyTaxDeducted: "Combien d'impôt a été retenu sur votre paie?"
+  friendlyTaxDeducted: "Combien d'impôt a été retenu sur votre paie?",
+  friendlyAgeAmount: "Demandez-vous le montant en raison de l'âge?",
+  friendlyPensionIncomeAmount: "Demandez-vous le montant pour revenu de pension?",
+  friendlyRefundableMedical: "Êtes-vous admissible au supplément remboursable pour frais médicaux?",
+  friendlySpouseAmount: "Demandez-vous un montant pour votre époux(se) ou conjoint(e)?",
+  friendlyEligibleDependant: "Demandez-vous un montant pour une personne à charge admissible?",
+  friendlyCanadaCaregiver: "Êtes-vous proche aidant d'un membre de la famille ayant une déficience?",
+  friendlyCppEiOverpayment: "Avez-vous payé trop de cotisations au RPC ou à l'AE cette année?",
+  friendlyCanadaWorkers: "Demandez-vous l'allocation canadienne pour les travailleurs?",
+  yesnoYes: "Oui",
+  yesnoNo: "Non",
+  yesnoEnterAmount: "Entrez le montant"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };
