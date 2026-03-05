@@ -250,11 +250,18 @@ describe("saveReturnForUser", () => {
     expect(result.missingRequired).toEqual([]);
   });
 
-  it("merges carry-forward data from prior year return", async () => {
+  it("merges only profile fields from prior year return (excludes income/deductions)", async () => {
     mockPrisma.taxReturn.findFirst.mockResolvedValue({
       id: "ret-prev",
       taxYear: 2023,
-      data: { legalName: "Alice", residencyProvince: "ON" }
+      data: {
+        legalName: "Alice",
+        residencyProvince: "ON",
+        employmentIncome: 85000,
+        rrsp: 12000,
+        capitalGains: 5000,
+        donations: 500
+      }
     });
     mockPrisma.taxReturn.upsert.mockImplementation(
       async (args: { create: { data: unknown } }) => ({
@@ -276,11 +283,63 @@ describe("saveReturnForUser", () => {
     expect(result.carryForwardFromYear).toBe(2023);
 
     const upsertCall = mockPrisma.taxReturn.upsert.mock.calls[0][0];
-    expect(upsertCall.create.data).toMatchObject({
-      legalName: "Alice",
-      residencyProvince: "ON",
-      sinLast4: "1234"
+    const mergedData = upsertCall.create.data as Record<string, unknown>;
+
+    // Profile fields carried forward
+    expect(mergedData.legalName).toBe("Alice");
+    expect(mergedData.residencyProvince).toBe("ON");
+    expect(mergedData.sinLast4).toBe("1234");
+
+    // Year-specific fields NOT carried forward
+    expect(mergedData.employmentIncome).toBeUndefined();
+    expect(mergedData.rrsp).toBeUndefined();
+    expect(mergedData.capitalGains).toBeUndefined();
+    expect(mergedData.donations).toBeUndefined();
+  });
+
+  it("returns carryForwardDiff with carried/new/changed entries", async () => {
+    mockPrisma.taxReturn.findFirst.mockResolvedValue({
+      id: "ret-prev",
+      taxYear: 2023,
+      data: { legalName: "Alice", residencyProvince: "ON", birthDate: "1990-01-01" }
     });
+    mockPrisma.taxReturn.upsert.mockImplementation(
+      async (args: { create: { data: unknown } }) => ({
+        id: "ret-diff",
+        taxYear: 2024,
+        filingMode: "INDIVIDUAL",
+        status: "DRAFT",
+        data: args.create.data,
+        updatedAt: new Date()
+      })
+    );
+
+    const result = await saveReturnForUser("user-1", {
+      taxYear: 2024,
+      filingMode: "INDIVIDUAL",
+      payload: { legalName: "Alice", residencyProvince: "BC", employmentIncome: 60000 }
+    });
+
+    expect(result.carryForwardDiff).toBeDefined();
+    const diff = result.carryForwardDiff;
+
+    // legalName unchanged → carried
+    const nameEntry = diff.find((d) => d.key === "legalName");
+    expect(nameEntry?.source).toBe("carried");
+
+    // residencyProvince changed ON→BC
+    const provEntry = diff.find((d) => d.key === "residencyProvince");
+    expect(provEntry?.source).toBe("changed");
+    expect(provEntry?.priorValue).toBe("ON");
+    expect(provEntry?.currentValue).toBe("BC");
+
+    // employmentIncome is year-specific → new
+    const incomeEntry = diff.find((d) => d.key === "employmentIncome");
+    expect(incomeEntry?.source).toBe("new");
+
+    // birthDate from prior year carried forward (absent in current payload but still present in merged)
+    const bdEntry = diff.find((d) => d.key === "birthDate");
+    expect(bdEntry?.source).toBe("carried");
   });
 
   it("current-year data overrides carry-forward data", async () => {

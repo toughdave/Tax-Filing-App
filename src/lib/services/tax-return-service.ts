@@ -4,6 +4,7 @@ import { getSubmissionProvider } from "@/lib/submission-providers";
 import { requiredFieldsForMode, type FilingMode } from "@/lib/tax-field-config";
 import { calculateTax, type CalculationResult } from "@/lib/services/tax-calculation-engine";
 import { runPreflightChecks } from "@/lib/services/filing-preflight";
+import { buildCarryForwardData, computeCarryForwardDiff, type CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
 
 export function sanitizePayload(payload: Record<string, unknown>) {
@@ -95,8 +96,11 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
     orderBy: { updatedAt: "desc" }
   });
 
+  const priorData = (carryForwardSource?.data as Record<string, unknown> | undefined) ?? {};
+  const carriedFields = buildCarryForwardData(priorData);
+
   const mergedData = {
-    ...(carryForwardSource?.data as Record<string, unknown> | undefined),
+    ...carriedFields,
     ...sanitizedPayload
   };
 
@@ -136,10 +140,15 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
 
   const taxSummary: CalculationResult = calculateTax(mode, mergedData);
 
+  const carryForwardDiff: CarryForwardDiffEntry[] = carryForwardSource
+    ? computeCarryForwardDiff(priorData, mergedData, mode)
+    : [];
+
   return {
     record,
     missingRequired: missing,
     carryForwardFromYear: carryForwardSource?.taxYear ?? null,
+    carryForwardDiff,
     taxSummary
   };
 }

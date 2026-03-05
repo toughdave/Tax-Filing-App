@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.11.0] - 2026-03-05
+### Added
+- **Robust carry-forward data mapping**: Prior-year data is now filtered to only carry forward stable profile/identity fields (name, SIN, DOB, province, marital status, dependants, company identity). Year-specific amounts (income, deductions, credits, payments, corporate financials) are no longer blindly carried forward.
+- New `carry-forward-config.ts` module with `buildCarryForwardData` (filtered extraction), `computeCarryForwardDiff` (carried/new/changed diff), and `isCarryForwardField` helpers.
+- `saveReturnForUser` now returns `carryForwardDiff` array showing which fields were carried unchanged, changed from prior year, or are new this year — enabling a "What changed?" UI step.
+- Bilingual EN/FR i18n strings for carry-forward diff labels (profile carried, changed, new, prior/current values).
+- 18 new carry-forward tests covering field filtering, exclusion of income/deductions/credits/payments, company identity carry-forward, diff computation for carried/changed/new entries, and integration with `saveReturnForUser`.
+- 179 tests total (17 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
 ## [0.10.1] - 2026-03-05
 ### Fixed
 - **Tax Calculation Engine Accuracy Audit Fixes**:
@@ -200,6 +209,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.
