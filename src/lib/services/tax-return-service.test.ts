@@ -208,7 +208,6 @@ describe("saveReturnForUser", () => {
       taxYear: 2024,
       filingMode: "INDIVIDUAL",
       status: "DRAFT",
-      data: { legalName: "Alice" },
       updatedAt: new Date()
     });
 
@@ -230,12 +229,6 @@ describe("saveReturnForUser", () => {
       taxYear: 2024,
       filingMode: "INDIVIDUAL",
       status: "READY_TO_REVIEW",
-      data: {
-        legalName: "Alice",
-        sinLast4: "1234",
-        birthDate: "1990-01-01",
-        residencyProvince: "ON"
-      },
       updatedAt: new Date()
     });
 
@@ -273,7 +266,6 @@ describe("saveReturnForUser", () => {
         taxYear: 2024,
         filingMode: "INDIVIDUAL",
         status: "DRAFT",
-        data: args.create.data,
         updatedAt: new Date()
       })
     );
@@ -315,7 +307,6 @@ describe("saveReturnForUser", () => {
         taxYear: 2024,
         filingMode: "INDIVIDUAL",
         status: "DRAFT",
-        data: args.create.data,
         updatedAt: new Date()
       })
     );
@@ -360,7 +351,6 @@ describe("saveReturnForUser", () => {
         taxYear: 2024,
         filingMode: "INDIVIDUAL",
         status: "DRAFT",
-        data: args.create.data,
         updatedAt: new Date()
       })
     );

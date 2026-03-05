@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.12.4] - 2026-03-05
+### Fixed
+- **Encrypted PII leaking in save API response**: `saveReturnForUser` upsert select included `data: true`, sending encrypted PII ciphertexts to the client. Removed `data` and `taxSummary` from the upsert select since the client only uses `record.id` and `record.status`. Reduces API response size and eliminates unnecessary encrypted data exposure.
+- **Server-side `sinLast4` validation gap**: Added `z.string().regex(/^\d{4}$/)` validation for `sinLast4` in `payload-schema.ts`. Previously only the client enforced the 4-digit pattern; now the server rejects malformed SIN values at the Zod layer (defense-in-depth).
+- **Redundant tax recalculation on return detail page**: The return detail page now uses the persisted `taxSummary` from the database instead of recalculating from the full payload on every page load. Falls back to recalculation only for legacy records without a persisted summary.
+
 ## [0.12.3] - 2026-03-05
 ### Fixed
 - **End-to-end data flow bug**: PII encryption ciphertexts (`enc:***`) were inadvertently being passed to the preflight checker, tax calculation engine, and NETFILE XML builder during the `prepareSubmissionForUser` step. The payload is now decrypted immediately after reading from the database and before processing submission logic.

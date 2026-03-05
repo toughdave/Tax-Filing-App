@@ -4,7 +4,7 @@ import { ReturnForm } from "@/components/return-form";
 import { SiteHeader } from "@/components/site-header";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
-import { calculateTax } from "@/lib/services/tax-calculation-engine";
+import { calculateTax, type CalculationResult } from "@/lib/services/tax-calculation-engine";
 import { getReturnForUser } from "@/lib/services/tax-return-service";
 import { prepareSubmissionSchema } from "@/lib/validation/tax-return";
 
@@ -61,6 +61,10 @@ export default async function ReturnByIdPage({
       ? (record.data as Record<string, unknown>)
       : {};
 
+  const initialTaxSummary: CalculationResult | null = record.taxSummary
+    ? { mode: record.filingMode, summary: record.taxSummary } as unknown as CalculationResult
+    : calculateTax(record.filingMode, payload);
+
   return (
     <main style={{ paddingBottom: "3rem" }}>
       <SiteHeader locale={locale} />
@@ -71,7 +75,7 @@ export default async function ReturnByIdPage({
           defaultMode={record.filingMode}
           initialReturnId={record.id}
           initialPayload={payload}
-          initialTaxSummary={calculateTax(record.filingMode, payload)}
+          initialTaxSummary={initialTaxSummary}
         />
       </section>
     </main>

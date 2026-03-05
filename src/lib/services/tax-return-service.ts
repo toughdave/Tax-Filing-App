@@ -148,8 +148,6 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
       taxYear: true,
       filingMode: true,
       status: true,
-      data: true,
-      taxSummary: true,
       updatedAt: true
     }
   });

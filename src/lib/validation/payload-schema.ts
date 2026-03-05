@@ -7,6 +7,10 @@ import {
 } from "@/lib/tax-field-config";
 
 function zodTypeForField(field: TaxField) {
+  if (field.key === "sinLast4") {
+    return z.string().regex(/^\d{4}$/, "sinLast4 must be exactly 4 digits").nullable();
+  }
+
   const base = field.type === "number"
     ? z.number().nullable()
     : z.string().nullable();
