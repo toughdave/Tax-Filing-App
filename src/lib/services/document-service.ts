@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { put, del } from "@vercel/blob";
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
@@ -12,6 +13,10 @@ const ALLOWED_MIME_TYPES = [
   "image/webp",
   "text/csv"
 ];
+
+function isBlobStorageEnabled(): boolean {
+  return !!process.env.BLOB_READ_WRITE_TOKEN;
+}
 
 export type DocumentCategoryValue =
   | "T4_SLIP"
@@ -67,13 +72,22 @@ export async function uploadDocument(input: UploadInput): Promise<DocumentRecord
     if (!owned) throw new Error("RETURN_NOT_OWNED");
   }
 
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-
   const ext = input.fileName.split(".").pop() ?? "bin";
   const storageName = `${crypto.randomUUID()}.${ext}`;
-  const storagePath = path.join(UPLOAD_DIR, storageName);
+  let storagePath: string;
 
-  await fs.writeFile(storagePath, input.data);
+  if (isBlobStorageEnabled()) {
+    const blob = await put(`documents/${storageName}`, input.data, {
+      access: "public",
+      contentType: input.mimeType
+    });
+    storagePath = blob.url;
+  } else {
+    await fs.mkdir(UPLOAD_DIR, { recursive: true });
+    const localPath = path.join(UPLOAD_DIR, storageName);
+    await fs.writeFile(localPath, input.data);
+    storagePath = storageName;
+  }
 
   const doc = await prisma.document.create({
     data: {
@@ -82,7 +96,7 @@ export async function uploadDocument(input: UploadInput): Promise<DocumentRecord
       fileName: input.fileName,
       mimeType: input.mimeType,
       sizeBytes: input.data.length,
-      storagePath: storageName,
+      storagePath,
       category: input.category
     }
   });
@@ -121,14 +135,15 @@ export async function listDocuments(userId: string, returnId?: string): Promise<
 export async function getDocumentForDownload(
   docId: string,
   userId: string
-): Promise<{ filePath: string; fileName: string; mimeType: string } | null> {
+): Promise<{ storagePath: string; fileName: string; mimeType: string; isBlob: boolean } | null> {
   const doc = await prisma.document.findFirst({
     where: { id: docId, userId }
   });
   if (!doc) return null;
 
-  const filePath = path.join(UPLOAD_DIR, doc.storagePath);
-  return { filePath, fileName: doc.fileName, mimeType: doc.mimeType };
+  const isBlob = doc.storagePath.startsWith("http");
+  const resolvedPath = isBlob ? doc.storagePath : path.join(UPLOAD_DIR, doc.storagePath);
+  return { storagePath: resolvedPath, fileName: doc.fileName, mimeType: doc.mimeType, isBlob };
 }
 
 export async function deleteDocument(docId: string, userId: string): Promise<boolean> {
@@ -137,11 +152,19 @@ export async function deleteDocument(docId: string, userId: string): Promise<boo
   });
   if (!doc) return false;
 
-  const filePath = path.join(UPLOAD_DIR, doc.storagePath);
-  try {
-    await fs.unlink(filePath);
-  } catch {
-    // File may already be deleted from storage
+  if (doc.storagePath.startsWith("http")) {
+    try {
+      await del(doc.storagePath);
+    } catch {
+      // Blob may already be deleted
+    }
+  } else {
+    const filePath = path.join(UPLOAD_DIR, doc.storagePath);
+    try {
+      await fs.unlink(filePath);
+    } catch {
+      // File may already be deleted from storage
+    }
   }
 
   await prisma.document.delete({ where: { id: docId } });

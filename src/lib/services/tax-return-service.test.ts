@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+vi.stubEnv("NEXTAUTH_SECRET", "test-secret-for-tax-return-service");
+
 import { sanitizePayload, missingRequiredFields } from "./tax-return-service";
+import { decryptPiiValue } from "@/lib/pii-crypto";
 
 // ---------------------------------------------------------------------------
 // Unit tests for pure domain helpers (no Prisma dependency)
@@ -285,10 +289,12 @@ describe("saveReturnForUser", () => {
     const upsertCall = mockPrisma.taxReturn.upsert.mock.calls[0][0];
     const mergedData = upsertCall.create.data as Record<string, unknown>;
 
-    // Profile fields carried forward
-    expect(mergedData.legalName).toBe("Alice");
+    // Profile PII fields carried forward and encrypted
+    expect((mergedData.legalName as string).startsWith("enc:")).toBe(true);
+    expect(decryptPiiValue(mergedData.legalName as string)).toBe("Alice");
     expect(mergedData.residencyProvince).toBe("ON");
-    expect(mergedData.sinLast4).toBe("1234");
+    expect((mergedData.sinLast4 as string).startsWith("enc:")).toBe(true);
+    expect(decryptPiiValue(mergedData.sinLast4 as string)).toBe("1234");
 
     // Year-specific fields NOT carried forward
     expect(mergedData.employmentIncome).toBeUndefined();
@@ -366,10 +372,9 @@ describe("saveReturnForUser", () => {
     });
 
     const upsertCall = mockPrisma.taxReturn.upsert.mock.calls[0][0];
-    expect(upsertCall.create.data).toMatchObject({
-      legalName: "New Name",
-      residencyProvince: "ON"
-    });
+    expect(upsertCall.create.data.residencyProvince).toBe("ON");
+    expect(typeof upsertCall.create.data.legalName).toBe("string");
+    expect(upsertCall.create.data.legalName.startsWith("enc:")).toBe(true);
   });
 });
 

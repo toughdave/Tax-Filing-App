@@ -31,8 +31,12 @@ export async function GET(
     return NextResponse.json({ message: "NOT_FOUND" }, { status: 404 });
   }
 
+  if (doc.isBlob) {
+    return NextResponse.redirect(doc.storagePath);
+  }
+
   try {
-    const fileBuffer = await fs.readFile(doc.filePath);
+    const fileBuffer = await fs.readFile(doc.storagePath);
     return new Response(fileBuffer, {
       status: 200,
       headers: {

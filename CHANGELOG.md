@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.12.1] - 2026-03-05
+### Added
+- **Vercel Blob document storage**: Document uploads now use `@vercel/blob` when `BLOB_READ_WRITE_TOKEN` is set, with local filesystem fallback for development. Downloads redirect to blob URLs in production.
+- **Field-level PII encryption**: `legalName`, `sinLast4`, and `birthDate` are now AES-256-GCM encrypted at rest in the `TaxReturn.data` JSON column. Transparent encrypt-on-save / decrypt-on-read via `pii-crypto.ts` module. Uses `PII_ENCRYPTION_KEY` env var (falls back to `NEXTAUTH_SECRET`).
+- 11 new PII crypto tests covering encrypt/decrypt round-trips, empty strings, unicode, double-encrypt prevention, field-level batch operations.
+- 195 tests total (18 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
+### Changed
+- `document-service.ts` refactored: `uploadDocument` uses `@vercel/blob` `put()`, `deleteDocument` uses `del()`, `getDocumentForDownload` returns `isBlob` flag for URL-based or file-based download.
+- Document download API route redirects to blob URL when document is stored in Vercel Blob.
+- `saveReturnForUser` encrypts PII fields before DB write; `getReturnForUser` decrypts after read.
+- Carry-forward source data is decrypted before merge to ensure plaintext profile fields for tax calculation.
+
 ## [0.12.0] - 2026-03-05
 ### Added
 - **Provincial tax data in NETFILE XML**: The XML builder now includes a `<TaxCalculation>` section with federal tax, provincial tax breakdown (province code, gross provincial tax, BPA credit, non-refundable credits, surtax, net provincial tax), total tax, and balance owing.

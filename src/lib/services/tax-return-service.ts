@@ -6,6 +6,7 @@ import { calculateTax, type CalculationResult } from "@/lib/services/tax-calcula
 import { runPreflightChecks } from "@/lib/services/filing-preflight";
 import { buildCarryForwardData, computeCarryForwardDiff, type CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
+import { encryptPiiFields, decryptPiiFields } from "@/lib/pii-crypto";
 
 export function sanitizePayload(payload: Record<string, unknown>) {
   const sanitized: Record<string, string | number | boolean | null> = {};
@@ -64,7 +65,7 @@ export async function listReturnsForUser(userId: string) {
 }
 
 export async function getReturnForUser(userId: string, returnId: string) {
-  return prisma.taxReturn.findFirst({
+  const record = await prisma.taxReturn.findFirst({
     where: {
       userId,
       id: returnId
@@ -82,6 +83,12 @@ export async function getReturnForUser(userId: string, returnId: string) {
       externalSubmissionRef: true
     }
   });
+
+  if (record?.data && typeof record.data === "object" && !Array.isArray(record.data)) {
+    return { ...record, data: decryptPiiFields(record.data as Record<string, unknown>) };
+  }
+
+  return record;
 }
 
 export async function saveReturnForUser(userId: string, input: SaveReturnInput) {
@@ -97,7 +104,8 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
     orderBy: { updatedAt: "desc" }
   });
 
-  const priorData = (carryForwardSource?.data as Record<string, unknown> | undefined) ?? {};
+  const priorDataRaw = (carryForwardSource?.data as Record<string, unknown> | undefined) ?? {};
+  const priorData = decryptPiiFields(priorDataRaw);
   const carriedFields = buildCarryForwardData(priorData);
 
   const mergedData = {
@@ -109,6 +117,8 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
   const nextStatus = missing.length === 0 ? "READY_TO_REVIEW" : "DRAFT";
 
   const taxSummary: CalculationResult = calculateTax(mode, mergedData);
+
+  const encryptedData = encryptPiiFields(mergedData);
 
   const record = await prisma.taxReturn.upsert({
     where: {
@@ -123,12 +133,12 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
       taxYear: input.taxYear,
       filingMode: mode,
       status: nextStatus,
-      data: mergedData as InputJsonValue,
+      data: encryptedData as InputJsonValue,
       taxSummary: taxSummary.summary as unknown as InputJsonValue,
       priorYearReturnId: carryForwardSource?.id
     },
     update: {
-      data: mergedData as InputJsonValue,
+      data: encryptedData as InputJsonValue,
       taxSummary: taxSummary.summary as unknown as InputJsonValue,
       status: nextStatus,
       priorYearReturnId: carryForwardSource?.id
