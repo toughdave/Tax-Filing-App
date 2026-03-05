@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.17.1] - 2026-03-05
+### Added
+- **Friendly conversational field labels**: 35 new question-style labels (EN/FR) for form fields. Instead of "Employment income", users see "How much did you earn from your job(s) this year?" with the official CRA term shown below as context.
+- **CRA line number references**: All income, deduction, and credit fields now display their CRA line number (e.g. "Line 10100") below the label, helping users cross-reference with their T4 slips and CRA documents.
+- **Extended data model**: `TaxField` now supports `craLine` and `friendlyLabelKey`. `WizardSection` supports `craFormRef` (e.g. "T1-Step2", "Schedule 11") and optional `subsections` array. New `FormSubsection` interface for nested grouping.
+
+### Changed
+- 35 new bilingual i18n keys (EN/FR): all `friendly*` conversational labels. Total: 511/511 parity.
+- Field rendering shows friendly label as primary, official CRA label + line number as secondary context underneath.
+
 ## [0.17.0] - 2026-03-05
 ### Added
 - **Vertical accordion timeline**: Replaces the old horizontal icon-only stepper with a vertical timeline layout. Each section shows as a node on a connecting line with expand/collapse navigation. Works identically on mobile and desktop — text labels always visible alongside icons.

@@ -280,12 +280,18 @@ export function ReturnForm({
   }
 
   function renderField(field: TaxField) {
+    const friendlyLabel = field.friendlyLabelKey ? t[field.friendlyLabelKey] : null;
+    const officialLabel = t[field.labelKey];
+    const displayLabel = friendlyLabel || officialLabel;
+    const craRef = field.craLine ? `Line ${field.craLine}` : null;
+
     if (field.type === "select" && field.options) {
       return (
         <div key={field.key} className="field">
           <label htmlFor={field.key}>
-            {t[field.labelKey]}{field.required ? " *" : ""}
+            {displayLabel}{field.required ? " *" : ""}
           </label>
+          {friendlyLabel && <small className="muted" style={{ marginTop: "-0.3rem", display: "block" }}>{officialLabel}{craRef ? ` · ${craRef}` : ""}</small>}
           <select
             id={field.key}
             aria-invalid={!!errors[field.key]}
@@ -316,8 +322,10 @@ export function ReturnForm({
     return (
       <div key={field.key} className="field">
         <label htmlFor={field.key}>
-          {t[field.labelKey]}{field.required ? " *" : ""}
+          {displayLabel}{field.required ? " *" : ""}
         </label>
+        {friendlyLabel && <small className="muted" style={{ marginTop: "-0.3rem", display: "block" }}>{officialLabel}{craRef ? ` · ${craRef}` : ""}</small>}
+        {!friendlyLabel && craRef && <small className="muted" style={{ marginTop: "-0.3rem", display: "block" }}>{craRef}</small>}
         <input
           id={field.key}
           type={inputType}
@@ -580,8 +588,13 @@ export function ReturnForm({
         <div className="surface" style={{ padding: "1.4rem", display: "grid", gap: "1rem" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.3rem" }}>
-              <span style={{ fontSize: "1.4rem" }}>{currentSection.icon}</span>
+              <LucideIcon name={currentSection.icon} size={22} style={{ color: "var(--brand)", flexShrink: 0 }} />
               <h2 style={{ margin: 0, fontFamily: "var(--font-title)" }}>{t[currentSection.titleKey]}</h2>
+              {currentSection.craFormRef && (
+                <span className="pill" style={{ fontSize: "0.7rem", padding: "0.1rem 0.45rem", marginLeft: "auto" }}>
+                  {currentSection.craFormRef}
+                </span>
+              )}
             </div>
             <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t[currentSection.descriptionKey]}</p>
             <div className="muted" style={{ fontSize: "0.82rem", marginTop: "0.3rem" }}>
