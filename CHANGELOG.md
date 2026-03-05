@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.15.0] - 2026-03-05
+### Added
+- **Multi-section wizard flow**: TurboTax-inspired guided tax filing experience. Users progress through focused sections one at a time instead of a single long form. Section stepper with completion indicators (checkmarks), section-by-section auto-save on "Continue".
+- **Dynamic profile branching**: "Tell us about your situation" profile step with 8 flags (student, retired, investments, rental income, medical, donations, disability, dependants). Selecting flags dynamically shows/hides relevant sections (e.g., checking "I'm a student" reveals Education section with tuition and student loan fields).
+- **Dropdown selects for limited-answer fields**: Province of residence (13 provinces/territories), marital status (6 CRA-defined options), and tax year now use proper `<select>` dropdowns instead of free-text inputs.
+- **Active nav highlighting**: Current page is visually indicated in the site header navigation with brand color and background. Uses middleware `x-pathname` header for server-component detection.
+- **84 new bilingual i18n keys** (EN/FR): 13 provinces, 6 marital statuses, 3 tax years, 8 profile flags with help text, 16 wizard section titles/descriptions, 10 wizard UI labels.
+- Wizard stepper CSS with light/dark mode support, responsive layout (icons-only on mobile, full labels on desktop).
+
+### Changed
+- `tax-field-config.ts`: Extended `FieldType` to include `"select"`, added `SelectOption`, `ProfileFlag`, and `WizardSection` interfaces. Province and marital status fields now use select type with predefined options. Added `getWizardSections()` for dynamic section filtering by filing mode and profile flags.
+- `return-form.tsx`: Complete rewrite from flat form to multi-step wizard with setup → profile → sections → documents → review flow.
+- `site-header.tsx`: Reads `x-pathname` from request headers for active nav link detection. Both desktop and mobile navs highlight current page.
+- `middleware.ts`: Now sets `x-pathname` header on all requests for server-component page detection.
+
 ## [0.14.0] - 2026-03-05
 ### Added
 - **Document management UI**: Inline document upload, list, and delete within the return form. Category selection (T4, T5, Receipt, Business Statement, NOA, Other), file size display, date formatting, and delete confirmation.
