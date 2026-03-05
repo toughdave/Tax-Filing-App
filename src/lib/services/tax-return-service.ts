@@ -182,7 +182,8 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
     throw new Error("RETURN_NOT_FOUND");
   }
 
-  const payload = taxReturn.data as Record<string, unknown>;
+  const rawData = taxReturn.data as Record<string, unknown>;
+  const payload = decryptPiiFields(rawData) as Record<string, unknown>;
 
   const missing = missingRequiredFields(taxReturn.filingMode, payload);
   if (missing.length > 0) {

@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.12.3] - 2026-03-05
+### Fixed
+- **End-to-end data flow bug**: PII encryption ciphertexts (`enc:***`) were inadvertently being passed to the preflight checker, tax calculation engine, and NETFILE XML builder during the `prepareSubmissionForUser` step. The payload is now decrypted immediately after reading from the database and before processing submission logic.
+
 ## [0.12.2] - 2026-03-05
 ### Added
 - **Real-time client-side Zod validation**: Return form fields now validate on blur with inline error messages. Required fields show "This field is required", number fields validate numeric input, and `sinLast4` enforces exactly 4 digits. Errors display in red with `role="alert"` and `aria-invalid`/`aria-describedby` for accessibility.
