@@ -280,12 +280,18 @@ export function ReturnForm({
   }
 
   function renderField(field: TaxField) {
+    const friendlyLabel = field.friendlyLabelKey ? t[field.friendlyLabelKey] : null;
+    const officialLabel = t[field.labelKey];
+    const displayLabel = friendlyLabel || officialLabel;
+    const craRef = field.craLine ? `Line ${field.craLine}` : null;
+
     if (field.type === "select" && field.options) {
       return (
         <div key={field.key} className="field">
           <label htmlFor={field.key}>
-            {t[field.labelKey]}{field.required ? " *" : ""}
+            {displayLabel}{field.required ? " *" : ""}
           </label>
+          {friendlyLabel && <small className="muted" style={{ marginTop: "-0.3rem", display: "block" }}>{officialLabel}{craRef ? ` · ${craRef}` : ""}</small>}
           <select
             id={field.key}
             aria-invalid={!!errors[field.key]}
@@ -316,8 +322,10 @@ export function ReturnForm({
     return (
       <div key={field.key} className="field">
         <label htmlFor={field.key}>
-          {t[field.labelKey]}{field.required ? " *" : ""}
+          {displayLabel}{field.required ? " *" : ""}
         </label>
+        {friendlyLabel && <small className="muted" style={{ marginTop: "-0.3rem", display: "block" }}>{officialLabel}{craRef ? ` · ${craRef}` : ""}</small>}
+        {!friendlyLabel && craRef && <small className="muted" style={{ marginTop: "-0.3rem", display: "block" }}>{craRef}</small>}
         <input
           id={field.key}
           type={inputType}
