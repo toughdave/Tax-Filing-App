@@ -45,8 +45,18 @@ function formDefaultsFromPayload(payload: Record<string, unknown> | undefined): 
   return defaults;
 }
 
+function allSectionFields(section: WizardSection): TaxField[] {
+  const fields = [...section.fields];
+  if (section.subsections) {
+    for (const sub of section.subsections) {
+      fields.push(...sub.fields);
+    }
+  }
+  return fields;
+}
+
 function isSectionComplete(section: WizardSection, values: Record<string, string>): boolean {
-  const required = section.fields.filter((f) => f.required);
+  const required = allSectionFields(section).filter((f) => f.required);
   if (required.length === 0) return true;
   return required.every((f) => {
     const v = values[f.key];
@@ -55,7 +65,7 @@ function isSectionComplete(section: WizardSection, values: Record<string, string
 }
 
 function countMissingRequired(section: WizardSection, values: Record<string, string>): number {
-  return section.fields.filter((f) => f.required).filter((f) => {
+  return allSectionFields(section).filter((f) => f.required).filter((f) => {
     const v = values[f.key];
     return !v || v.trim() === "";
   }).length;
@@ -130,7 +140,7 @@ export function ReturnForm({
     const raw = getValues();
     const payload: Record<string, string | number | boolean | null> = {};
     for (const section of activeSections) {
-      for (const field of section.fields) {
+      for (const field of allSectionFields(section)) {
         const value = raw[field.key];
         if (value === undefined || value === "") { payload[field.key] = null; continue; }
         if (field.type === "number") {
@@ -684,6 +694,39 @@ export function ReturnForm({
           <div style={{ display: "grid", gap: "1rem" }}>
             {matchedSection.fields.map((field) => renderField(field))}
           </div>
+          {matchedSection.subsections && matchedSection.subsections.length > 0 && (
+            <div style={{ display: "grid", gap: "1.2rem" }}>
+              {matchedSection.subsections
+                .filter((sub) => {
+                  if (sub.mode && !sub.mode.includes(filingMode)) return false;
+                  if (sub.profileFlag && !profileFlags[sub.profileFlag]) return false;
+                  return true;
+                })
+                .map((sub) => (
+                  <div key={sub.id} style={{
+                    display: "grid", gap: "0.8rem",
+                    padding: "1rem",
+                    borderRadius: "10px",
+                    border: "1px solid var(--line)",
+                    background: "rgba(255,255,255,0.03)"
+                  }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "0.98rem" }}>
+                        {t[sub.titleKey]}
+                      </h4>
+                      {sub.descriptionKey && (
+                        <p className="muted" style={{ margin: "0.2rem 0 0", fontSize: "0.85rem" }}>
+                          {t[sub.descriptionKey]}
+                        </p>
+                      )}
+                    </div>
+                    <div style={{ display: "grid", gap: "1rem" }}>
+                      {sub.fields.map((field) => renderField(field))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
           <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
             <button className="btn btn-secondary" type="button" onClick={handleSectionBack}>
               {t.wizardStepBack}

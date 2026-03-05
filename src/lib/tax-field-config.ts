@@ -453,12 +453,39 @@ export const individualWizardSections: WizardSection[] = [
     fields: [
       { key: "rrsp", labelKey: "fieldRrsp", helpKey: "fieldRrspHelp", type: "number", craLine: "20800", friendlyLabelKey: "friendlyRrsp" },
       { key: "fhsa", labelKey: "fieldFhsa", helpKey: "fieldFhsaHelp", type: "number", craLine: "20805", friendlyLabelKey: "friendlyFhsa" },
-      { key: "unionDues", labelKey: "fieldUnionDues", helpKey: "fieldUnionDuesHelp", type: "number", craLine: "21200", friendlyLabelKey: "friendlyUnionDues" },
-      { key: "childCareExpenses", labelKey: "fieldChildCareExpenses", helpKey: "fieldChildCareExpensesHelp", type: "number", craLine: "21400", friendlyLabelKey: "friendlyChildCare", promptType: "yesno" },
-      { key: "movingExpenses", labelKey: "fieldMovingExpenses", helpKey: "fieldMovingExpensesHelp", type: "number", craLine: "21900", friendlyLabelKey: "friendlyMovingExpenses", promptType: "yesno" },
-      { key: "supportPaymentsMade", labelKey: "fieldSupportPaymentsMade", helpKey: "fieldSupportPaymentsMadeHelp", type: "number", craLine: "22000", friendlyLabelKey: "friendlySupportPayments", promptType: "yesno" },
-      { key: "carryingCharges", labelKey: "fieldCarryingCharges", helpKey: "fieldCarryingChargesHelp", type: "number", craLine: "22100", friendlyLabelKey: "friendlyCarryingCharges", promptType: "yesno" },
-      { key: "northernResidents", labelKey: "fieldNorthernResidents", helpKey: "fieldNorthernResidentsHelp", type: "number", craLine: "25500", friendlyLabelKey: "friendlyNorthernResidents", promptType: "yesno" }
+      { key: "unionDues", labelKey: "fieldUnionDues", helpKey: "fieldUnionDuesHelp", type: "number", craLine: "21200", friendlyLabelKey: "friendlyUnionDues" }
+    ],
+    subsections: [
+      {
+        id: "deductions-family",
+        titleKey: "subsectionDeductionsFamily",
+        descriptionKey: "subsectionDeductionsFamilyDesc",
+        fields: [
+          { key: "childCareExpenses", labelKey: "fieldChildCareExpenses", helpKey: "fieldChildCareExpensesHelp", type: "number", craLine: "21400", friendlyLabelKey: "friendlyChildCare", promptType: "yesno" },
+          { key: "supportPaymentsMade", labelKey: "fieldSupportPaymentsMade", helpKey: "fieldSupportPaymentsMadeHelp", type: "number", craLine: "22000", friendlyLabelKey: "friendlySupportPayments", promptType: "yesno" }
+        ]
+      },
+      {
+        id: "deductions-other",
+        titleKey: "subsectionDeductionsOther",
+        descriptionKey: "subsectionDeductionsOtherDesc",
+        fields: [
+          { key: "movingExpenses", labelKey: "fieldMovingExpenses", helpKey: "fieldMovingExpensesHelp", type: "number", craLine: "21900", friendlyLabelKey: "friendlyMovingExpenses", promptType: "yesno" },
+          { key: "carryingCharges", labelKey: "fieldCarryingCharges", helpKey: "fieldCarryingChargesHelp", type: "number", craLine: "22100", friendlyLabelKey: "friendlyCarryingCharges", promptType: "yesno" },
+          { key: "northernResidents", labelKey: "fieldNorthernResidents", helpKey: "fieldNorthernResidentsHelp", type: "number", craLine: "25500", friendlyLabelKey: "friendlyNorthernResidents", promptType: "yesno" }
+        ]
+      },
+      {
+        id: "deductions-cpp",
+        titleKey: "subsectionSchedule8",
+        descriptionKey: "subsectionSchedule8Desc",
+        fields: [
+          { key: "cppPensionableEarnings", labelKey: "fieldCppPensionableEarnings", helpKey: "fieldCppPensionableEarningsHelp", type: "number", craLine: "30800", friendlyLabelKey: "friendlyCppPensionableEarnings" },
+          { key: "cppEmployeeContributions", labelKey: "fieldCppEmployeeContributions", helpKey: "fieldCppEmployeeContributionsHelp", type: "number", craLine: "30800", friendlyLabelKey: "friendlyCppEmployeeContributions" },
+          { key: "cppSelfEmployedContributions", labelKey: "fieldCppSelfEmployedContributions", helpKey: "fieldCppSelfEmployedContributionsHelp", type: "number", craLine: "31000", friendlyLabelKey: "friendlyCppSelfEmployed" }
+        ],
+        mode: ["SELF_EMPLOYED"]
+      }
     ]
   },
   {
@@ -469,9 +496,19 @@ export const individualWizardSections: WizardSection[] = [
     craFormRef: "Schedule 11",
     profileFlag: "isStudent",
     fields: [
-      { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number", required: true, craLine: "32300", friendlyLabelKey: "friendlyTuition" },
-      { key: "studentLoanInterest", labelKey: "fieldStudentLoanInterest", helpKey: "fieldStudentLoanInterestHelp", type: "number", craLine: "31900", friendlyLabelKey: "friendlyStudentLoan" },
-      { key: "canadaTrainingCredit", labelKey: "fieldCanadaTrainingCredit", helpKey: "fieldCanadaTrainingCreditHelp", type: "number", craLine: "45350", friendlyLabelKey: "friendlyTrainingCredit" }
+      { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number", required: true, craLine: "32300", friendlyLabelKey: "friendlyTuition" }
+    ],
+    subsections: [
+      {
+        id: "education-additional",
+        titleKey: "subsectionEducationAdditional",
+        descriptionKey: "subsectionEducationAdditionalDesc",
+        fields: [
+          { key: "studentLoanInterest", labelKey: "fieldStudentLoanInterest", helpKey: "fieldStudentLoanInterestHelp", type: "number", craLine: "31900", friendlyLabelKey: "friendlyStudentLoan" },
+          { key: "canadaTrainingCredit", labelKey: "fieldCanadaTrainingCredit", helpKey: "fieldCanadaTrainingCreditHelp", type: "number", craLine: "45350", friendlyLabelKey: "friendlyTrainingCredit" },
+          { key: "educationCarryForward", labelKey: "fieldEducationCarryForward", helpKey: "fieldEducationCarryForwardHelp", type: "number", craLine: "32700", friendlyLabelKey: "friendlyEducationCarryForward" }
+        ]
+      }
     ]
   },
   {

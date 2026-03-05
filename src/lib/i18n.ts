@@ -528,7 +528,27 @@ const en: TextDictionary = {
   friendlyCanadaWorkers: "Are you claiming the Canada workers benefit?",
   yesnoYes: "Yes",
   yesnoNo: "No",
-  yesnoEnterAmount: "Enter the amount"
+  yesnoEnterAmount: "Enter the amount",
+  subsectionDeductionsFamily: "Family & dependant deductions",
+  subsectionDeductionsFamilyDesc: "Child care and support payment deductions",
+  subsectionDeductionsOther: "Other deductions",
+  subsectionDeductionsOtherDesc: "Moving expenses, carrying charges, and northern residents",
+  subsectionSchedule8: "CPP contributions (Schedule 8)",
+  subsectionSchedule8Desc: "Canada Pension Plan contributions for self-employed earners",
+  subsectionEducationAdditional: "Additional education credits",
+  subsectionEducationAdditionalDesc: "Student loan interest, training credits, and carry-forward amounts",
+  fieldCppPensionableEarnings: "CPP pensionable earnings",
+  fieldCppPensionableEarningsHelp: "Total pensionable earnings from T4 box 26",
+  fieldCppEmployeeContributions: "CPP employee contributions",
+  fieldCppEmployeeContributionsHelp: "CPP contributions deducted from your pay (T4 box 16)",
+  fieldCppSelfEmployedContributions: "CPP self-employed contributions",
+  fieldCppSelfEmployedContributionsHelp: "CPP contributions on self-employment income",
+  fieldEducationCarryForward: "Tuition carry-forward from prior years",
+  fieldEducationCarryForwardHelp: "Unused tuition amounts carried forward from previous tax years",
+  friendlyCppPensionableEarnings: "What were your total CPP pensionable earnings?",
+  friendlyCppEmployeeContributions: "How much CPP was deducted from your paycheques?",
+  friendlyCppSelfEmployed: "How much CPP did you owe on self-employment income?",
+  friendlyEducationCarryForward: "Do you have unused tuition from previous years?"
 };
 
 const fr: TextDictionary = {
@@ -1057,7 +1077,27 @@ const fr: TextDictionary = {
   friendlyCanadaWorkers: "Demandez-vous l'allocation canadienne pour les travailleurs?",
   yesnoYes: "Oui",
   yesnoNo: "Non",
-  yesnoEnterAmount: "Entrez le montant"
+  yesnoEnterAmount: "Entrez le montant",
+  subsectionDeductionsFamily: "Déductions familiales et pour personnes à charge",
+  subsectionDeductionsFamilyDesc: "Frais de garde d'enfants et pensions alimentaires",
+  subsectionDeductionsOther: "Autres déductions",
+  subsectionDeductionsOtherDesc: "Frais de déménagement, frais financiers et habitants du Nord",
+  subsectionSchedule8: "Cotisations au RPC (Annexe 8)",
+  subsectionSchedule8Desc: "Cotisations au Régime de pensions du Canada pour travailleurs autonomes",
+  subsectionEducationAdditional: "Crédits d'études supplémentaires",
+  subsectionEducationAdditionalDesc: "Intérêts sur prêt étudiant, crédit pour formation et montants reportés",
+  fieldCppPensionableEarnings: "Gains ouvrant droit à pension du RPC",
+  fieldCppPensionableEarningsHelp: "Gains ouvrant droit à pension totaux de la case 26 du T4",
+  fieldCppEmployeeContributions: "Cotisations d'employé au RPC",
+  fieldCppEmployeeContributionsHelp: "Cotisations au RPC retenues sur votre paie (case 16 du T4)",
+  fieldCppSelfEmployedContributions: "Cotisations au RPC pour travail autonome",
+  fieldCppSelfEmployedContributionsHelp: "Cotisations au RPC sur le revenu de travail autonome",
+  fieldEducationCarryForward: "Report de frais de scolarité des années précédentes",
+  fieldEducationCarryForwardHelp: "Montants de frais de scolarité inutilisés reportés des années précédentes",
+  friendlyCppPensionableEarnings: "Quels étaient vos gains ouvrant droit à pension au RPC?",
+  friendlyCppEmployeeContributions: "Combien de RPC a été retenu sur vos chèques de paie?",
+  friendlyCppSelfEmployed: "Combien de RPC deviez-vous sur votre revenu de travail autonome?",
+  friendlyEducationCarryForward: "Avez-vous des frais de scolarité inutilisés des années précédentes?"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

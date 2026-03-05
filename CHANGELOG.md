@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.19.0] - 2026-03-05
+### Added
+- **Subsection rendering**: Wizard sections now support nested subsections (`FormSubsection`) with their own titles, descriptions, and fields. Subsections render as bordered cards inside their parent section, filtered by `mode` and `profileFlag`.
+- **Schedule 8 (CPP contributions)**: New subsection under Deductions with 3 fields (`cppPensionableEarnings`, `cppEmployeeContributions`, `cppSelfEmployedContributions`), gated to `SELF_EMPLOYED` mode.
+- **Education carry-forward field**: New `educationCarryForward` field (Line 32700) under a new "Additional education credits" subsection in Schedule 11.
+- **Deductions restructured into subsections**: Family & dependant deductions, Other deductions, and CPP contributions are now grouped as subsections under the main Deductions section.
+- 20 new bilingual i18n keys (EN/FR): subsection titles, Schedule 8 fields, education carry-forward. Total: 542/542 parity.
+
+### Changed
+- `allSectionFields()` helper aggregates fields from both section and subsections for completeness checks and payload serialization.
+- `isSectionComplete()` and `countMissingRequired()` now include subsection fields.
+
 ## [0.18.0] - 2026-03-05
 ### Fixed
 - **Responsive header navigation**: Desktop nav and mobile nav no longer display simultaneously. Added CSS media queries to toggle `.desktop-nav` / `.mobile-nav` visibility at 640px breakpoint.
@@ -378,6 +390,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.
