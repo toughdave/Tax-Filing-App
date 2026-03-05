@@ -6,6 +6,7 @@ import { baseFieldGroups, filingModes, modeSpecificFieldGroups, parseFilingMode,
 import { textFor, type Locale } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/format";
 import type { TaxSummary, CorporateTaxSummary, CalculationResult } from "@/lib/services/tax-calculation-engine";
+import type { CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -23,6 +24,7 @@ interface SaveResponse {
   };
   missingRequired: string[];
   carryForwardFromYear: number | null;
+  carryForwardDiff: CarryForwardDiffEntry[];
   taxSummary: CalculationResult;
 }
 
@@ -71,6 +73,7 @@ export function ReturnForm({
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [carryForwardYear, setCarryForwardYear] = useState<number | null>(null);
+  const [carryForwardDiff, setCarryForwardDiff] = useState<CarryForwardDiffEntry[]>([]);
   const [taxSummary, setTaxSummary] = useState<CalculationResult | null>(initialTaxSummary);
 
   const { register, getValues, reset } = useForm<Record<string, string>>({
@@ -131,6 +134,7 @@ export function ReturnForm({
       const data = (await response.json()) as SaveResponse;
       setReturnId(data.record.id);
       setCarryForwardYear(data.carryForwardFromYear);
+      setCarryForwardDiff(data.carryForwardDiff ?? []);
       setTaxSummary(data.taxSummary);
 
       if (data.missingRequired.length > 0) {
@@ -204,6 +208,7 @@ export function ReturnForm({
     reset();
     setReturnId(null);
     setCarryForwardYear(null);
+    setCarryForwardDiff([]);
     setTaxSummary(null);
     setInfoMessage(null);
     setErrorMessage(null);
@@ -300,6 +305,36 @@ export function ReturnForm({
         <div className="notice-success">
           {t.filingCarryForward}: {carryForwardYear}
         </div>
+      ) : null}
+
+      {carryForwardDiff.length > 0 ? (
+        <section className="surface" style={{ padding: "0.95rem", display: "grid", gap: "0.6rem" }}>
+          <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>
+            {t.filingCarryForwardProfile}
+          </h3>
+          <div style={{ display: "grid", gap: "0.35rem", fontSize: "0.9rem" }}>
+            {carryForwardDiff.filter((d) => d.source === "carried").length > 0 && (
+              <div>
+                <strong style={{ color: "var(--success)" }}>{t.filingCarryForwardCarried}</strong>
+                <ul style={{ margin: "0.2rem 0 0.5rem 1.2rem", padding: 0 }}>
+                  {carryForwardDiff.filter((d) => d.source === "carried").map((d) => (
+                    <li key={d.key}>{t[`field${d.key.charAt(0).toUpperCase()}${d.key.slice(1)}`] ?? d.key}: {String(d.currentValue ?? "")}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {carryForwardDiff.filter((d) => d.source === "changed").length > 0 && (
+              <div>
+                <strong style={{ color: "var(--warning, #b58900)" }}>{t.filingCarryForwardChanged}</strong>
+                <ul style={{ margin: "0.2rem 0 0.5rem 1.2rem", padding: 0 }}>
+                  {carryForwardDiff.filter((d) => d.source === "changed").map((d) => (
+                    <li key={d.key}>{t[`field${d.key.charAt(0).toUpperCase()}${d.key.slice(1)}`] ?? d.key}: {String(d.priorValue ?? "")} → {String(d.currentValue ?? "")}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
       ) : null}
 
       <div style={{ display: "grid", gap: "1rem" }}>
