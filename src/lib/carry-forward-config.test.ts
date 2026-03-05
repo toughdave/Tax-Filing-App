@@ -3,7 +3,9 @@ import {
   isCarryForwardField,
   getCarryForwardFieldKeys,
   buildCarryForwardData,
-  computeCarryForwardDiff
+  computeCarryForwardDiff,
+  migrateFieldKeys,
+  getFieldKeyMigrations
 } from "./carry-forward-config";
 
 describe("isCarryForwardField", () => {
@@ -196,5 +198,27 @@ describe("computeCarryForwardDiff", () => {
 
     const rrspEntry = diff.find((d) => d.key === "rrsp");
     expect(rrspEntry?.source).toBe("new");
+  });
+});
+
+describe("migrateFieldKeys", () => {
+  it("returns data unchanged when no migrations are defined", () => {
+    const data = { legalName: "Alice", employmentIncome: 80000 };
+    const result = migrateFieldKeys(data);
+    expect(result).toEqual(data);
+  });
+
+  it("returns same reference when migration map is empty", () => {
+    const data = { legalName: "Bob" };
+    const result = migrateFieldKeys(data);
+    // With an empty migration map, the function short-circuits and returns the same reference
+    expect(result).toBe(data);
+  });
+});
+
+describe("getFieldKeyMigrations", () => {
+  it("returns a map (may be empty when no migrations are active)", () => {
+    const migrations = getFieldKeyMigrations();
+    expect(migrations).toBeInstanceOf(Map);
   });
 });

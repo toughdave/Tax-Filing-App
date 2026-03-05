@@ -11,6 +11,39 @@ import type { FilingMode } from "@/lib/tax-field-config";
  * tax year.
  */
 
+/**
+ * Year-over-year field key migrations.
+ * Maps { oldKey -> newKey } for cases where we renamed an internal field key.
+ * During carry-forward, prior-year data using the old key is automatically
+ * mapped to the new key. Add entries here when field keys change between versions.
+ */
+const FIELD_KEY_MIGRATIONS: ReadonlyMap<string, string> = new Map([
+  // Example (uncomment when an actual migration is needed):
+  // ["oldFieldName", "newFieldName"],
+]);
+
+/** Apply key migrations to a data blob, returning a new object with renamed keys. */
+export function migrateFieldKeys(
+  data: Record<string, unknown>
+): Record<string, unknown> {
+  if (FIELD_KEY_MIGRATIONS.size === 0) return data;
+
+  const migrated: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    const newKey = FIELD_KEY_MIGRATIONS.get(key) ?? key;
+    // New key takes precedence if both old and new exist in source data
+    if (!(newKey in migrated) || key === newKey) {
+      migrated[newKey] = value;
+    }
+  }
+  return migrated;
+}
+
+/** Returns the field key migrations map (for testing/inspection). */
+export function getFieldKeyMigrations(): ReadonlyMap<string, string> {
+  return FIELD_KEY_MIGRATIONS;
+}
+
 /** Fields that carry forward across tax years (stable profile data). */
 const PROFILE_FIELDS: ReadonlySet<string> = new Set([
   // Identity
@@ -44,8 +77,9 @@ export function getCarryForwardFieldKeys(): ReadonlySet<string> {
 export function buildCarryForwardData(
   priorYearData: Record<string, unknown>
 ): Record<string, unknown> {
+  const migrated = migrateFieldKeys(priorYearData);
   const carried: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(priorYearData)) {
+  for (const [key, value] of Object.entries(migrated)) {
     if (PROFILE_FIELDS.has(key) && value !== null && value !== undefined) {
       carried[key] = value;
     }
