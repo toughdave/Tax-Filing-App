@@ -12,6 +12,7 @@ export interface TaxYearParams {
   taxYear: number;
   federalBrackets: TaxBracket[];
   basicPersonalAmount: number;
+  basicPersonalAmountMin: number;
   smallBusinessRate: number;
   generalCorporateRate: number;
   smallBusinessLimit: number;
@@ -34,6 +35,7 @@ const params2023: TaxYearParams = {
     { upTo: Infinity, rate: 0.33 }
   ],
   basicPersonalAmount: 15000,
+  basicPersonalAmountMin: 13521,
   smallBusinessRate: 0.09,
   generalCorporateRate: 0.15,
   smallBusinessLimit: 500000,
@@ -56,6 +58,7 @@ const params2024: TaxYearParams = {
     { upTo: Infinity, rate: 0.33 }
   ],
   basicPersonalAmount: 15705,
+  basicPersonalAmountMin: 14156,
   smallBusinessRate: 0.09,
   generalCorporateRate: 0.15,
   smallBusinessLimit: 500000,
@@ -78,6 +81,7 @@ const params2025: TaxYearParams = {
     { upTo: Infinity, rate: 0.33 }
   ],
   basicPersonalAmount: 16129,
+  basicPersonalAmountMin: 14538,
   smallBusinessRate: 0.09,
   generalCorporateRate: 0.15,
   smallBusinessLimit: 500000,

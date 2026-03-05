@@ -17,6 +17,7 @@ const FALLBACK_PARAMS: TaxYearParams = {
   taxYear: 2024,
   federalBrackets: FALLBACK_BRACKETS,
   basicPersonalAmount: 15705,
+  basicPersonalAmountMin: 14156,
   smallBusinessRate: 0.09,
   generalCorporateRate: 0.15,
   smallBusinessLimit: 500000,
@@ -152,12 +153,38 @@ function computePersonalTax(
   const taxableIncome = netIncome;
 
   const federalTax = calculateFederalTax(taxableIncome, params.federalBrackets);
-  const basicPersonalCredit = round2(params.basicPersonalAmount * 0.15);
+  
+  // Basic Personal Amount income scaling logic
+  // Starts scaling down at bottom of 4th bracket (e.g. $173,205 in 2024, but usually 150k+ in earlier years. We use bracket 3 upTo for 2024).
+  // Actually, CRA rules: The enhanced BPA is reduced for net income above the 4th tax bracket threshold (e.g., $173,205 in 2024), reaching minimum at the top bracket ($246,752 in 2024).
+  // Using the bracket configurations from params:
+  // Bracket 3 upTo is the start of the 4th bracket. Bracket 4 upTo is the start of the 5th bracket.
+  let bpa = params.basicPersonalAmount;
+  const bpaMin = params.basicPersonalAmountMin;
+  if (params.federalBrackets.length >= 4) {
+    const threshold1 = params.federalBrackets[2]?.upTo ?? 0;
+    const threshold2 = params.federalBrackets[3]?.upTo ?? 0;
+    if (netIncome > threshold1 && threshold2 > threshold1) {
+      if (netIncome >= threshold2) {
+        bpa = bpaMin;
+      } else {
+        const ratio = (netIncome - threshold1) / (threshold2 - threshold1);
+        bpa = bpa - (bpa - bpaMin) * ratio;
+      }
+    }
+  }
+  const basicPersonalCredit = round2(bpa * 0.15);
 
   const totalCreditAmounts = Object.values(creditItems).reduce((a, b) => a + b, 0);
   const nonRefundableCredits = round2(basicPersonalCredit + totalCreditAmounts * 0.15);
 
-  const netFederalTax = Math.max(round2(federalTax - nonRefundableCredits), 0);
+  let netFederalTax = Math.max(round2(federalTax - nonRefundableCredits), 0);
+  
+  // Quebec Abatement (16.5% reduction of basic federal tax for QC residents)
+  if (provParams?.provinceCode === "QC") {
+    const quebecAbatement = round2(netFederalTax * 0.165);
+    netFederalTax = Math.max(round2(netFederalTax - quebecAbatement), 0);
+  }
 
   const provincial = provParams
     ? computeProvincialTax(taxableIncome, totalCreditAmounts, provParams)
@@ -195,8 +222,21 @@ function round2(v: number): number {
 export function calculateIndividualTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
   const params = resolveParams(taxYear);
 
-  const capitalGainsRaw = num(payload.capitalGains);
-  const taxableCapitalGains = round2(Math.max(capitalGainsRaw, 0) * 0.5);
+  const capitalGainsRaw = Math.max(num(payload.capitalGains), 0);
+  
+  // 2024+ Capital Gains Inclusion Rate rules (effective June 25, 2024, but simplified for full year in this app):
+  // Individuals: 1/2 on first $250,000; 2/3 on amounts over $250,000.
+  // For pre-2024, it's 1/2 on everything. We apply this rule for 2024+ years.
+  let taxableCapitalGains = 0;
+  if (params.taxYear >= 2024) {
+    if (capitalGainsRaw <= 250000) {
+      taxableCapitalGains = round2(capitalGainsRaw * 0.5);
+    } else {
+      taxableCapitalGains = round2(250000 * 0.5 + (capitalGainsRaw - 250000) * (2 / 3));
+    }
+  } else {
+    taxableCapitalGains = round2(capitalGainsRaw * 0.5);
+  }
 
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
@@ -256,8 +296,18 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
 export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
   const params = resolveParams(taxYear);
 
-  const capitalGainsRaw = num(payload.capitalGains);
-  const taxableCapitalGains = round2(Math.max(capitalGainsRaw, 0) * 0.5);
+  const capitalGainsRaw = Math.max(num(payload.capitalGains), 0);
+  
+  let taxableCapitalGains = 0;
+  if (params.taxYear >= 2024) {
+    if (capitalGainsRaw <= 250000) {
+      taxableCapitalGains = round2(capitalGainsRaw * 0.5);
+    } else {
+      taxableCapitalGains = round2(250000 * 0.5 + (capitalGainsRaw - 250000) * (2 / 3));
+    }
+  } else {
+    taxableCapitalGains = round2(capitalGainsRaw * 0.5);
+  }
 
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
@@ -357,6 +407,15 @@ export function calculateCompanyTax(payload: Record<string, unknown>, taxYear?: 
   const corporateRevenue = num(payload.corporateRevenue);
   const capitalCostAllowance = num(payload.capitalCostAllowance);
   const retainedEarnings = num(payload.retainedEarnings);
+  
+  const capitalGainsRaw = Math.max(num(payload.capitalGains), 0);
+  let taxableCapitalGains = 0;
+  if (params.taxYear >= 2024) {
+    // Corporations pay 2/3 on all capital gains in 2024+
+    taxableCapitalGains = round2(capitalGainsRaw * (2 / 3));
+  } else {
+    taxableCapitalGains = round2(capitalGainsRaw * 0.5);
+  }
 
   const deductionItems: Record<string, number> = {
     corporatePayroll: num(payload.corporatePayroll),

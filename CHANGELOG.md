@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.10.1] - 2026-03-05
+### Fixed
+- **Tax Calculation Engine Accuracy Audit Fixes**:
+  - Implemented the **Basic Personal Amount (BPA) income scaling** logic for 2023, 2024, and 2025. High earners now see their BPA correctly reduced down to the minimum (e.g., scaled down from $15,705 to $14,156 for net income between $173,205 and $246,752 in 2024).
+  - Implemented the **2024 Capital Gains Inclusion Rate changes**: 
+    - Individuals: 1/2 inclusion up to $250,000; 2/3 inclusion on the portion above $250,000 (starting 2024).
+    - Corporations: 2/3 inclusion on all capital gains (starting 2024).
+  - Implemented the **Quebec Abatement**: 16.5% reduction of basic federal tax for Quebec residents (Line 44000).
+- **NETFILE Provider**: Updated the XML builder to include all newly added tax fields (interest, dividends, capital gains, rental, pension, EI benefits, and all new deductions/credits).
+
 ## [0.10.0] - 2026-03-04
 ### Added
 - **Provincial / territorial tax calculations** for all 13 Canadian provinces and territories (Form 428 equivalent).
