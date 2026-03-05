@@ -219,6 +219,42 @@ function round2(v: number): number {
   return Math.round(v * 100) / 100;
 }
 
+interface CppEiResult {
+  cppEmployeeCredit: number;
+  cppSelfEmployedDeduction: number;
+  cppSelfEmployedCredit: number;
+  eiCredit: number;
+}
+
+function computeCppEi(
+  payload: Record<string, unknown>,
+  isSelfEmployed: boolean,
+  params: TaxYearParams
+): CppEiResult {
+  const cppEmployeeContributions = num(payload.cppEmployeeContributions);
+  const cppSelfEmployedContributions = num(payload.cppSelfEmployedContributions);
+
+  // Employee CPP: full amount is a non-refundable credit at 15%
+  const cppEmployeeCredit = cppEmployeeContributions;
+
+  // Self-employed CPP: half is deductible (Step 3), half is a credit (Step 5)
+  let cppSelfEmployedDeduction = 0;
+  let cppSelfEmployedCredit = 0;
+  if (isSelfEmployed && cppSelfEmployedContributions > 0) {
+    cppSelfEmployedDeduction = round2(cppSelfEmployedContributions / 2);
+    cppSelfEmployedCredit = round2(cppSelfEmployedContributions / 2);
+  }
+
+  // EI premiums: T4 box 18, full amount is a credit
+  // Max EI = insurable earnings * employee rate (1.66% for 2024)
+  const eiMaxPremium = round2(params.eiMaxInsurableEarnings * 0.0166);
+  const eiPaid = Math.min(num(payload.eiPremiums ?? payload.eiBenefits ?? 0), eiMaxPremium);
+  // For individuals, the EI credit is based on premiums paid (from T4), not benefits received
+  const eiCredit = num(payload.cppEiOverpayment) > 0 ? num(payload.cppEiOverpayment) : 0;
+
+  return { cppEmployeeCredit, cppSelfEmployedDeduction, cppSelfEmployedCredit, eiCredit };
+}
+
 export function calculateIndividualTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
   const params = resolveParams(taxYear);
 
@@ -260,8 +296,11 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
     northernResidents: num(payload.northernResidents)
   };
 
+  const cppEi = computeCppEi(payload, false, params);
+
   const creditItems: Record<string, number> = {
     tuition: num(payload.tuition),
+    educationCarryForward: num(payload.educationCarryForward),
     medical: num(payload.medical),
     donations: num(payload.donations),
     ageAmount: num(payload.ageAmount),
@@ -270,6 +309,7 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
     canadaCaregiverAmount: num(payload.canadaCaregiverAmount),
     disabilityAmount: num(payload.disabilityAmount),
     cppEiOverpayment: num(payload.cppEiOverpayment),
+    cppEmployeeCredit: cppEi.cppEmployeeCredit,
     canadaEmploymentAmount: num(payload.canadaEmploymentAmount),
     homeBuyersAmount: num(payload.homeBuyersAmount),
     pensionIncomeAmount: num(payload.pensionIncomeAmount),
@@ -279,7 +319,11 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
   const refundableCreditItems: Record<string, number> = {
     canadaWorkersAmount: num(payload.canadaWorkersAmount),
     canadaTrainingCredit: num(payload.canadaTrainingCredit),
-    refundableMedical: num(payload.refundableMedical)
+    refundableMedical: num(payload.refundableMedical),
+    onPropertyTaxCredit: num(payload.onPropertyTax) > 0 ? round2(num(payload.onPropertyTax) * 0.1) : 0,
+    onEnergyCredit: num(payload.onEnergyCredit),
+    onRentCredit: num(payload.onRent) > 0 ? round2(num(payload.onRent) * 0.2) : 0,
+    onNorthernEnergy: num(payload.onNorthernEnergy)
   };
 
   const paymentItems: Record<string, number> = {
@@ -334,8 +378,16 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYe
     businessUseHome: num(payload.businessUseHome)
   };
 
+  const cppEi = computeCppEi(payload, true, params);
+
+  // Self-employed CPP deduction (half of SE contributions)
+  if (cppEi.cppSelfEmployedDeduction > 0) {
+    deductionItems.cppSelfEmployedDeduction = cppEi.cppSelfEmployedDeduction;
+  }
+
   const creditItems: Record<string, number> = {
     tuition: num(payload.tuition),
+    educationCarryForward: num(payload.educationCarryForward),
     medical: num(payload.medical),
     donations: num(payload.donations),
     ageAmount: num(payload.ageAmount),
@@ -344,6 +396,8 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYe
     canadaCaregiverAmount: num(payload.canadaCaregiverAmount),
     disabilityAmount: num(payload.disabilityAmount),
     cppEiOverpayment: num(payload.cppEiOverpayment),
+    cppEmployeeCredit: cppEi.cppEmployeeCredit,
+    cppSelfEmployedCredit: cppEi.cppSelfEmployedCredit,
     canadaEmploymentAmount: num(payload.canadaEmploymentAmount),
     homeBuyersAmount: num(payload.homeBuyersAmount),
     pensionIncomeAmount: num(payload.pensionIncomeAmount),
@@ -353,7 +407,11 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYe
   const refundableCreditItems: Record<string, number> = {
     canadaWorkersAmount: num(payload.canadaWorkersAmount),
     canadaTrainingCredit: num(payload.canadaTrainingCredit),
-    refundableMedical: num(payload.refundableMedical)
+    refundableMedical: num(payload.refundableMedical),
+    onPropertyTaxCredit: num(payload.onPropertyTax) > 0 ? round2(num(payload.onPropertyTax) * 0.1) : 0,
+    onEnergyCredit: num(payload.onEnergyCredit),
+    onRentCredit: num(payload.onRent) > 0 ? round2(num(payload.onRent) * 0.2) : 0,
+    onNorthernEnergy: num(payload.onNorthernEnergy)
   };
 
   const paymentItems: Record<string, number> = {

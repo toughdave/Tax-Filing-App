@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.22.0] - 2026-03-05
+### Added
+- **CPP/EI individual calculation**: New `computeCppEi()` helper computes employee CPP credits, self-employed CPP deduction/credit split (half deductible, half as credit), and EI overpayment handling.
+- **Education carry-forward in tax math**: `educationCarryForward` field now flows into non-refundable credit items for both individual and self-employed calculations.
+- **Ontario ON-BEN refundable credits**: Property tax (10% credit), rent (20% credit), energy credit, and Northern Ontario energy now flow into refundable credit items in the calculation engine.
+- CPP self-employed contributions automatically split: half added to deductions (Step 3), half to non-refundable credits (Step 5).
+
+### Changed
+- `calculateIndividualTax()` and `calculateSelfEmployedTax()` now call `computeCppEi()` and include Schedule 8 CPP fields and ON-BEN provincial fields in their respective item maps.
+
 ## [0.21.0] - 2026-03-05
 ### Added
 - **Field-level conditions**: New `FieldCondition` interface and `condition` property on `TaxField`. Fields with conditions are only rendered when the referenced field's value matches one of the specified values (e.g. spouse amount only shown when marital status is married/commonLaw).
@@ -412,6 +422,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.
