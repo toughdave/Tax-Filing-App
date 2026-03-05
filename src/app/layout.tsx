@@ -33,22 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${titleFont.variable} ${bodyFont.variable}`}>
-        <a
-          href="#main-content"
-          style={{
-            position: "absolute",
-            left: "-9999px",
-            top: "0",
-            zIndex: 100,
-            padding: "0.6rem 1rem",
-            background: "var(--brand)",
-            color: "white",
-            fontWeight: 600,
-            borderRadius: "0 0 8px 0"
-          }}
-          onFocus={(e) => { e.currentTarget.style.left = "0"; }}
-          onBlur={(e) => { e.currentTarget.style.left = "-9999px"; }}
-        >
+        <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
         {children}
