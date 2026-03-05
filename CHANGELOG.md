@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.17.0] - 2026-03-05
+### Added
+- **Vertical accordion timeline**: Replaces the old horizontal icon-only stepper with a vertical timeline layout. Each section shows as a node on a connecting line with expand/collapse navigation. Works identically on mobile and desktop — text labels always visible alongside icons.
+- **Lucide React monochrome icons**: All wizard section icons switched from emojis to a consistent flat monochrome icon set via `lucide-react`. New `LucideIcon` component wraps the icon map for easy reuse across the app.
+- **CRA Form Redesign master plan**: Comprehensive 6-phase plan at `.windsurf/plans/cra-form-redesign-plan.md` covering CRA T1 alignment, provincial form integration (ON428, ON-BEN), conversational field labels, deep dynamic branching, and calculation engine upgrades.
+
+### Changed
+- **Icon migration**: 16 wizard section icons replaced (user, home, briefcase, trending-up, building, award, file-text, clipboard-list, graduation-cap, heart, sparkles, credit-card, landmark, dollar-sign, users, calculator). Stepper meta-steps use settings, target, paperclip, check-square.
+- **Timeline CSS**: New `.timeline`, `.timeline-item`, `.timeline-node`, `.timeline-header`, `.timeline-body` CSS classes with light/dark mode support, smooth transitions, and completion/missing status badges.
+- Dependency: added `lucide-react`.
+
 ## [0.16.0] - 2026-03-05
 ### Added
 - **"Next" button on section forms**: Users can now skip sections without being blocked by mandatory field validation. "Save & Continue" still validates and saves; "Next →" simply advances to the next section.

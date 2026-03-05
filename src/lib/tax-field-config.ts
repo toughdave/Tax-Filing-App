@@ -347,7 +347,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "personal-info",
     titleKey: "wizardPersonalInfo",
     descriptionKey: "wizardPersonalInfoDesc",
-    icon: "👤",
+    icon: "user",
     fields: [
       { key: "legalName", labelKey: "fieldLegalName", helpKey: "fieldLegalNameHelp", type: "text", required: true },
       { key: "sinLast4", labelKey: "fieldSinLast4", helpKey: "fieldSinLast4Help", type: "text", required: true },
@@ -358,7 +358,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "residency-family",
     titleKey: "wizardResidencyFamily",
     descriptionKey: "wizardResidencyFamilyDesc",
-    icon: "🏠",
+    icon: "home",
     fields: [
       { key: "residencyProvince", labelKey: "fieldResidencyProvince", helpKey: "fieldResidencyProvinceHelp", type: "select", required: true, options: PROVINCES },
       { key: "maritalStatus", labelKey: "fieldMaritalStatus", helpKey: "fieldMaritalStatusHelp", type: "select", options: MARITAL_STATUSES },
@@ -369,7 +369,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "employment-income",
     titleKey: "wizardEmploymentIncome",
     descriptionKey: "wizardEmploymentIncomeDesc",
-    icon: "💼",
+    icon: "briefcase",
     fields: [
       { key: "employmentIncome", labelKey: "fieldEmploymentIncome", helpKey: "fieldEmploymentIncomeHelp", type: "number", required: true },
       { key: "eiBenefits", labelKey: "fieldEiBenefits", helpKey: "fieldEiBenefitsHelp", type: "number" },
@@ -380,7 +380,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "investment-income",
     titleKey: "wizardInvestmentIncome",
     descriptionKey: "wizardInvestmentIncomeDesc",
-    icon: "📈",
+    icon: "trending-up",
     profileFlag: "hasInvestments",
     fields: [
       { key: "interestIncome", labelKey: "fieldInterestIncome", helpKey: "fieldInterestIncomeHelp", type: "number" },
@@ -392,7 +392,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "rental-income",
     titleKey: "wizardRentalIncome",
     descriptionKey: "wizardRentalIncomeDesc",
-    icon: "🏢",
+    icon: "building",
     profileFlag: "hasRentalIncome",
     fields: [
       { key: "rentalIncome", labelKey: "fieldRentalIncome", helpKey: "fieldRentalIncomeHelp", type: "number", required: true }
@@ -402,7 +402,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "pension-benefits",
     titleKey: "wizardPensionBenefits",
     descriptionKey: "wizardPensionBenefitsDesc",
-    icon: "🎖️",
+    icon: "award",
     profileFlag: "isRetired",
     fields: [
       { key: "pensionIncome", labelKey: "fieldPensionIncome", helpKey: "fieldPensionIncomeHelp", type: "number", required: true },
@@ -414,7 +414,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "self-employment",
     titleKey: "wizardSelfEmployment",
     descriptionKey: "wizardSelfEmploymentDesc",
-    icon: "🧾",
+    icon: "file-text",
     mode: ["SELF_EMPLOYED"],
     fields: [
       { key: "businessIncome", labelKey: "fieldBusinessIncome", helpKey: "fieldBusinessIncomeHelp", type: "number", required: true },
@@ -427,7 +427,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "deductions",
     titleKey: "wizardDeductions",
     descriptionKey: "wizardDeductionsDesc",
-    icon: "📋",
+    icon: "clipboard-list",
     fields: [
       { key: "rrsp", labelKey: "fieldRrsp", helpKey: "fieldRrspHelp", type: "number" },
       { key: "fhsa", labelKey: "fieldFhsa", helpKey: "fieldFhsaHelp", type: "number" },
@@ -443,7 +443,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "education",
     titleKey: "wizardEducation",
     descriptionKey: "wizardEducationDesc",
-    icon: "🎓",
+    icon: "graduation-cap",
     profileFlag: "isStudent",
     fields: [
       { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number", required: true },
@@ -455,7 +455,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "medical-donations",
     titleKey: "wizardMedicalDonations",
     descriptionKey: "wizardMedicalDonationsDesc",
-    icon: "❤️",
+    icon: "heart",
     fields: [
       { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number" },
       { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number" },
@@ -467,7 +467,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "other-credits",
     titleKey: "wizardOtherCredits",
     descriptionKey: "wizardOtherCreditsDesc",
-    icon: "✨",
+    icon: "sparkles",
     fields: [
       { key: "spouseAmount", labelKey: "fieldSpouseAmount", helpKey: "fieldSpouseAmountHelp", type: "number" },
       { key: "eligibleDependantAmount", labelKey: "fieldEligibleDependantAmount", helpKey: "fieldEligibleDependantAmountHelp", type: "number" },
@@ -482,7 +482,7 @@ export const individualWizardSections: WizardSection[] = [
     id: "payments",
     titleKey: "wizardPayments",
     descriptionKey: "wizardPaymentsDesc",
-    icon: "💳",
+    icon: "credit-card",
     fields: [
       { key: "taxPaidByInstalments", labelKey: "fieldTaxPaidByInstalments", helpKey: "fieldTaxPaidByInstalmentsHelp", type: "number" },
       { key: "totalIncomeTaxDeducted", labelKey: "fieldTotalIncomeTaxDeducted", helpKey: "fieldTotalIncomeTaxDeductedHelp", type: "number", required: true }
@@ -495,7 +495,7 @@ export const companyWizardSections: WizardSection[] = [
     id: "company-info",
     titleKey: "wizardCompanyInfo",
     descriptionKey: "wizardCompanyInfoDesc",
-    icon: "🏛️",
+    icon: "landmark",
     fields: [
       { key: "corporationName", labelKey: "fieldCorpName", helpKey: "fieldCorpNameHelp", type: "text", required: true },
       { key: "businessNumber", labelKey: "fieldBusinessNumber", helpKey: "fieldBusinessNumberHelp", type: "text", required: true },
@@ -506,7 +506,7 @@ export const companyWizardSections: WizardSection[] = [
     id: "company-revenue",
     titleKey: "wizardCompanyRevenue",
     descriptionKey: "wizardCompanyRevenueDesc",
-    icon: "💰",
+    icon: "dollar-sign",
     fields: [
       { key: "corporateRevenue", labelKey: "fieldCorpRevenue", helpKey: "fieldCorpRevenueHelp", type: "number", required: true },
       { key: "corporateDeductions", labelKey: "fieldCorpDeductions", helpKey: "fieldCorpDeductionsHelp", type: "number" },
@@ -518,7 +518,7 @@ export const companyWizardSections: WizardSection[] = [
     id: "company-payroll",
     titleKey: "wizardCompanyPayroll",
     descriptionKey: "wizardCompanyPayrollDesc",
-    icon: "👥",
+    icon: "users",
     fields: [
       { key: "corporatePayroll", labelKey: "fieldCorpPayroll", helpKey: "fieldCorpPayrollHelp", type: "number" },
       { key: "employeeCount", labelKey: "fieldEmployeeCount", helpKey: "fieldEmployeeCountHelp", type: "number" },
@@ -531,7 +531,7 @@ export const companyWizardSections: WizardSection[] = [
     id: "company-gst",
     titleKey: "wizardCompanyGst",
     descriptionKey: "wizardCompanyGstDesc",
-    icon: "🧮",
+    icon: "calculator",
     fields: [
       { key: "gstHstCollected", labelKey: "fieldGstHstCollected", helpKey: "fieldGstHstCollectedHelp", type: "number" },
       { key: "gstHstPaid", labelKey: "fieldGstHstPaid", helpKey: "fieldGstHstPaidHelp", type: "number" },

@@ -13,6 +13,7 @@ import type { TaxSummary, CorporateTaxSummary, CalculationResult } from "@/lib/s
 import type { CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import { DocumentPanel } from "@/components/document-panel";
 import { TaxSlipImportStub, NoaImportStub } from "@/components/import-stubs";
+import { LucideIcon } from "@/components/lucide-icon";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -347,17 +348,17 @@ export function ReturnForm({
     );
   }
 
-  function renderStepper() {
+  function renderTimeline() {
     const allSteps = [
-      { id: "setup", label: t.filingTitle, icon: "⚙️" },
-      ...(filingMode !== "COMPANY" ? [{ id: "profile", label: t.profileTitle, icon: "🎯" }] : []),
-      { id: "documents", label: t.wizardDocuments, icon: "📎" },
+      { id: "setup", label: t.filingTitle, icon: "settings" },
+      ...(filingMode !== "COMPANY" ? [{ id: "profile", label: t.profileTitle, icon: "target" }] : []),
+      { id: "documents", label: t.wizardDocuments, icon: "paperclip" },
       ...activeSections.map((s) => ({ id: s.id, label: t[s.titleKey] ?? s.id, icon: s.icon })),
-      { id: "review", label: t.wizardReview, icon: "✅" }
+      { id: "review", label: t.wizardReview, icon: "check-square" }
     ];
 
     return (
-      <div className="wizard-stepper">
+      <div className="timeline surface" style={{ padding: "1rem 1rem 0.5rem" }}>
         {allSteps.map((step) => {
           const matchingSection = activeSections.find((s) => s.id === step.id);
           const isCompleted =
@@ -371,29 +372,52 @@ export function ReturnForm({
             (step.id === "documents" && wizardStep === "documents") ||
             (step.id === "review" && wizardStep === "review") ||
             (wizardStep === "section" && currentSection?.id === step.id);
+          const missing = matchingSection ? countMissingRequired(matchingSection, watchedValues) : 0;
 
           return (
-            <button
+            <div
               key={step.id}
-              type="button"
-              className={`wizard-step ${isActive ? "wizard-step-active" : ""} ${isCompleted ? "wizard-step-done" : ""}`}
-              onClick={() => {
-                if (step.id === "setup") setWizardStep("setup");
-                else if (step.id === "profile") setWizardStep("profile");
-                else if (step.id === "documents") setWizardStep("documents");
-                else if (step.id === "review") setWizardStep("review");
-                else {
-                  const sIdx = activeSections.findIndex((s) => s.id === step.id);
-                  if (sIdx >= 0) { setWizardStep("section"); setActiveSectionIndex(sIdx); }
-                }
-              }}
-              aria-current={isActive ? "step" : undefined}
+              className={`timeline-item ${isActive ? "timeline-item-active" : ""} ${isCompleted ? "timeline-item-done" : ""}`}
             >
-              <span className="wizard-step-icon">
-                {isCompleted ? "✓" : step.icon}
-              </span>
-              <span className="wizard-step-label">{step.label}</span>
-            </button>
+              <div className="timeline-node">
+                {isCompleted
+                  ? <LucideIcon name="check" size={14} />
+                  : <LucideIcon name={step.icon} size={14} />
+                }
+              </div>
+              <button
+                type="button"
+                className="timeline-header"
+                onClick={() => {
+                  if (step.id === "setup") setWizardStep("setup");
+                  else if (step.id === "profile") setWizardStep("profile");
+                  else if (step.id === "documents") setWizardStep("documents");
+                  else if (step.id === "review") setWizardStep("review");
+                  else {
+                    const sIdx = activeSections.findIndex((s) => s.id === step.id);
+                    if (sIdx >= 0) { setWizardStep("section"); setActiveSectionIndex(sIdx); }
+                  }
+                }}
+                aria-current={isActive ? "step" : undefined}
+              >
+                <span className="timeline-header-title">{step.label}</span>
+                {isCompleted && (
+                  <span className="timeline-header-status timeline-header-status-complete">
+                    {t.wizardStepComplete}
+                  </span>
+                )}
+                {!isCompleted && missing > 0 && (
+                  <span className="timeline-header-status timeline-header-status-missing">
+                    {missing} {t.wizardMissingFields}
+                  </span>
+                )}
+                <LucideIcon
+                  name="chevron-right"
+                  size={16}
+                  className={`timeline-header-chevron ${isActive ? "timeline-header-chevron-open" : ""}`}
+                />
+              </button>
+            </div>
           );
         })}
       </div>
@@ -451,7 +475,7 @@ export function ReturnForm({
 
   return (
     <div style={{ display: "grid", gap: "1rem" }}>
-      {renderStepper()}
+      {renderTimeline()}
 
       {/* Step: Setup */}
       {wizardStep === "setup" && (
