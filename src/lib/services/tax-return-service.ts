@@ -75,6 +75,7 @@ export async function getReturnForUser(userId: string, returnId: string) {
       filingMode: true,
       status: true,
       data: true,
+      taxSummary: true,
       updatedAt: true,
       createdAt: true,
       submittedAt: true,
@@ -107,6 +108,8 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
   const missing = missingRequiredFields(mode, mergedData);
   const nextStatus = missing.length === 0 ? "READY_TO_REVIEW" : "DRAFT";
 
+  const taxSummary: CalculationResult = calculateTax(mode, mergedData);
+
   const record = await prisma.taxReturn.upsert({
     where: {
       userId_taxYear_filingMode: {
@@ -121,10 +124,12 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
       filingMode: mode,
       status: nextStatus,
       data: mergedData as InputJsonValue,
+      taxSummary: taxSummary.summary as unknown as InputJsonValue,
       priorYearReturnId: carryForwardSource?.id
     },
     update: {
       data: mergedData as InputJsonValue,
+      taxSummary: taxSummary.summary as unknown as InputJsonValue,
       status: nextStatus,
       priorYearReturnId: carryForwardSource?.id
     },
@@ -134,11 +139,10 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
       filingMode: true,
       status: true,
       data: true,
+      taxSummary: true,
       updatedAt: true
     }
   });
-
-  const taxSummary: CalculationResult = calculateTax(mode, mergedData);
 
   const carryForwardDiff: CarryForwardDiffEntry[] = carryForwardSource
     ? computeCarryForwardDiff(priorData, mergedData, mode)
@@ -190,13 +194,24 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
     throw new Error(`PREFLIGHT_FAILED:${failedIds.join(",")}`);
   }
 
+  const calcResult = calculateTax(taxReturn.filingMode, payload);
+  const personalSummary = calcResult.mode !== "COMPANY" ? calcResult.summary : null;
+
   const provider = getSubmissionProvider();
   const prepared = await provider.prepare({
     returnId: taxReturn.id,
     taxYear: taxReturn.taxYear,
     filingMode: taxReturn.filingMode,
     payload,
-    generatedAt: new Date().toISOString()
+    generatedAt: new Date().toISOString(),
+    taxSummary: personalSummary
+      ? {
+          netFederalTax: personalSummary.netFederalTax,
+          totalTax: personalSummary.totalTax,
+          balanceOwing: personalSummary.balanceOwing,
+          provincial: personalSummary.provincial ?? null
+        }
+      : undefined
   });
 
   const updated = await prisma.taxReturn.update({

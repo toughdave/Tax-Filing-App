@@ -1,6 +1,27 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.12.0] - 2026-03-05
+### Added
+- **Provincial tax data in NETFILE XML**: The XML builder now includes a `<TaxCalculation>` section with federal tax, provincial tax breakdown (province code, gross provincial tax, BPA credit, non-refundable credits, surtax, net provincial tax), total tax, and balance owing.
+- **Tax summary persistence**: Computed tax summaries are now stored in the database (`taxSummary` JSON column on TaxReturn) alongside user data, eliminating the need to recalculate on every page load.
+- **Data request history UI**: Account Settings page now displays a table of submitted data requests (export/deletion) with type, status, and date — powered by the existing GET `/api/account/data-request` endpoint.
+- **Privacy Policy page** (`/privacy`): Bilingual EN/FR page covering data collection, usage, storage, sharing, PIPEDA rights, retention, cookies, and contact. Required by PIPEDA and OAuth providers.
+- **Terms of Service page** (`/terms`): Bilingual EN/FR page covering acceptance, service description, user responsibilities, accuracy/liability, prohibited use, termination, governing law.
+- Footer links to Privacy Policy and Terms of Service on the home page.
+- **Loading states**: Skeleton screens for dashboard, return detail, and account pages via Next.js `loading.tsx` streaming.
+- **Accessibility improvements**: Skip navigation link in root layout, `id="main-content"` targets on key pages, ARIA labels on navigation elements (`aria-label` on desktop and mobile nav).
+- **Filing flow progress meter**: Real-time section completion indicator in the return form showing filled vs. required fields per section with visual progress bar and per-section status pills.
+- Bilingual EN/FR i18n strings for all new features (data request history, privacy/terms pages, progress meter).
+- 2 new NETFILE provincial XML tests (with and without provincial data).
+- 184 tests total (17 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
+### Changed
+- `SubmissionPackage` interface now includes optional `taxSummary` with provincial detail for XML serialization.
+- `prepareSubmissionForUser` computes and passes tax summary to submission providers.
+- `getReturnForUser` now includes `taxSummary` in its select.
+- Prisma schema: added `taxSummary Json?` column to `TaxReturn` model.
+
 ## [0.11.0] - 2026-03-05
 ### Added
 - **Robust carry-forward data mapping**: Prior-year data is now filtered to only carry forward stable profile/identity fields (name, SIN, DOB, province, marital status, dependants, company identity). Year-specific amounts (income, deductions, credits, payments, corporate financials) are no longer blindly carried forward.

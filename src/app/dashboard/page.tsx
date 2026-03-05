@@ -19,7 +19,7 @@ export default async function DashboardPage({
   const returns: TaxReturnRow[] = session?.user?.id ? await listReturnsForUser(session.user.id) : [];
 
   return (
-    <main style={{ paddingBottom: "3rem" }}>
+    <main id="main-content" style={{ paddingBottom: "3rem" }}>
       <SiteHeader locale={locale} />
       <section className="container" style={{ marginTop: "1.2rem", display: "grid", gap: "0.9rem" }}>
         <div className="surface" style={{ padding: "1.2rem", display: "grid", gap: "0.5rem" }}>

@@ -25,7 +25,7 @@ export async function SiteHeader({ locale }: SiteHeaderProps) {
             </Link>
           </div>
 
-          <nav className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+          <nav className="desktop-nav" aria-label="Main navigation" style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
             <Link href={withLang("/", locale)}>{t.navHome}</Link>
             <Link href={withLang("/dashboard", locale)}>{t.navDashboard}</Link>
             <Link href={withLang("/returns/new", locale)}>{t.navStartReturn}</Link>
@@ -53,7 +53,7 @@ export async function SiteHeader({ locale }: SiteHeaderProps) {
           </div>
         </div>
 
-        <nav className="mobile-nav" style={{ marginTop: "0.9rem", display: "flex", gap: "1rem", overflowX: "auto" }}>
+        <nav className="mobile-nav" aria-label="Mobile navigation" style={{ marginTop: "0.9rem", display: "flex", gap: "1rem", overflowX: "auto" }}>
           <Link href={withLang("/", locale)}>{t.navHome}</Link>
           <Link href={withLang("/dashboard", locale)}>{t.navDashboard}</Link>
           <Link href={withLang("/returns/new", locale)}>{t.navStartReturn}</Link>

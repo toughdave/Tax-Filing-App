@@ -113,6 +113,7 @@ model TaxReturn {
   filingMode            FilingMode
   status                ReturnStatus @default(DRAFT)
   data                  Json
+  taxSummary            Json?
   priorYearReturnId     String?
   externalSubmissionRef String?
   createdAt             DateTime     @default(now())

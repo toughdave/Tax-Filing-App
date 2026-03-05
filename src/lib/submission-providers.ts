@@ -5,6 +5,20 @@ export interface SubmissionPackage {
   payload: Record<string, unknown>;
   documents?: { id: string; category: string; storagePath: string }[];
   generatedAt: string;
+  taxSummary?: {
+    netFederalTax: number;
+    totalTax: number;
+    balanceOwing: number;
+    provincial?: {
+      provinceCode: string;
+      provinceName: string;
+      provincialTax: number;
+      provincialBasicPersonalCredit: number;
+      provincialNonRefundableCredits: number;
+      netProvincialTax: number;
+      provincialSurtax: number;
+    } | null;
+  };
 }
 
 export interface SubmissionResult {
@@ -158,6 +172,24 @@ export class NetfileCraProvider implements FilingSubmissionProvider {
       `    <Line45350>${escapeXml(p.canadaTrainingCredit ?? 0)}</Line45350>`,
       `    <Line47600>${escapeXml(p.taxPaidByInstalments ?? 0)}</Line47600>`,
       "  </RefundableCreditsAndPayments>",
+      ...(packageData.taxSummary ? [
+        "  <TaxCalculation>",
+        `    <NetFederalTax>${escapeXml(packageData.taxSummary.netFederalTax)}</NetFederalTax>`,
+        ...(packageData.taxSummary.provincial ? [
+          "    <ProvincialTax>",
+          `      <ProvinceCode>${escapeXml(packageData.taxSummary.provincial.provinceCode)}</ProvinceCode>`,
+          `      <ProvinceName>${escapeXml(packageData.taxSummary.provincial.provinceName)}</ProvinceName>`,
+          `      <GrossProvincialTax>${escapeXml(packageData.taxSummary.provincial.provincialTax)}</GrossProvincialTax>`,
+          `      <BasicPersonalCredit>${escapeXml(packageData.taxSummary.provincial.provincialBasicPersonalCredit)}</BasicPersonalCredit>`,
+          `      <NonRefundableCredits>${escapeXml(packageData.taxSummary.provincial.provincialNonRefundableCredits)}</NonRefundableCredits>`,
+          `      <Surtax>${escapeXml(packageData.taxSummary.provincial.provincialSurtax)}</Surtax>`,
+          `      <NetProvincialTax>${escapeXml(packageData.taxSummary.provincial.netProvincialTax)}</NetProvincialTax>`,
+          "    </ProvincialTax>"
+        ] : []),
+        `    <TotalTax>${escapeXml(packageData.taxSummary.totalTax)}</TotalTax>`,
+        `    <BalanceOwing>${escapeXml(packageData.taxSummary.balanceOwing)}</BalanceOwing>`,
+        "  </TaxCalculation>"
+      ] : []),
       "</T1Return>"
     ].join("\n");
   }

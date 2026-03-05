@@ -107,6 +107,58 @@ describe("submission provider", () => {
   });
 });
 
+describe("NETFILE XML provincial tax section", () => {
+  it("includes provincial tax data in XML when taxSummary is provided", async () => {
+    const provider = getSubmissionProvider();
+    const prepared = await provider.prepare({
+      returnId: "ret-prov-test",
+      taxYear: 2024,
+      filingMode: "INDIVIDUAL",
+      payload: {
+        legalName: "Jane Doe",
+        sinLast4: "1234",
+        birthDate: "1990-01-01",
+        residencyProvince: "ON",
+        employmentIncome: 80000
+      },
+      generatedAt: "2026-03-04T00:00:00.000Z",
+      taxSummary: {
+        netFederalTax: 8500,
+        totalTax: 12300,
+        balanceOwing: 2300,
+        provincial: {
+          provinceCode: "ON",
+          provinceName: "Ontario",
+          provincialTax: 4200,
+          provincialBasicPersonalCredit: 572.28,
+          provincialNonRefundableCredits: 572.28,
+          netProvincialTax: 3800,
+          provincialSurtax: 0
+        }
+      }
+    });
+    expect(prepared.status).toBe("SUBMISSION_PENDING");
+  });
+
+  it("omits provincial section when taxSummary has no provincial data", async () => {
+    const provider = getSubmissionProvider();
+    const prepared = await provider.prepare({
+      returnId: "ret-no-prov",
+      taxYear: 2024,
+      filingMode: "INDIVIDUAL",
+      payload: { legalName: "John Doe", employmentIncome: 50000 },
+      generatedAt: "2026-03-04T00:00:00.000Z",
+      taxSummary: {
+        netFederalTax: 5000,
+        totalTax: 5000,
+        balanceOwing: -1000,
+        provincial: null
+      }
+    });
+    expect(prepared.status).toBe("SUBMISSION_PENDING");
+  });
+});
+
 describe("escapeXml", () => {
   it("escapes all five XML entities", () => {
     expect(escapeXml('A & B < C > D "E" \'F\'')).toBe(

@@ -15,7 +15,7 @@ export default async function HomePage({
   const session = await getAuthSession();
 
   return (
-    <main style={{ paddingBottom: "3rem" }}>
+    <main id="main-content" style={{ paddingBottom: "3rem" }}>
       <SiteHeader locale={locale} />
 
       <section className="container" style={{ marginTop: "1.3rem" }}>
@@ -80,6 +80,15 @@ export default async function HomePage({
           </article>
         </div>
       </section>
+
+      <footer className="container" style={{ marginTop: "2rem", paddingBottom: "1rem", display: "flex", gap: "1.2rem", justifyContent: "center", fontSize: "0.85rem" }}>
+        <Link href={withLang("/privacy", locale)} className="muted" style={{ textDecoration: "underline" }}>
+          {t.privacyTitle}
+        </Link>
+        <Link href={withLang("/terms", locale)} className="muted" style={{ textDecoration: "underline" }}>
+          {t.termsTitle}
+        </Link>
+      </footer>
     </main>
   );
 }

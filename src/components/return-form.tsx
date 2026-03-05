@@ -7,6 +7,7 @@ import { textFor, type Locale } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/format";
 import type { TaxSummary, CorporateTaxSummary, CalculationResult } from "@/lib/services/tax-calculation-engine";
 import type { CarryForwardDiffEntry } from "@/lib/carry-forward-config";
+import { FilingProgress } from "@/components/filing-progress";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -76,10 +77,12 @@ export function ReturnForm({
   const [carryForwardDiff, setCarryForwardDiff] = useState<CarryForwardDiffEntry[]>([]);
   const [taxSummary, setTaxSummary] = useState<CalculationResult | null>(initialTaxSummary);
 
-  const { register, getValues, reset } = useForm<Record<string, string>>({
+  const { register, getValues, reset, watch } = useForm<Record<string, string>>({
     mode: "onBlur",
     defaultValues: formDefaults
   });
+
+  const watchedValues = watch();
 
   const activeGroups = useMemo(
     () => [...baseFieldGroups, ...(modeSpecificFieldGroups[filingMode] ?? [])],
@@ -300,6 +303,8 @@ export function ReturnForm({
           </select>
         </div>
       </div>
+
+      <FilingProgress locale={locale} groups={activeGroups} values={watchedValues} />
 
       {carryForwardYear ? (
         <div className="notice-success">
