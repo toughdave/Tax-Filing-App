@@ -77,7 +77,7 @@ export function ReturnForm({
   const [carryForwardDiff, setCarryForwardDiff] = useState<CarryForwardDiffEntry[]>([]);
   const [taxSummary, setTaxSummary] = useState<CalculationResult | null>(initialTaxSummary);
 
-  const { register, getValues, reset, watch } = useForm<Record<string, string>>({
+  const { register, getValues, reset, watch, formState: { errors } } = useForm<Record<string, string>>({
     mode: "onBlur",
     defaultValues: formDefaults
   });
@@ -356,9 +356,29 @@ export function ReturnForm({
                   <input
                     id={field.key}
                     type={htmlInputType(field)}
-                    {...register(field.key)}
+                    aria-invalid={!!errors[field.key]}
+                    aria-describedby={errors[field.key] ? `${field.key}-error` : `${field.key}-help`}
+                    style={errors[field.key] ? { borderColor: "var(--error, #ef4444)" } : undefined}
+                    {...register(field.key, {
+                      ...(field.required ? { required: t.validationRequired } : {}),
+                      ...(field.type === "number" ? {
+                        validate: (v: string) => {
+                          if (!v || v.trim() === "") return true;
+                          return Number.isFinite(Number(v)) || t.validationNumber;
+                        }
+                      } : {}),
+                      ...(field.key === "sinLast4" ? {
+                        pattern: { value: /^\d{4}$/, message: t.validationSinLast4 }
+                      } : {})
+                    })}
                   />
-                  <small>{t[field.helpKey]}</small>
+                  {errors[field.key] ? (
+                    <small id={`${field.key}-error`} style={{ color: "var(--error, #ef4444)" }} role="alert">
+                      {errors[field.key]?.message as string}
+                    </small>
+                  ) : (
+                    <small id={`${field.key}-help`}>{t[field.helpKey]}</small>
+                  )}
                 </div>
               ))}
             </div>

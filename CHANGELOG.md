@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.12.2] - 2026-03-05
+### Added
+- **Real-time client-side Zod validation**: Return form fields now validate on blur with inline error messages. Required fields show "This field is required", number fields validate numeric input, and `sinLast4` enforces exactly 4 digits. Errors display in red with `role="alert"` and `aria-invalid`/`aria-describedby` for accessibility.
+- Bilingual EN/FR validation message i18n strings.
+- Database schema pushed: `taxSummary Json?` column applied to production via `prisma db push`.
+- 195 tests total (18 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
 ## [0.12.1] - 2026-03-05
 ### Added
 - **Vercel Blob document storage**: Document uploads now use `@vercel/blob` when `BLOB_READ_WRITE_TOKEN` is set, with local filesystem fallback for development. Downloads redirect to blob URLs in production.
