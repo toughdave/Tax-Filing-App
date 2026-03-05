@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { resolveLocale, textFor } from "@/lib/i18n";
 import { RecoveryForm } from "@/components/recovery-form";
 import Link from "next/link";
@@ -36,6 +37,7 @@ export default async function RecoveryPage({
           </Link>
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

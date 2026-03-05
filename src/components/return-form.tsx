@@ -31,7 +31,7 @@ interface SaveResponse {
   taxSummary: CalculationResult;
 }
 
-type WizardStep = "setup" | "profile" | "section" | "documents" | "review";
+type WizardStep = "setup" | "profile" | "documents" | "section" | "review";
 
 function formDefaultsFromPayload(payload: Record<string, unknown> | undefined): Record<string, string> {
   if (!payload) return {};
@@ -210,16 +210,27 @@ export function ReturnForm({
 
   function handleSetupContinue() {
     if (filingMode === "COMPANY") {
-      setWizardStep("section");
-      setActiveSectionIndex(0);
+      setWizardStep("documents");
     } else {
       setWizardStep("profile");
     }
   }
 
   function handleProfileContinue() {
+    setWizardStep("documents");
+  }
+
+  function handleDocumentsContinue() {
     setWizardStep("section");
     setActiveSectionIndex(0);
+  }
+
+  function handleDocumentsBack() {
+    if (filingMode === "COMPANY") {
+      setWizardStep("setup");
+    } else {
+      setWizardStep("profile");
+    }
   }
 
   async function handleSectionContinue() {
@@ -242,21 +253,28 @@ export function ReturnForm({
     if (!saved) return;
 
     setCompletedSections((prev) => new Set(prev).add(currentSection.id));
+    advanceSection();
+  }
 
+  function handleSectionNext() {
+    setInfoMessage(null);
+    setErrorMessage(null);
+    advanceSection();
+  }
+
+  function advanceSection() {
     if (activeSectionIndex < activeSections.length - 1) {
       setActiveSectionIndex(activeSectionIndex + 1);
     } else {
-      setWizardStep("documents");
+      setWizardStep("review");
     }
   }
 
   function handleSectionBack() {
     if (activeSectionIndex > 0) {
       setActiveSectionIndex(activeSectionIndex - 1);
-    } else if (filingMode === "COMPANY") {
-      setWizardStep("setup");
     } else {
-      setWizardStep("profile");
+      setWizardStep("documents");
     }
   }
 
@@ -333,8 +351,8 @@ export function ReturnForm({
     const allSteps = [
       { id: "setup", label: t.filingTitle, icon: "⚙️" },
       ...(filingMode !== "COMPANY" ? [{ id: "profile", label: t.profileTitle, icon: "🎯" }] : []),
-      ...activeSections.map((s) => ({ id: s.id, label: t[s.titleKey] ?? s.id, icon: s.icon })),
       { id: "documents", label: t.wizardDocuments, icon: "📎" },
+      ...activeSections.map((s) => ({ id: s.id, label: t[s.titleKey] ?? s.id, icon: s.icon })),
       { id: "review", label: t.wizardReview, icon: "✅" }
     ];
 
@@ -345,6 +363,7 @@ export function ReturnForm({
           const isCompleted =
             (step.id === "setup" && wizardStep !== "setup") ||
             (step.id === "profile" && wizardStep !== "setup" && wizardStep !== "profile") ||
+            (step.id === "documents" && (wizardStep === "section" || wizardStep === "review")) ||
             (matchingSection ? isSectionComplete(matchingSection, watchedValues) && completedSections.has(step.id) : completedSections.has(step.id));
           const isActive =
             (step.id === "setup" && wizardStep === "setup") ||
@@ -562,6 +581,13 @@ export function ReturnForm({
             >
               {isSaving ? t.filingSaving : t.wizardStepContinue}
             </button>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={handleSectionNext}
+            >
+              {t.wizardNext} →
+            </button>
           </div>
 
           {infoMessage ? <p className="notice-success" style={{ margin: 0 }}>{infoMessage}</p> : null}
@@ -569,17 +595,21 @@ export function ReturnForm({
         </div>
       )}
 
-      {/* Step: Documents */}
+      {/* Step: Documents & Imports (early — before manual form sections) */}
       {wizardStep === "documents" && (
         <div style={{ display: "grid", gap: "1rem" }}>
-          <DocumentPanel locale={locale} returnId={returnId} />
+          <div className="surface" style={{ padding: "1.2rem", display: "grid", gap: "0.5rem" }}>
+            <h2 style={{ margin: 0, fontFamily: "var(--font-title)" }}>{t.wizardDocuments}</h2>
+            <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t.wizardDocumentsDesc}</p>
+          </div>
           <TaxSlipImportStub locale={locale} />
           <NoaImportStub locale={locale} />
+          <DocumentPanel locale={locale} returnId={returnId} />
           <div style={{ display: "flex", gap: "0.7rem" }}>
-            <button className="btn btn-secondary" type="button" onClick={() => { setWizardStep("section"); setActiveSectionIndex(activeSections.length - 1); }}>
+            <button className="btn btn-secondary" type="button" onClick={handleDocumentsBack}>
               {t.wizardStepBack}
             </button>
-            <button className="btn btn-primary" type="button" onClick={() => setWizardStep("review")}>
+            <button className="btn btn-primary" type="button" onClick={handleDocumentsContinue}>
               {t.wizardStepContinue}
             </button>
           </div>
@@ -667,7 +697,7 @@ export function ReturnForm({
 
           {/* Action buttons */}
           <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
-            <button className="btn btn-secondary" type="button" onClick={() => setWizardStep("documents")}>
+            <button className="btn btn-secondary" type="button" onClick={() => { setWizardStep("section"); setActiveSectionIndex(activeSections.length - 1); }}>
               {t.wizardStepBack}
             </button>
             <button className="btn btn-secondary" onClick={() => void saveDraft()} disabled={isSaving || isPreparing} type="button">

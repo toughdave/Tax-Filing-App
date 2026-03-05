@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { resolveLocale, textFor } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
 import { AdminPanels } from "@/components/admin-panels";
@@ -38,6 +39,7 @@ export default async function AdminPage({
           <AdminPanels locale={locale} />
         )}
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

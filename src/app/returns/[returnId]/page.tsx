@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ReturnForm } from "@/components/return-form";
 import { YoyComparison } from "@/components/yoy-comparison";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
 import { calculateTax, type CalculationResult } from "@/lib/services/tax-calculation-engine";
@@ -47,6 +48,7 @@ export default async function ReturnByIdPage({
             </div>
           </div>
         </section>
+        <SiteFooter locale={locale} />
       </main>
     );
   }
@@ -82,6 +84,7 @@ export default async function ReturnByIdPage({
           <YoyComparison locale={locale} returnId={record.id} />
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

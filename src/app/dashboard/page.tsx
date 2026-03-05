@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { formatDate } from "@/lib/format";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
@@ -80,6 +81,7 @@ export default async function DashboardPage({
           </div>
         )}
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

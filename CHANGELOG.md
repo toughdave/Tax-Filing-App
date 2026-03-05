@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.16.0] - 2026-03-05
+### Added
+- **"Next" button on section forms**: Users can now skip sections without being blocked by mandatory field validation. "Save & Continue" still validates and saves; "Next →" simply advances to the next section.
+- **Persistent site footer**: Privacy Policy, Terms of Service, and copyright links now appear on every page (previously only on landing page). New `SiteFooter` shared component.
+- **Dynamic nav label**: "Start a return" nav link changes to "Filing forms" (highlighted) when user is on any `/returns/*` page.
+
+### Changed
+- **Documents & imports moved early**: The supporting documents, tax slip import, and NOA import sections now appear *before* manual form sections in the wizard flow (Setup → Profile → Documents → Sections → Review). This lets uploaded documents and CRA imports autofill fields before users fill them manually.
+- **Wizard flow reorder**: Setup → Profile → Documents/Imports → Form Sections → Review & Submit. Back/forward navigation updated throughout.
+- **Eyebrow pill**: "Canada-only • CRA-focused" replaced with 🍁 CRA / 🍁 ARC (bilingual).
+- 4 new bilingual i18n keys (EN/FR): `navFilingForms`, `wizardNext`.
+
 ## [0.15.1] - 2026-03-05
 ### Fixed
 - **Wizard navigation blocked on incomplete sections**: "Save & Continue" now validates all required fields via `react-hook-form` `trigger()` before advancing. If required fields are empty, an error message is shown and the user stays on the current section.

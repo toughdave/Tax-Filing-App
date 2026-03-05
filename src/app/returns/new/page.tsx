@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ReturnForm } from "@/components/return-form";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { textFor, resolveLocale, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
 
@@ -37,6 +38,7 @@ export default async function NewReturnPage({
           </div>
         )}
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

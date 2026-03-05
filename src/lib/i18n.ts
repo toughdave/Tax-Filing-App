@@ -11,7 +11,7 @@ const en: TextDictionary = {
   navSignOut: "Sign out",
   navSignedInAs: "Signed in as",
   navAccount: "Account",
-  homeEyebrow: "Canada-only • CRA-focused",
+  homeEyebrow: "🍁 CRA",
   homeTitle: "Tax filing that feels clear, calm, and actually manageable.",
   homeSubtitle:
     "Start as an individual, self-employed person, or company. The app shows only what matters for your filing path and carries your profile into future years.",
@@ -480,7 +480,9 @@ const en: TextDictionary = {
   wizardSelectOption: "Select…",
   wizardSectionIncomplete: "Please fill in all required fields before continuing.",
   wizardMissingFields: "required field(s) missing",
-  wizardNotSaved: "Not yet saved"
+  wizardNotSaved: "Not yet saved",
+  navFilingForms: "Filing forms",
+  wizardNext: "Next"
 };
 
 const fr: TextDictionary = {
@@ -492,7 +494,7 @@ const fr: TextDictionary = {
   navSignOut: "Se déconnecter",
   navSignedInAs: "Connecté en tant que",
   navAccount: "Compte",
-  homeEyebrow: "Canada seulement • Axé sur l'ARC",
+  homeEyebrow: "🍁 ARC",
   homeTitle: "La déclaration d'impôt qui devient claire, simple et gérable.",
   homeSubtitle:
     "Commencez en tant que particulier, travailleur autonome ou entreprise. L'application affiche seulement ce qui est pertinent et conserve votre profil pour les années futures.",
@@ -961,7 +963,9 @@ const fr: TextDictionary = {
   wizardSelectOption: "Sélectionner…",
   wizardSectionIncomplete: "Veuillez remplir tous les champs obligatoires avant de continuer.",
   wizardMissingFields: "champ(s) obligatoire(s) manquant(s)",
-  wizardNotSaved: "Pas encore enregistré"
+  wizardNotSaved: "Pas encore enregistré",
+  navFilingForms: "Formulaires de déclaration",
+  wizardNext: "Suivant"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

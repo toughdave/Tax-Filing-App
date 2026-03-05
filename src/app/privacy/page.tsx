@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 
 const LAST_UPDATED = "2026-03-04";
@@ -33,6 +34,7 @@ export default async function PrivacyPage({
           {locale === "fr" ? <PrivacyContentFr /> : <PrivacyContentEn />}
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

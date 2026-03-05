@@ -25,6 +25,7 @@ const navLinkActive: React.CSSProperties = {
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
+  if (href === "/returns/new") return pathname.startsWith("/returns");
   return pathname === href || pathname.startsWith(href + "/");
 }
 
@@ -35,10 +36,11 @@ export async function SiteHeader({ locale }: SiteHeaderProps) {
   const headerList = await headers();
   const pathname = headerList.get("x-pathname") ?? "/";
 
+  const onReturnsPage = pathname.startsWith("/returns");
   const navLinks = [
     { href: "/", label: t.navHome },
     { href: "/dashboard", label: t.navDashboard },
-    { href: "/returns/new", label: t.navStartReturn }
+    { href: "/returns/new", label: onReturnsPage ? t.navFilingForms : t.navStartReturn }
   ];
 
   return (

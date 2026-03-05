@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { filingModes } from "@/lib/tax-field-config";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
@@ -152,15 +153,7 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="container" style={{ marginTop: "2rem", paddingBottom: "1rem", display: "flex", gap: "1.2rem", justifyContent: "center", fontSize: "0.85rem", flexWrap: "wrap" }}>
-        <Link href={withLang("/privacy", locale)} className="muted" style={{ textDecoration: "underline" }}>
-          {t.privacyTitle}
-        </Link>
-        <Link href={withLang("/terms", locale)} className="muted" style={{ textDecoration: "underline" }}>
-          {t.termsTitle}
-        </Link>
-      </footer>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

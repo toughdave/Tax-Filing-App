@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { SignInPanel } from "@/components/sign-in-panel";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { availableProviders } from "@/lib/auth-policy";
@@ -34,6 +35,7 @@ export default async function SignInPage({
           </a>
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

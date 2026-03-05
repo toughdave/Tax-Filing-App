@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
 import { getUserConsentStatus } from "@/lib/services/consent-service";
@@ -75,6 +76,7 @@ export default async function AccountPage({
 
         <AccountActions locale={locale} />
       </section>
+      <SiteFooter locale={locale} />
     </main>
   );
 }
