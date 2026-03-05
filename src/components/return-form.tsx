@@ -313,6 +313,11 @@ export function ReturnForm({
   }
 
   function renderField(field: TaxField) {
+    if (field.condition) {
+      const currentValue = watchedValues[field.condition.field] ?? "";
+      if (!field.condition.values.includes(currentValue)) return null;
+    }
+
     const friendlyLabel = field.friendlyLabelKey ? t[field.friendlyLabelKey] : null;
     const officialLabel = t[field.labelKey];
     const displayLabel = friendlyLabel || officialLabel;

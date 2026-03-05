@@ -7,6 +7,11 @@ export interface SelectOption {
   labelKey: string;
 }
 
+export interface FieldCondition {
+  field: string;
+  values: string[];
+}
+
 export interface TaxField {
   key: string;
   labelKey: string;
@@ -17,6 +22,7 @@ export interface TaxField {
   craLine?: string;
   friendlyLabelKey?: string;
   promptType?: "yesno";
+  condition?: FieldCondition;
 }
 
 export interface FieldGroup {
@@ -517,11 +523,36 @@ export const individualWizardSections: WizardSection[] = [
     descriptionKey: "wizardMedicalDonationsDesc",
     icon: "heart",
     craFormRef: "T1-Step5B",
-    fields: [
-      { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number", craLine: "33099", friendlyLabelKey: "friendlyMedical", promptType: "yesno" },
-      { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number", craLine: "45200", friendlyLabelKey: "friendlyRefundableMedical", promptType: "yesno" },
-      { key: "donations", labelKey: "fieldDonations", helpKey: "fieldDonationsHelp", type: "number", craLine: "34900", friendlyLabelKey: "friendlyDonations", promptType: "yesno" },
-      { key: "disabilityAmount", labelKey: "fieldDisabilityAmount", helpKey: "fieldDisabilityAmountHelp", type: "number", craLine: "31600", friendlyLabelKey: "friendlyDisability", promptType: "yesno" }
+    fields: [],
+    subsections: [
+      {
+        id: "medical-expenses",
+        titleKey: "subsectionMedicalExpenses",
+        descriptionKey: "subsectionMedicalExpensesDesc",
+        profileFlag: "hasMedicalExpenses",
+        fields: [
+          { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number", craLine: "33099", friendlyLabelKey: "friendlyMedical" },
+          { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number", craLine: "45200", friendlyLabelKey: "friendlyRefundableMedical", promptType: "yesno" }
+        ]
+      },
+      {
+        id: "charitable-donations",
+        titleKey: "subsectionCharitableDonations",
+        descriptionKey: "subsectionCharitableDonationsDesc",
+        profileFlag: "hasDonations",
+        fields: [
+          { key: "donations", labelKey: "fieldDonations", helpKey: "fieldDonationsHelp", type: "number", craLine: "34900", friendlyLabelKey: "friendlyDonations" }
+        ]
+      },
+      {
+        id: "disability-credit",
+        titleKey: "subsectionDisabilityCredit",
+        descriptionKey: "subsectionDisabilityCreditDesc",
+        profileFlag: "hasDisability",
+        fields: [
+          { key: "disabilityAmount", labelKey: "fieldDisabilityAmount", helpKey: "fieldDisabilityAmountHelp", type: "number", craLine: "31600", friendlyLabelKey: "friendlyDisability" }
+        ]
+      }
     ]
   },
   {
@@ -531,13 +562,30 @@ export const individualWizardSections: WizardSection[] = [
     icon: "sparkles",
     craFormRef: "T1-Step5B",
     fields: [
-      { key: "spouseAmount", labelKey: "fieldSpouseAmount", helpKey: "fieldSpouseAmountHelp", type: "number", craLine: "30300", friendlyLabelKey: "friendlySpouseAmount", promptType: "yesno" },
-      { key: "eligibleDependantAmount", labelKey: "fieldEligibleDependantAmount", helpKey: "fieldEligibleDependantAmountHelp", type: "number", craLine: "30400", friendlyLabelKey: "friendlyEligibleDependant", promptType: "yesno" },
-      { key: "canadaCaregiverAmount", labelKey: "fieldCanadaCaregiverAmount", helpKey: "fieldCanadaCaregiverAmountHelp", type: "number", craLine: "30450", friendlyLabelKey: "friendlyCanadaCaregiver", promptType: "yesno" },
-      { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number", craLine: "44800", friendlyLabelKey: "friendlyCppEiOverpayment", promptType: "yesno" },
       { key: "canadaEmploymentAmount", labelKey: "fieldCanadaEmploymentAmount", helpKey: "fieldCanadaEmploymentAmountHelp", type: "number", craLine: "31260", friendlyLabelKey: "friendlyCanadaEmployment" },
+      { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number", craLine: "44800", friendlyLabelKey: "friendlyCppEiOverpayment", promptType: "yesno" },
       { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number", craLine: "31270", friendlyLabelKey: "friendlyHomeBuyers", promptType: "yesno" },
       { key: "canadaWorkersAmount", labelKey: "fieldCanadaWorkersAmount", helpKey: "fieldCanadaWorkersAmountHelp", type: "number", craLine: "45300", friendlyLabelKey: "friendlyCanadaWorkers", promptType: "yesno" }
+    ],
+    subsections: [
+      {
+        id: "spouse-partner-credits",
+        titleKey: "subsectionSpousePartner",
+        descriptionKey: "subsectionSpousePartnerDesc",
+        fields: [
+          { key: "spouseAmount", labelKey: "fieldSpouseAmount", helpKey: "fieldSpouseAmountHelp", type: "number", craLine: "30300", friendlyLabelKey: "friendlySpouseAmount", promptType: "yesno", condition: { field: "maritalStatus", values: ["married", "commonLaw"] } }
+        ]
+      },
+      {
+        id: "dependant-credits",
+        titleKey: "subsectionDependantCredits",
+        descriptionKey: "subsectionDependantCreditsDesc",
+        profileFlag: "hasDependants",
+        fields: [
+          { key: "eligibleDependantAmount", labelKey: "fieldEligibleDependantAmount", helpKey: "fieldEligibleDependantAmountHelp", type: "number", craLine: "30400", friendlyLabelKey: "friendlyEligibleDependant", promptType: "yesno" },
+          { key: "canadaCaregiverAmount", labelKey: "fieldCanadaCaregiverAmount", helpKey: "fieldCanadaCaregiverAmountHelp", type: "number", craLine: "30450", friendlyLabelKey: "friendlyCanadaCaregiver", promptType: "yesno" }
+        ]
+      }
     ]
   },
   {

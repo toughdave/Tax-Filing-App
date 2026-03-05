@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.21.0] - 2026-03-05
+### Added
+- **Field-level conditions**: New `FieldCondition` interface and `condition` property on `TaxField`. Fields with conditions are only rendered when the referenced field's value matches one of the specified values (e.g. spouse amount only shown when marital status is married/commonLaw).
+- **Medical-donations restructured**: Section now uses profile-flag-gated subsections: Medical expenses (`hasMedicalExpenses`), Charitable donations (`hasDonations`), Disability tax credit (`hasDisability`). Each subsection only appears when the user checked the corresponding profile flag.
+- **Other-credits restructured**: Spouse/partner credits subsection (conditionally visible by marital status), Dependant credits subsection (gated by `hasDependants` profile flag). General credits remain as top-level fields.
+- 10 new bilingual i18n keys (EN/FR) for subsection titles. Total: 583/583 parity.
+
+### Changed
+- `renderField()` now checks `field.condition` against `watchedValues` before rendering, enabling cross-field dynamic visibility.
+
 ## [0.20.0] - 2026-03-05
 ### Added
 - **Provincial forms system**: New `src/lib/provincial-forms.ts` module provides province-keyed wizard section configs loaded dynamically when the user selects their province of residence.
@@ -402,6 +412,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.
