@@ -4,6 +4,7 @@ import { getAuthSession } from "@/lib/session";
 import { saveReturnForUser, listReturnsForUser } from "@/lib/services/tax-return-service";
 import { writeAuditEvent, extractRequestMeta } from "@/lib/audit";
 import { guardApiRoute } from "@/lib/api-guard";
+import { sendFilingConfirmation, isEmailEnabled } from "@/lib/email";
 
 export async function GET(request: Request) {
   const blocked = guardApiRoute(request);
@@ -54,6 +55,20 @@ export async function POST(request: Request) {
     },
     ...extractRequestMeta(request)
   });
+
+  if (isEmailEnabled() && session.user.email) {
+    const appUrl = process.env.NEXTAUTH_URL ?? "https://canada-tax-filing.vercel.app";
+    sendFilingConfirmation({
+      email: session.user.email,
+      name: session.user.name ?? undefined,
+      taxYear: result.record.taxYear,
+      filingMode: result.record.filingMode,
+      status: result.record.status,
+      returnId: result.record.id,
+      missingFields: result.missingRequired.length,
+      appUrl
+    }).catch(() => {});
+  }
 
   return NextResponse.json(result);
 }

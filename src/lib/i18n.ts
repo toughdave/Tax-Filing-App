@@ -356,7 +356,25 @@ const en: TextDictionary = {
   taxSummaryProvincialSurtax: "Provincial surtax",
   taxSummaryNetProvincialTax: "Net provincial tax",
   taxSummaryTotalCombinedTax: "Total combined tax (federal + provincial)",
-  taxSummaryProvince: "Province of residence"
+  taxSummaryProvince: "Province of residence",
+  homeStatsProvinces: "13 provinces & territories",
+  homeStatsTaxYears: "3 tax years supported",
+  homeStatsFields: "44+ CRA field mappings",
+  homeStatsEncryption: "AES-256-GCM encryption",
+  homeHowItWorksTitle: "How it works",
+  homeStep1Title: "1. Choose your path",
+  homeStep1Body: "Select individual, self-employed, or company. The app adapts instantly to show only relevant fields.",
+  homeStep2Title: "2. Fill in your details",
+  homeStep2Body: "Plain-language fields with real-time validation. Prior-year data carries forward automatically.",
+  homeStep3Title: "3. Review and submit",
+  homeStep3Body: "Get a tax estimate, run preflight checks, then prepare your CRA submission package.",
+  homeTrustTitle: "Built for Canadian taxpayers",
+  homeTrustPipeda: "PIPEDA-aligned privacy practices",
+  homeTrustBilingual: "Full English & French bilingual support",
+  homeTrustAudit: "Complete audit trail for every action",
+  homeTrustMfa: "Two-factor authentication available",
+  homeTrustOpenSource: "Open-source and transparent",
+  homeTrustNoTracking: "No third-party tracking or ads"
 };
 
 const fr: TextDictionary = {
@@ -713,7 +731,25 @@ const fr: TextDictionary = {
   taxSummaryProvincialSurtax: "Surtaxe provinciale",
   taxSummaryNetProvincialTax: "Impôt provincial net",
   taxSummaryTotalCombinedTax: "Impôt total combiné (fédéral + provincial)",
-  taxSummaryProvince: "Province de résidence"
+  taxSummaryProvince: "Province de résidence",
+  homeStatsProvinces: "13 provinces et territoires",
+  homeStatsTaxYears: "3 années d'imposition",
+  homeStatsFields: "44+ champs ARC mappés",
+  homeStatsEncryption: "Chiffrement AES-256-GCM",
+  homeHowItWorksTitle: "Comment ça fonctionne",
+  homeStep1Title: "1. Choisissez votre parcours",
+  homeStep1Body: "Sélectionnez particulier, travailleur autonome ou entreprise. L'application s'adapte instantanément.",
+  homeStep2Title: "2. Remplissez vos informations",
+  homeStep2Body: "Champs en langage clair avec validation en temps réel. Les données de l'année précédente sont reprises automatiquement.",
+  homeStep3Title: "3. Révisez et soumettez",
+  homeStep3Body: "Obtenez une estimation fiscale, vérifiez les prérequis, puis préparez votre dossier de soumission à l'ARC.",
+  homeTrustTitle: "Conçu pour les contribuables canadiens",
+  homeTrustPipeda: "Pratiques de confidentialité conformes à la LPRPDE",
+  homeTrustBilingual: "Entièrement bilingue anglais et français",
+  homeTrustAudit: "Piste d'audit complète pour chaque action",
+  homeTrustMfa: "Authentification à deux facteurs disponible",
+  homeTrustOpenSource: "Code source ouvert et transparent",
+  homeTrustNoTracking: "Aucun suivi tiers ni publicité"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

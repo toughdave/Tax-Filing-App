@@ -6,6 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import { availableProviders } from "@/lib/auth-policy";
+import { sendWelcomeOrSignInNotification, isEmailEnabled } from "@/lib/email";
 
 const providerAvailability = availableProviders();
 
@@ -110,6 +111,17 @@ export const authOptions: NextAuthOptions = {
           }
         }
       });
+
+      if (isEmailEnabled() && user.email) {
+        const appUrl = process.env.NEXTAUTH_URL ?? "https://canada-tax-filing.vercel.app";
+        sendWelcomeOrSignInNotification({
+          email: user.email,
+          name: user.name ?? undefined,
+          isNewUser: Boolean(isNewUser),
+          provider: account?.provider,
+          appUrl
+        }).catch(() => {});
+      }
     },
     async signOut({ token, session }) {
       await prisma.auditEvent.create({

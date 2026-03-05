@@ -1,6 +1,23 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.13.0] - 2026-03-05
+### Added
+- **Email infrastructure via Resend**: Transactional email system with three bilingual (EN/FR) templates:
+  - **Filing confirmation**: Sent after each save with status, missing field count, and deep link to return.
+  - **Submission confirmation**: Sent after successful CRA submission with confirmation number and provider.
+  - **Welcome / sign-in notification**: Welcome email for new users; sign-in alert for existing users with provider info.
+  - Graceful degradation: all email sends are fire-and-forget; app works fully without `RESEND_API_KEY`.
+  - 12 new email service tests covering all templates, error handling, and disabled-state behavior.
+- **Landing page redesign**: New hero section with centered CTA, stats bar (13 provinces, 3 tax years, 44+ field mappings, AES-256-GCM), "How it works" 3-step section, trust signals checklist (PIPEDA, bilingual, audit trail, MFA, open-source, no tracking).
+- **Mobile-responsive CSS**: Touch-friendly 44px minimum targets for buttons and inputs, single-column grid on small screens, responsive table cells, and tighter container width on mobile.
+- 20 new bilingual i18n keys (EN/FR) for landing page stats, how-it-works steps, and trust signals.
+
+### Changed
+- `prepareSubmissionForUser` now includes `taxYear` in its return value for downstream use.
+- README updated from v0.1.0 to v0.13.0 with comprehensive current feature summary.
+- 207 tests (19 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
 ## [0.12.4] - 2026-03-05
 ### Fixed
 - **Encrypted PII leaking in save API response**: `saveReturnForUser` upsert select included `data: true`, sending encrypted PII ciphertexts to the client. Removed `data` and `taxSummary` from the upsert select since the client only uses `record.id` and `record.status`. Reduces API response size and eliminates unnecessary encrypted data exposure.

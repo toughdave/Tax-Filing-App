@@ -12,25 +12,37 @@ Tax filing should feel structured, understandable, and calm. This project priori
 - Strong account security + privacy controls
 - Submission architecture for CRA-compatible e-filing integrations
 
-## Current Implementation (v0.1.0)
+## Current Implementation (v0.13.0)
 
-- Next.js App Router + TypeScript fullstack architecture
-- OAuth-ready authentication via NextAuth + Prisma adapter
-- Demo credentials sign-in mode for local development
-- PostgreSQL + Prisma data model for:
-  - user accounts/sessions
-  - tax profiles
-  - tax returns by year and filing mode
-  - audit events
-- Guided filing form that supports:
-  - `INDIVIDUAL`
-  - `SELF_EMPLOYED`
-  - `COMPANY`
-- Prior-year carry-forward by filing mode
-- Submission package preparation through a sandbox provider abstraction
-- Bilingual interface for core flow (`en` / `fr`)
-- API routes for return save/list/prepare and health checks
-- CI/CD baseline and semantic version bump automation
+### Core Filing
+- Guided interview for **INDIVIDUAL**, **SELF_EMPLOYED**, and **COMPANY** filing modes
+- 44+ CRA field mappings per tax year (T1, T2125, T2, Schedule 3/6/9/11)
+- Tax calculation engine with federal + provincial/territorial tax for all 13 jurisdictions
+- Prior-year carry-forward with smart field filtering and "What changed?" diff
+- Filing preflight checks (8 validations) before submission
+- Real-time client-side Zod validation with inline error messages
+
+### Security & Privacy
+- AES-256-GCM field-level PII encryption (SIN, name, DOB) at rest
+- JWT sessions via NextAuth with OAuth providers (Google/Microsoft/Apple)
+- Two-factor authentication (TOTP) with recovery codes
+- Rate limiting, CSRF protection, nonce-based CSP on all routes
+- Consent management, data retention controls, account recovery
+- Admin dashboard with masked PII for support workflows
+- Complete audit trail for auth, filing, and document actions
+
+### E-Filing & Documents
+- Production e-filing providers: NETFILE (XML/T1) and EFILE (JSON/all modes)
+- Document upload/download/delete with Vercel Blob storage (local fallback)
+- XML escaping and ownership verification on all document operations
+
+### Infrastructure
+- Email notifications via Resend (filing confirmation, submission, sign-in alerts)
+- PostgreSQL + Prisma with migrations for all models
+- Bilingual EN/FR interface (370+ i18n key pairs)
+- Loading states, skeleton screens, accessibility (skip nav, ARIA)
+- Privacy Policy and Terms of Service pages (PIPEDA-aligned)
+- CI/CD: GitHub Actions for lint/typecheck/test/build/security-scan
 
 ## Tech Stack
 

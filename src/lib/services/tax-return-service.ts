@@ -239,6 +239,7 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
 
   return {
     ...updated,
+    taxYear: taxReturn.taxYear,
     provider: provider.name,
     message: prepared.message
   };
