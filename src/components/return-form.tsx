@@ -356,6 +356,254 @@ export function ReturnForm({
     );
   }
 
+  function renderStepContent(stepId: string): React.ReactNode {
+    if (stepId === "setup") {
+      return (
+        <div style={{ display: "grid", gap: "1.2rem" }}>
+          <p className="timeline-desc">{t.filingSubtitle}</p>
+          <div style={{ display: "grid", gap: "1rem" }}>
+            <div className="field">
+              <label htmlFor="taxYear">{t.filingTaxYear}</label>
+              <select id="taxYear" value={taxYear} onChange={(e) => setTaxYear(e.target.value)}>
+                {TAX_YEARS.map((y) => (
+                  <option key={y.value} value={y.value}>{t[y.labelKey]}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="filingMode">{t.filingMode}</label>
+              <select id="filingMode" value={filingMode} onChange={(e) => handleModeChange(parseFilingMode(e.target.value))}>
+                {filingModes.map((mode) => (
+                  <option key={mode.value} value={mode.value}>{t[mode.labelKey]}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {carryForwardYear ? (
+            <div className="notice-success">{t.filingCarryForward}: {carryForwardYear}</div>
+          ) : null}
+          {carryForwardDiff.length > 0 && carryForwardDiff.filter((d) => d.source === "carried").length > 0 && (
+            <div style={{ display: "grid", gap: "0.35rem", fontSize: "0.9rem" }}>
+              <strong style={{ color: "var(--brand)" }}>{t.filingCarryForwardCarried}</strong>
+              <ul style={{ margin: "0.2rem 0 0.5rem 1.2rem", padding: 0 }}>
+                {carryForwardDiff.filter((d) => d.source === "carried").map((d) => (
+                  <li key={d.key}>{t[`field${d.key.charAt(0).toUpperCase()}${d.key.slice(1)}`] ?? d.key}: {String(d.currentValue ?? "")}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button className="btn btn-primary" type="button" onClick={handleSetupContinue} style={{ justifySelf: "start" }}>
+            {t.wizardStepContinue}
+          </button>
+        </div>
+      );
+    }
+
+    if (stepId === "profile") {
+      return (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          <p className="timeline-desc">{t.profileSubtitle}</p>
+          <div style={{ display: "grid", gap: "0.6rem" }}>
+            {PROFILE_FLAGS.map((flag) => (
+              <label
+                key={flag.key}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "0.7rem",
+                  padding: "0.8rem 1rem",
+                  background: profileFlags[flag.key] ? "rgba(31, 107, 87, 0.06)" : "transparent",
+                  border: `1px solid ${profileFlags[flag.key] ? "var(--brand)" : "var(--line)"}`,
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  transition: "border-color 0.15s, background 0.15s"
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={!!profileFlags[flag.key]}
+                  onChange={(e) => setProfileFlags((prev) => ({ ...prev, [flag.key]: e.target.checked }))}
+                  style={{ marginTop: "0.15rem", width: "18px", height: "18px", accentColor: "var(--brand)" }}
+                />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: "0.95rem" }}>{t[flag.labelKey]}</div>
+                  <div className="muted" style={{ fontSize: "0.85rem" }}>{t[flag.helpKey]}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: "0.7rem" }}>
+            <button className="btn btn-secondary" type="button" onClick={() => setWizardStep("setup")}>
+              {t.wizardStepBack}
+            </button>
+            <button className="btn btn-primary" type="button" onClick={handleProfileContinue}>
+              {t.wizardStepContinue}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (stepId === "documents") {
+      return (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          <p className="timeline-desc">{t.wizardDocumentsDesc}</p>
+          <TaxSlipImportStub locale={locale} />
+          <NoaImportStub locale={locale} />
+          <DocumentPanel locale={locale} returnId={returnId} />
+          <div style={{ display: "flex", gap: "0.7rem" }}>
+            <button className="btn btn-secondary" type="button" onClick={handleDocumentsBack}>
+              {t.wizardStepBack}
+            </button>
+            <button className="btn btn-primary" type="button" onClick={handleDocumentsContinue}>
+              {t.wizardStepContinue}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (stepId === "review") {
+      return (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          <p className="timeline-desc">{t.wizardReviewDesc}</p>
+          <div style={{ display: "grid", gap: "0.4rem" }}>
+            {activeSections.map((section) => {
+              const fieldsFilled = isSectionComplete(section, watchedValues);
+              const wasSaved = completedSections.has(section.id);
+              const complete = wasSaved && fieldsFilled;
+              const missingCount = countMissingRequired(section, watchedValues);
+              return (
+                <div
+                  key={section.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.6rem",
+                    padding: "0.65rem 0.9rem",
+                    borderRadius: "10px",
+                    border: `1px solid ${complete ? "rgba(31, 107, 87, 0.25)" : missingCount > 0 ? "rgba(239, 68, 68, 0.3)" : "var(--line)"}`,
+                    background: complete ? "rgba(31, 107, 87, 0.04)" : missingCount > 0 ? "rgba(239, 68, 68, 0.03)" : "transparent",
+                    cursor: "pointer"
+                  }}
+                  onClick={() => {
+                    const sIdx = activeSections.findIndex((s) => s.id === section.id);
+                    if (sIdx >= 0) { setWizardStep("section"); setActiveSectionIndex(sIdx); }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      const sIdx = activeSections.findIndex((s) => s.id === section.id);
+                      if (sIdx >= 0) { setWizardStep("section"); setActiveSectionIndex(sIdx); }
+                    }
+                  }}
+                >
+                  <span style={{
+                    width: "24px", height: "24px", borderRadius: "50%",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "0.8rem", fontWeight: 700,
+                    background: complete ? "var(--brand)" : missingCount > 0 ? "var(--error, #ef4444)" : "var(--line)",
+                    color: complete ? "white" : missingCount > 0 ? "white" : "var(--ink-soft)"
+                  }}>
+                    {complete ? "✓" : missingCount > 0 ? "!" : <LucideIcon name={section.icon} size={12} />}
+                  </span>
+                  <span style={{ fontWeight: 600, fontSize: "0.92rem", flex: 1 }}>{t[section.titleKey]}</span>
+                  {complete ? (
+                    <span className="pill" style={{ fontSize: "0.75rem", padding: "0.15rem 0.5rem", color: "var(--brand)" }}>
+                      {t.wizardStepComplete}
+                    </span>
+                  ) : missingCount > 0 ? (
+                    <span style={{ fontSize: "0.75rem", color: "var(--error, #ef4444)", fontWeight: 600 }}>
+                      {missingCount} {t.wizardMissingFields}
+                    </span>
+                  ) : !wasSaved ? (
+                    <span className="muted" style={{ fontSize: "0.75rem" }}>
+                      {t.wizardNotSaved}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+          {taxSummary ? (
+            <div style={{ display: "grid", gap: "0.6rem", padding: "1rem", borderRadius: "10px", border: "1px solid var(--line)" }}>
+              <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{t.taxSummaryTitle}</h3>
+              {taxSummary.mode === "COMPANY"
+                ? renderCorporateSummary(taxSummary.summary as CorporateTaxSummary)
+                : renderIndividualSummary(taxSummary.summary as TaxSummary)}
+              <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>{t.taxSummaryNotice}</p>
+            </div>
+          ) : null}
+          <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
+            <button className="btn btn-secondary" type="button" onClick={() => { setWizardStep("section"); setActiveSectionIndex(activeSections.length - 1); }}>
+              {t.wizardStepBack}
+            </button>
+            <button className="btn btn-secondary" onClick={() => void saveDraft()} disabled={isSaving || isPreparing} type="button">
+              {isSaving ? t.filingSaving : t.filingSaveDraft}
+            </button>
+            <button className="btn btn-primary" onClick={() => void prepareSubmission()} disabled={isPreparing || isSaving} type="button">
+              {isPreparing ? t.filingSaving : t.filingPrepare}
+            </button>
+            {returnId && (
+              <a href={`/api/returns/${returnId}/pdf`} className="btn btn-secondary" download style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+                {t.pdfDownload}
+              </a>
+            )}
+          </div>
+          {infoMessage ? <p className="notice-success" style={{ margin: 0 }}>{infoMessage}</p> : null}
+          {errorMessage ? <p className="notice-error" style={{ margin: 0 }}>{errorMessage}</p> : null}
+        </div>
+      );
+    }
+
+    // Form section content
+    const matchedSection = activeSections.find((s) => s.id === stepId);
+    if (matchedSection) {
+      const sectionIdx = activeSections.findIndex((s) => s.id === stepId);
+      return (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          <p className="timeline-desc">{t[matchedSection.descriptionKey]}</p>
+          {matchedSection.craFormRef && (
+            <span className="pill" style={{ fontSize: "0.7rem", padding: "0.1rem 0.45rem", justifySelf: "start" }}>
+              {matchedSection.craFormRef}
+            </span>
+          )}
+          <p className="timeline-step-counter">
+            {t.wizardStepOf}: {sectionIdx + 1} / {activeSections.length}
+          </p>
+          <div style={{ display: "grid", gap: "1rem" }}>
+            {matchedSection.fields.map((field) => renderField(field))}
+          </div>
+          <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
+            <button className="btn btn-secondary" type="button" onClick={handleSectionBack}>
+              {t.wizardStepBack}
+            </button>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={() => void handleSectionContinue()}
+              disabled={isSaving}
+            >
+              {isSaving ? t.filingSaving : t.wizardStepContinue}
+            </button>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={handleSectionNext}
+            >
+              {t.wizardNext} →
+            </button>
+          </div>
+          {infoMessage ? <p className="notice-success" style={{ margin: 0 }}>{infoMessage}</p> : null}
+          {errorMessage ? <p className="notice-error" style={{ margin: 0 }}>{errorMessage}</p> : null}
+        </div>
+      );
+    }
+
+    return null;
+  }
+
   function renderTimeline() {
     const allSteps = [
       { id: "setup", label: t.filingTitle, icon: "settings" },
@@ -425,6 +673,9 @@ export function ReturnForm({
                   className={`timeline-header-chevron ${isActive ? "timeline-header-chevron-open" : ""}`}
                 />
               </button>
+              <div className={`timeline-body ${isActive ? "timeline-body-open" : ""}`}>
+                {isActive && renderStepContent(step.id)}
+              </div>
             </div>
           );
         })}
@@ -481,279 +732,5 @@ export function ReturnForm({
     );
   }
 
-  return (
-    <div style={{ display: "grid", gap: "1rem" }}>
-      {renderTimeline()}
-
-      {/* Step: Setup */}
-      {wizardStep === "setup" && (
-        <div className="surface" style={{ padding: "1.4rem", display: "grid", gap: "1.2rem" }}>
-          <div>
-            <h2 style={{ marginTop: 0, marginBottom: "0.35rem", fontFamily: "var(--font-title)" }}>{t.filingTitle}</h2>
-            <p className="muted" style={{ margin: 0 }}>{t.filingSubtitle}</p>
-          </div>
-          <div className="grid-cards">
-            <div className="field">
-              <label htmlFor="taxYear">{t.filingTaxYear}</label>
-              <select id="taxYear" value={taxYear} onChange={(e) => setTaxYear(e.target.value)}>
-                {TAX_YEARS.map((y) => (
-                  <option key={y.value} value={y.value}>{t[y.labelKey]}</option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="filingMode">{t.filingMode}</label>
-              <select id="filingMode" value={filingMode} onChange={(e) => handleModeChange(parseFilingMode(e.target.value))}>
-                {filingModes.map((mode) => (
-                  <option key={mode.value} value={mode.value}>{t[mode.labelKey]}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {carryForwardYear ? (
-            <div className="notice-success">{t.filingCarryForward}: {carryForwardYear}</div>
-          ) : null}
-
-          {carryForwardDiff.length > 0 ? (
-            <div style={{ display: "grid", gap: "0.35rem", fontSize: "0.9rem" }}>
-              {carryForwardDiff.filter((d) => d.source === "carried").length > 0 && (
-                <div>
-                  <strong style={{ color: "var(--brand)" }}>{t.filingCarryForwardCarried}</strong>
-                  <ul style={{ margin: "0.2rem 0 0.5rem 1.2rem", padding: 0 }}>
-                    {carryForwardDiff.filter((d) => d.source === "carried").map((d) => (
-                      <li key={d.key}>{t[`field${d.key.charAt(0).toUpperCase()}${d.key.slice(1)}`] ?? d.key}: {String(d.currentValue ?? "")}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ) : null}
-
-          <button className="btn btn-primary" type="button" onClick={handleSetupContinue} style={{ justifySelf: "start" }}>
-            {t.wizardStepContinue}
-          </button>
-        </div>
-      )}
-
-      {/* Step: Profile (Individual/Self-Employed only) */}
-      {wizardStep === "profile" && (
-        <div className="surface" style={{ padding: "1.4rem", display: "grid", gap: "1rem" }}>
-          <div>
-            <h2 style={{ marginTop: 0, marginBottom: "0.35rem", fontFamily: "var(--font-title)" }}>{t.profileTitle}</h2>
-            <p className="muted" style={{ margin: 0 }}>{t.profileSubtitle}</p>
-          </div>
-          <div style={{ display: "grid", gap: "0.6rem" }}>
-            {PROFILE_FLAGS.map((flag) => (
-              <label
-                key={flag.key}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "0.7rem",
-                  padding: "0.8rem 1rem",
-                  background: profileFlags[flag.key] ? "rgba(31, 107, 87, 0.06)" : "transparent",
-                  border: `1px solid ${profileFlags[flag.key] ? "var(--brand)" : "var(--line)"}`,
-                  borderRadius: "12px",
-                  cursor: "pointer",
-                  transition: "border-color 0.15s, background 0.15s"
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={!!profileFlags[flag.key]}
-                  onChange={(e) => setProfileFlags((prev) => ({ ...prev, [flag.key]: e.target.checked }))}
-                  style={{ marginTop: "0.15rem", width: "18px", height: "18px", accentColor: "var(--brand)" }}
-                />
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: "0.95rem" }}>{t[flag.labelKey]}</div>
-                  <div className="muted" style={{ fontSize: "0.85rem" }}>{t[flag.helpKey]}</div>
-                </div>
-              </label>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: "0.7rem" }}>
-            <button className="btn btn-secondary" type="button" onClick={() => setWizardStep("setup")}>
-              {t.wizardStepBack}
-            </button>
-            <button className="btn btn-primary" type="button" onClick={handleProfileContinue}>
-              {t.wizardStepContinue}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Step: Section fields */}
-      {wizardStep === "section" && currentSection && (
-        <div className="surface" style={{ padding: "1.4rem", display: "grid", gap: "1rem" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.3rem" }}>
-              <LucideIcon name={currentSection.icon} size={22} style={{ color: "var(--brand)", flexShrink: 0 }} />
-              <h2 style={{ margin: 0, fontFamily: "var(--font-title)" }}>{t[currentSection.titleKey]}</h2>
-              {currentSection.craFormRef && (
-                <span className="pill" style={{ fontSize: "0.7rem", padding: "0.1rem 0.45rem", marginLeft: "auto" }}>
-                  {currentSection.craFormRef}
-                </span>
-              )}
-            </div>
-            <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t[currentSection.descriptionKey]}</p>
-            <div className="muted" style={{ fontSize: "0.82rem", marginTop: "0.3rem" }}>
-              {t.wizardStepOf}: {activeSectionIndex + 1} / {activeSections.length}
-            </div>
-          </div>
-
-          <div className="grid-cards">
-            {currentSection.fields.map((field) => renderField(field))}
-          </div>
-
-          <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
-            <button className="btn btn-secondary" type="button" onClick={handleSectionBack}>
-              {t.wizardStepBack}
-            </button>
-            <button
-              className="btn btn-primary"
-              type="button"
-              onClick={() => void handleSectionContinue()}
-              disabled={isSaving}
-            >
-              {isSaving ? t.filingSaving : t.wizardStepContinue}
-            </button>
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={handleSectionNext}
-            >
-              {t.wizardNext} →
-            </button>
-          </div>
-
-          {infoMessage ? <p className="notice-success" style={{ margin: 0 }}>{infoMessage}</p> : null}
-          {errorMessage ? <p className="notice-error" style={{ margin: 0 }}>{errorMessage}</p> : null}
-        </div>
-      )}
-
-      {/* Step: Documents & Imports (early — before manual form sections) */}
-      {wizardStep === "documents" && (
-        <div style={{ display: "grid", gap: "1rem" }}>
-          <div className="surface" style={{ padding: "1.2rem", display: "grid", gap: "0.5rem" }}>
-            <h2 style={{ margin: 0, fontFamily: "var(--font-title)" }}>{t.wizardDocuments}</h2>
-            <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t.wizardDocumentsDesc}</p>
-          </div>
-          <TaxSlipImportStub locale={locale} />
-          <NoaImportStub locale={locale} />
-          <DocumentPanel locale={locale} returnId={returnId} />
-          <div style={{ display: "flex", gap: "0.7rem" }}>
-            <button className="btn btn-secondary" type="button" onClick={handleDocumentsBack}>
-              {t.wizardStepBack}
-            </button>
-            <button className="btn btn-primary" type="button" onClick={handleDocumentsContinue}>
-              {t.wizardStepContinue}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Step: Review & Submit */}
-      {wizardStep === "review" && (
-        <div style={{ display: "grid", gap: "1rem" }}>
-          {/* Completed sections overview */}
-          <div className="surface" style={{ padding: "1.2rem", display: "grid", gap: "0.6rem" }}>
-            <h2 style={{ margin: 0, fontFamily: "var(--font-title)" }}>{t.wizardReview}</h2>
-            <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t.wizardReviewDesc}</p>
-            <div style={{ display: "grid", gap: "0.4rem", marginTop: "0.4rem" }}>
-              {activeSections.map((section) => {
-                const fieldsFilled = isSectionComplete(section, watchedValues);
-                const wasSaved = completedSections.has(section.id);
-                const complete = wasSaved && fieldsFilled;
-                const missing = countMissingRequired(section, watchedValues);
-                return (
-                  <div
-                    key={section.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.6rem",
-                      padding: "0.65rem 0.9rem",
-                      borderRadius: "10px",
-                      border: `1px solid ${complete ? "rgba(31, 107, 87, 0.25)" : missing > 0 ? "rgba(239, 68, 68, 0.3)" : "var(--line)"}`,
-                      background: complete ? "rgba(31, 107, 87, 0.04)" : missing > 0 ? "rgba(239, 68, 68, 0.03)" : "transparent",
-                      cursor: "pointer"
-                    }}
-                    onClick={() => {
-                      const sIdx = activeSections.findIndex((s) => s.id === section.id);
-                      if (sIdx >= 0) { setWizardStep("section"); setActiveSectionIndex(sIdx); }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        const sIdx = activeSections.findIndex((s) => s.id === section.id);
-                        if (sIdx >= 0) { setWizardStep("section"); setActiveSectionIndex(sIdx); }
-                      }
-                    }}
-                  >
-                    <span style={{
-                      width: "24px", height: "24px", borderRadius: "50%",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: "0.8rem", fontWeight: 700,
-                      background: complete ? "var(--brand)" : missing > 0 ? "var(--error, #ef4444)" : "var(--line)",
-                      color: complete ? "white" : missing > 0 ? "white" : "var(--ink-soft)"
-                    }}>
-                      {complete ? "✓" : missing > 0 ? "!" : section.icon}
-                    </span>
-                    <span style={{ fontWeight: 600, fontSize: "0.92rem", flex: 1 }}>{t[section.titleKey]}</span>
-                    {complete ? (
-                      <span className="pill" style={{ fontSize: "0.75rem", padding: "0.15rem 0.5rem", color: "var(--brand)" }}>
-                        {t.wizardStepComplete}
-                      </span>
-                    ) : missing > 0 ? (
-                      <span style={{ fontSize: "0.75rem", color: "var(--error, #ef4444)", fontWeight: 600 }}>
-                        {missing} {t.wizardMissingFields}
-                      </span>
-                    ) : !wasSaved ? (
-                      <span className="muted" style={{ fontSize: "0.75rem" }}>
-                        {t.wizardNotSaved}
-                      </span>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tax Summary */}
-          {taxSummary ? (
-            <div className="surface" style={{ padding: "1rem", display: "grid", gap: "0.6rem" }}>
-              <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{t.taxSummaryTitle}</h3>
-              {taxSummary.mode === "COMPANY"
-                ? renderCorporateSummary(taxSummary.summary as CorporateTaxSummary)
-                : renderIndividualSummary(taxSummary.summary as TaxSummary)}
-              <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>{t.taxSummaryNotice}</p>
-            </div>
-          ) : null}
-
-          {/* Action buttons */}
-          <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
-            <button className="btn btn-secondary" type="button" onClick={() => { setWizardStep("section"); setActiveSectionIndex(activeSections.length - 1); }}>
-              {t.wizardStepBack}
-            </button>
-            <button className="btn btn-secondary" onClick={() => void saveDraft()} disabled={isSaving || isPreparing} type="button">
-              {isSaving ? t.filingSaving : t.filingSaveDraft}
-            </button>
-            <button className="btn btn-primary" onClick={() => void prepareSubmission()} disabled={isPreparing || isSaving} type="button">
-              {isPreparing ? t.filingSaving : t.filingPrepare}
-            </button>
-            {returnId && (
-              <a href={`/api/returns/${returnId}/pdf`} className="btn btn-secondary" download style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-                {t.pdfDownload}
-              </a>
-            )}
-          </div>
-
-          {infoMessage ? <p className="notice-success">{infoMessage}</p> : null}
-          {errorMessage ? <p className="notice-error">{errorMessage}</p> : null}
-        </div>
-      )}
-    </div>
-  );
+  return renderTimeline();
 }

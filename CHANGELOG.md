@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.17.2] - 2026-03-05
+### Fixed
+- **Single-column vertical field layout**: All form fields now stack vertically in a single column instead of the previous multi-column grid. Improves readability and scrollability on both mobile and desktop.
+- **Inline accordion form content**: Each wizard step's form content now renders directly inside its corresponding timeline item as an expandable accordion body, instead of appearing as a separate card below the timeline. Clicking a timeline header expands the form inline beneath it.
+
+### Changed
+- Refactored `renderTimeline()` into two functions: `renderStepContent()` (returns JSX per step) and `renderTimeline()` (builds the full accordion). Main component return now delegates entirely to `renderTimeline()`.
+- Review step section icons now render as Lucide icons instead of raw string names.
+
 ## [0.17.1] - 2026-03-05
 ### Added
 - **Friendly conversational field labels**: 35 new question-style labels (EN/FR) for form fields. Instead of "Employment income", users see "How much did you earn from your job(s) this year?" with the official CRA term shown below as context.
