@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.15.1] - 2026-03-05
+### Fixed
+- **Wizard navigation blocked on incomplete sections**: "Save & Continue" now validates all required fields via `react-hook-form` `trigger()` before advancing. If required fields are empty, an error message is shown and the user stays on the current section.
+- **Save failure no longer advances**: If the API save fails, the wizard stays on the current section instead of silently moving forward.
+- **Stepper completion checkmarks**: Green checkmarks (✓) now only appear when a section has been both saved AND all required fields are filled. Previously sections were marked complete unconditionally on navigation.
+- **Review page section indicators**: Sections with missing required fields show a red "!" badge with a count of missing fields. Unsaved sections show "Not yet saved". Only fully completed sections show the green "Complete" badge.
+
+### Changed
+- **CRA-essential fields now required**: Employment income, rental income, pension income, tuition, and total income tax deducted are now marked as required in their respective wizard sections — matching CRA filing requirements.
+- 3 new bilingual i18n keys (EN/FR): `wizardSectionIncomplete`, `wizardMissingFields`, `wizardNotSaved`.
+
 ## [0.15.0] - 2026-03-05
 ### Added
 - **Multi-section wizard flow**: TurboTax-inspired guided tax filing experience. Users progress through focused sections one at a time instead of a single long form. Section stepper with completion indicators (checkmarks), section-by-section auto-save on "Continue".

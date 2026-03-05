@@ -371,7 +371,7 @@ export const individualWizardSections: WizardSection[] = [
     descriptionKey: "wizardEmploymentIncomeDesc",
     icon: "💼",
     fields: [
-      { key: "employmentIncome", labelKey: "fieldEmploymentIncome", helpKey: "fieldEmploymentIncomeHelp", type: "number" },
+      { key: "employmentIncome", labelKey: "fieldEmploymentIncome", helpKey: "fieldEmploymentIncomeHelp", type: "number", required: true },
       { key: "eiBenefits", labelKey: "fieldEiBenefits", helpKey: "fieldEiBenefitsHelp", type: "number" },
       { key: "otherIncome", labelKey: "fieldOtherIncome", helpKey: "fieldOtherIncomeHelp", type: "number" }
     ]
@@ -395,7 +395,7 @@ export const individualWizardSections: WizardSection[] = [
     icon: "🏢",
     profileFlag: "hasRentalIncome",
     fields: [
-      { key: "rentalIncome", labelKey: "fieldRentalIncome", helpKey: "fieldRentalIncomeHelp", type: "number" }
+      { key: "rentalIncome", labelKey: "fieldRentalIncome", helpKey: "fieldRentalIncomeHelp", type: "number", required: true }
     ]
   },
   {
@@ -405,7 +405,7 @@ export const individualWizardSections: WizardSection[] = [
     icon: "🎖️",
     profileFlag: "isRetired",
     fields: [
-      { key: "pensionIncome", labelKey: "fieldPensionIncome", helpKey: "fieldPensionIncomeHelp", type: "number" },
+      { key: "pensionIncome", labelKey: "fieldPensionIncome", helpKey: "fieldPensionIncomeHelp", type: "number", required: true },
       { key: "ageAmount", labelKey: "fieldAgeAmount", helpKey: "fieldAgeAmountHelp", type: "number" },
       { key: "pensionIncomeAmount", labelKey: "fieldPensionIncomeAmount", helpKey: "fieldPensionIncomeAmountHelp", type: "number" }
     ]
@@ -446,7 +446,7 @@ export const individualWizardSections: WizardSection[] = [
     icon: "🎓",
     profileFlag: "isStudent",
     fields: [
-      { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number" },
+      { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number", required: true },
       { key: "studentLoanInterest", labelKey: "fieldStudentLoanInterest", helpKey: "fieldStudentLoanInterestHelp", type: "number" },
       { key: "canadaTrainingCredit", labelKey: "fieldCanadaTrainingCredit", helpKey: "fieldCanadaTrainingCreditHelp", type: "number" }
     ]
@@ -485,7 +485,7 @@ export const individualWizardSections: WizardSection[] = [
     icon: "💳",
     fields: [
       { key: "taxPaidByInstalments", labelKey: "fieldTaxPaidByInstalments", helpKey: "fieldTaxPaidByInstalmentsHelp", type: "number" },
-      { key: "totalIncomeTaxDeducted", labelKey: "fieldTotalIncomeTaxDeducted", helpKey: "fieldTotalIncomeTaxDeductedHelp", type: "number" }
+      { key: "totalIncomeTaxDeducted", labelKey: "fieldTotalIncomeTaxDeducted", helpKey: "fieldTotalIncomeTaxDeductedHelp", type: "number", required: true }
     ]
   }
 ];

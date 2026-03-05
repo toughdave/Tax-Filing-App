@@ -477,7 +477,10 @@ const en: TextDictionary = {
   wizardSectionComplete: "Section complete",
   wizardSelectProvince: "Select province…",
   wizardSelectMaritalStatus: "Select marital status…",
-  wizardSelectOption: "Select…"
+  wizardSelectOption: "Select…",
+  wizardSectionIncomplete: "Please fill in all required fields before continuing.",
+  wizardMissingFields: "required field(s) missing",
+  wizardNotSaved: "Not yet saved"
 };
 
 const fr: TextDictionary = {
@@ -955,7 +958,10 @@ const fr: TextDictionary = {
   wizardSectionComplete: "Section terminée",
   wizardSelectProvince: "Sélectionnez la province…",
   wizardSelectMaritalStatus: "Sélectionnez l'état civil…",
-  wizardSelectOption: "Sélectionner…"
+  wizardSelectOption: "Sélectionner…",
+  wizardSectionIncomplete: "Veuillez remplir tous les champs obligatoires avant de continuer.",
+  wizardMissingFields: "champ(s) obligatoire(s) manquant(s)",
+  wizardNotSaved: "Pas encore enregistré"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

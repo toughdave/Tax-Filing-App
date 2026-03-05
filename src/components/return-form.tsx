@@ -45,16 +45,18 @@ function formDefaultsFromPayload(payload: Record<string, unknown> | undefined): 
 
 function isSectionComplete(section: WizardSection, values: Record<string, string>): boolean {
   const required = section.fields.filter((f) => f.required);
-  if (required.length === 0) {
-    return section.fields.some((f) => {
-      const v = values[f.key];
-      return v !== undefined && v !== "";
-    });
-  }
+  if (required.length === 0) return true;
   return required.every((f) => {
     const v = values[f.key];
-    return v !== undefined && v !== "";
+    return v !== undefined && v.trim() !== "";
   });
+}
+
+function countMissingRequired(section: WizardSection, values: Record<string, string>): number {
+  return section.fields.filter((f) => f.required).filter((f) => {
+    const v = values[f.key];
+    return !v || v.trim() === "";
+  }).length;
 }
 
 export function ReturnForm({
@@ -93,7 +95,7 @@ export function ReturnForm({
   });
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
 
-  const { register, getValues, reset, watch, formState: { errors } } = useForm<Record<string, string>>({
+  const { register, getValues, reset, watch, trigger, formState: { errors } } = useForm<Record<string, string>>({
     mode: "onBlur",
     defaultValues: formDefaults
   });
@@ -221,10 +223,26 @@ export function ReturnForm({
   }
 
   async function handleSectionContinue() {
-    if (currentSection) {
-      setCompletedSections((prev) => new Set(prev).add(currentSection.id));
+    if (!currentSection) return;
+
+    const sectionFieldKeys = currentSection.fields.map((f) => f.key);
+    const valid = await trigger(sectionFieldKeys);
+    if (!valid) {
+      setErrorMessage(t.wizardSectionIncomplete);
+      return;
     }
-    await saveDraft();
+
+    const missing = countMissingRequired(currentSection, getValues());
+    if (missing > 0) {
+      setErrorMessage(`${t.wizardSectionIncomplete} (${missing} ${t.wizardMissingFields})`);
+      return;
+    }
+
+    const saved = await saveDraft();
+    if (!saved) return;
+
+    setCompletedSections((prev) => new Set(prev).add(currentSection.id));
+
     if (activeSectionIndex < activeSections.length - 1) {
       setActiveSectionIndex(activeSectionIndex + 1);
     } else {
@@ -323,10 +341,11 @@ export function ReturnForm({
     return (
       <div className="wizard-stepper">
         {allSteps.map((step) => {
+          const matchingSection = activeSections.find((s) => s.id === step.id);
           const isCompleted =
             (step.id === "setup" && wizardStep !== "setup") ||
             (step.id === "profile" && wizardStep !== "setup" && wizardStep !== "profile") ||
-            completedSections.has(step.id);
+            (matchingSection ? isSectionComplete(matchingSection, watchedValues) && completedSections.has(step.id) : completedSections.has(step.id));
           const isActive =
             (step.id === "setup" && wizardStep === "setup") ||
             (step.id === "profile" && wizardStep === "profile") ||
@@ -576,7 +595,10 @@ export function ReturnForm({
             <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t.wizardReviewDesc}</p>
             <div style={{ display: "grid", gap: "0.4rem", marginTop: "0.4rem" }}>
               {activeSections.map((section) => {
-                const complete = completedSections.has(section.id) || isSectionComplete(section, watchedValues);
+                const fieldsFilled = isSectionComplete(section, watchedValues);
+                const wasSaved = completedSections.has(section.id);
+                const complete = wasSaved && fieldsFilled;
+                const missing = countMissingRequired(section, watchedValues);
                 return (
                   <div
                     key={section.id}
@@ -586,8 +608,8 @@ export function ReturnForm({
                       gap: "0.6rem",
                       padding: "0.65rem 0.9rem",
                       borderRadius: "10px",
-                      border: `1px solid ${complete ? "rgba(31, 107, 87, 0.25)" : "var(--line)"}`,
-                      background: complete ? "rgba(31, 107, 87, 0.04)" : "transparent",
+                      border: `1px solid ${complete ? "rgba(31, 107, 87, 0.25)" : missing > 0 ? "rgba(239, 68, 68, 0.3)" : "var(--line)"}`,
+                      background: complete ? "rgba(31, 107, 87, 0.04)" : missing > 0 ? "rgba(239, 68, 68, 0.03)" : "transparent",
                       cursor: "pointer"
                     }}
                     onClick={() => {
@@ -607,17 +629,25 @@ export function ReturnForm({
                       width: "24px", height: "24px", borderRadius: "50%",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: "0.8rem", fontWeight: 700,
-                      background: complete ? "var(--brand)" : "var(--line)",
-                      color: complete ? "white" : "var(--ink-soft)"
+                      background: complete ? "var(--brand)" : missing > 0 ? "var(--error, #ef4444)" : "var(--line)",
+                      color: complete ? "white" : missing > 0 ? "white" : "var(--ink-soft)"
                     }}>
-                      {complete ? "✓" : section.icon}
+                      {complete ? "✓" : missing > 0 ? "!" : section.icon}
                     </span>
                     <span style={{ fontWeight: 600, fontSize: "0.92rem", flex: 1 }}>{t[section.titleKey]}</span>
-                    {complete && (
+                    {complete ? (
                       <span className="pill" style={{ fontSize: "0.75rem", padding: "0.15rem 0.5rem", color: "var(--brand)" }}>
                         {t.wizardStepComplete}
                       </span>
-                    )}
+                    ) : missing > 0 ? (
+                      <span style={{ fontSize: "0.75rem", color: "var(--error, #ef4444)", fontWeight: 600 }}>
+                        {missing} {t.wizardMissingFields}
+                      </span>
+                    ) : !wasSaved ? (
+                      <span className="muted" style={{ fontSize: "0.75rem" }}>
+                        {t.wizardNotSaved}
+                      </span>
+                    ) : null}
                   </div>
                 );
               })}
