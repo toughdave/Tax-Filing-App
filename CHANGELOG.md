@@ -7,8 +7,10 @@ All notable changes to this project are documented in this file.
 - New `carry-forward-config.ts` module with `buildCarryForwardData` (filtered extraction), `computeCarryForwardDiff` (carried/new/changed diff), and `isCarryForwardField` helpers.
 - `saveReturnForUser` now returns `carryForwardDiff` array showing which fields were carried unchanged, changed from prior year, or are new this year — enabling a "What changed?" UI step.
 - Bilingual EN/FR i18n strings for carry-forward diff labels (profile carried, changed, new, prior/current values).
-- 18 new carry-forward tests covering field filtering, exclusion of income/deductions/credits/payments, company identity carry-forward, diff computation for carried/changed/new entries, and integration with `saveReturnForUser`.
-- 179 tests total (17 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+- Year-over-year field key migration infrastructure (`migrateFieldKeys`) for handling internal field key renames between app versions; runs automatically during carry-forward.
+- "What changed?" diff panel in the return form UI — shows carried-forward unchanged fields, changed fields (prior → current), and new fields after save.
+- 21 new carry-forward tests covering field filtering, exclusion of income/deductions/credits/payments, company identity carry-forward, diff computation, field key migration, and integration with `saveReturnForUser`.
+- 182 tests total (17 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
 
 ## [0.10.1] - 2026-03-05
 ### Fixed
