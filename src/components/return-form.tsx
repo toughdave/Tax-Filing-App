@@ -15,6 +15,7 @@ import type { CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import { DocumentPanel } from "@/components/document-panel";
 import { TaxSlipImportStub, NoaImportStub } from "@/components/import-stubs";
 import { LucideIcon } from "@/components/lucide-icon";
+import { getProvincialSections } from "@/lib/provincial-forms";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -129,9 +130,15 @@ export function ReturnForm({
 
   const watchedValues = watch();
 
+  const selectedProvince = watchedValues.residencyProvince ?? "";
+  const provincialSections = useMemo(
+    () => selectedProvince ? getProvincialSections(selectedProvince) : [],
+    [selectedProvince]
+  );
+
   const activeSections = useMemo(
-    () => getWizardSections(filingMode, profileFlags),
-    [filingMode, profileFlags]
+    () => getWizardSections(filingMode, profileFlags, provincialSections),
+    [filingMode, profileFlags, provincialSections]
   );
 
   const currentSection = activeSections[activeSectionIndex] ?? null;

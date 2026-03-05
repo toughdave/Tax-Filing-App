@@ -603,13 +603,17 @@ export const companyWizardSections: WizardSection[] = [
   }
 ];
 
-export function getWizardSections(mode: FilingMode, profileFlags: Record<string, boolean>): WizardSection[] {
+export function getWizardSections(mode: FilingMode, profileFlags: Record<string, boolean>, provincialSections?: WizardSection[]): WizardSection[] {
   const base = mode === "COMPANY" ? companyWizardSections : individualWizardSections;
-  return base.filter((section) => {
+  const filtered = base.filter((section) => {
     if (section.mode && !section.mode.includes(mode)) return false;
     if (section.profileFlag && !profileFlags[section.profileFlag]) return false;
     return true;
   });
+  if (provincialSections && provincialSections.length > 0 && mode !== "COMPANY") {
+    return [...filtered, ...provincialSections];
+  }
+  return filtered;
 }
 
 export function requiredFieldsForMode(mode: FilingMode): string[] {

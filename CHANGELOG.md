@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.20.0] - 2026-03-05
+### Added
+- **Provincial forms system**: New `src/lib/provincial-forms.ts` module provides province-keyed wizard section configs loaded dynamically when the user selects their province of residence.
+- **Ontario ON428**: Provincial tax section with 5 fields (basic personal, spouse amount, age amount, donations credit, surtax).
+- **Ontario ON-BEN**: Trillium Benefit section with 4 fields (property tax, energy credit, rent, Northern Ontario energy).
+- Provincial sections automatically appear in the wizard timeline when Ontario is selected and disappear when province changes.
+- 31 new bilingual i18n keys (EN/FR) for Ontario forms. Total: 573/573 parity.
+
+### Changed
+- `getWizardSections()` now accepts optional `provincialSections` parameter and appends them after federal sections (individual/self-employed only).
+- `ReturnForm` derives `provincialSections` from `watchedValues.residencyProvince` via `getProvincialSections()`.
+
 ## [0.19.0] - 2026-03-05
 ### Added
 - **Subsection rendering**: Wizard sections now support nested subsections (`FormSubsection`) with their own titles, descriptions, and fields. Subsections render as bordered cards inside their parent section, filtered by `mode` and `profileFlag`.
@@ -390,6 +402,10 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-03-03
 ### Added
 - Initial Next.js fullstack foundation for Canada-focused tax filing.
+- OAuth-ready authentication architecture with secure session handling.
+- Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
+- Prisma data model for user profiles, tax returns, and audit events.
+- CI/CD baseline plan with lint, typecheck, test, build, and security scan steps.
 - OAuth-ready authentication architecture with secure session handling.
 - Guided bilingual (EN/FR) filing UX for individual, self-employed, and company paths.
 - Prisma data model for user profiles, tax returns, and audit events.
