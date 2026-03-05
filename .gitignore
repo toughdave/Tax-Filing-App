@@ -19,6 +19,9 @@ pnpm-debug.log*
 
 # tests
 coverage/
+test-results/
+playwright-report/
+.uploads/
 
 # misc
 .DS_Store

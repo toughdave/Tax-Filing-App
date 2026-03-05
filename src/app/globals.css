@@ -170,6 +170,83 @@ a {
   }
 }
 
+/* Dark mode */
+[data-theme="dark"] {
+  --bg-deep: #0a0f18;
+  --bg-mid: #111827;
+  --bg-soft: #1e293b;
+  --ink: #e2e8f0;
+  --ink-soft: #94a3b8;
+  --line: #334155;
+  --brand: #34d399;
+  --brand-2: #60a5fa;
+  --alert: #fb923c;
+  --surface: #1e293b;
+}
+
+[data-theme="dark"] html,
+[data-theme="dark"] body,
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  color: var(--ink);
+}
+
+[data-theme="dark"] .surface {
+  background: color-mix(in srgb, var(--surface) 95%, #0f172a 5%);
+  border-color: var(--line);
+  box-shadow: 0 20px 50px -38px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .pill {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: #334155;
+}
+
+[data-theme="dark"] .field input,
+[data-theme="dark"] .field select {
+  background: #0f172a;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .field input:focus,
+[data-theme="dark"] .field select:focus {
+  outline-color: rgba(96, 165, 250, 0.4);
+  border-color: #60a5fa;
+}
+
+[data-theme="dark"] .notice-success {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="dark"] .notice-error {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] table tr {
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] a {
+  color: inherit;
+}
+
 /* Mobile-responsive enhancements */
 @media (max-width: 640px) {
   .container {

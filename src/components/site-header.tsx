@@ -2,6 +2,7 @@ import Link from "next/link";
 import { type Locale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
 import { SignOutButton } from "@/components/sign-out-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface SiteHeaderProps {
   locale: Locale;
@@ -32,6 +33,7 @@ export async function SiteHeader({ locale }: SiteHeaderProps) {
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", flexWrap: "wrap" }}>
+            <ThemeToggle />
             <Link href={withLang("/", otherLocale)} className="btn btn-secondary" style={{ padding: "0.45rem 0.8rem" }}>
               {otherLocale.toUpperCase()}
             </Link>

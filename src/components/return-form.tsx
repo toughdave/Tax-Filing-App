@@ -8,6 +8,8 @@ import { formatCurrency } from "@/lib/format";
 import type { TaxSummary, CorporateTaxSummary, CalculationResult } from "@/lib/services/tax-calculation-engine";
 import type { CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import { FilingProgress } from "@/components/filing-progress";
+import { DocumentPanel } from "@/components/document-panel";
+import { TaxSlipImportStub, NoaImportStub } from "@/components/import-stubs";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -386,6 +388,10 @@ export function ReturnForm({
         ))}
       </div>
 
+      <DocumentPanel locale={locale} returnId={returnId} />
+      <TaxSlipImportStub locale={locale} />
+      <NoaImportStub locale={locale} />
+
       <section className="surface" style={{ padding: "1rem", display: "grid", gap: "0.8rem" }}>
         <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.03rem" }}>{t.filingChecklist}</h3>
         <div className="checklist">
@@ -421,6 +427,16 @@ export function ReturnForm({
         <button className="btn btn-primary" onClick={() => void prepareSubmission()} disabled={isPreparing || isSaving} type="button">
           {isPreparing ? t.filingSaving : t.filingPrepare}
         </button>
+        {returnId && (
+          <a
+            href={`/api/returns/${returnId}/pdf`}
+            className="btn btn-secondary"
+            download
+            style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+          >
+            {t.pdfDownload}
+          </a>
+        )}
       </div>
 
       {infoMessage ? <p className="notice-success">{infoMessage}</p> : null}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReturnForm } from "@/components/return-form";
+import { YoyComparison } from "@/components/yoy-comparison";
 import { SiteHeader } from "@/components/site-header";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
@@ -77,6 +78,9 @@ export default async function ReturnByIdPage({
           initialPayload={payload}
           initialTaxSummary={initialTaxSummary}
         />
+        <div style={{ marginTop: "1rem" }}>
+          <YoyComparison locale={locale} returnId={record.id} />
+        </div>
       </section>
     </main>
   );

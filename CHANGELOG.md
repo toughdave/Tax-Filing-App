@@ -1,6 +1,25 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.14.0] - 2026-03-05
+### Added
+- **Document management UI**: Inline document upload, list, and delete within the return form. Category selection (T4, T5, Receipt, Business Statement, NOA, Other), file size display, date formatting, and delete confirmation.
+- **PDF generation**: Downloadable tax return summary PDFs via `/api/returns/[returnId]/pdf`. Includes return info, taxpayer data, full tax summary with federal/provincial breakdown. "Download PDF Summary" button in return form.
+- **Year-over-year comparison**: `/api/returns/[returnId]/compare` endpoint and `YoyComparison` client component. Field-level diff table (added/removed/changed/unchanged), summary delta cards for key metrics (income, tax, balance owing), toggle to show/hide unchanged fields.
+- **Dark mode**: Full CSS variable-based dark theme via `[data-theme="dark"]` selector. Theme toggle button (☀️/🌙) in site header with localStorage persistence. Dark overrides for surfaces, buttons, form fields, notices, tables, and pills.
+- **E2E test framework**: Playwright setup with `playwright.config.ts`, smoke tests for public pages, auth-gated redirects, dark mode persistence, mobile responsiveness, and API auth guards. Scripts: `npm run e2e`, `npm run e2e:ui`, `npm run e2e:install`.
+- **Tax slip import stub**: "Import Tax Slips" section with drag-and-drop placeholder and "Coming soon" badge. Future CRA My Account / OCR integration point.
+- **NOA import stub**: "Notice of Assessment" section with disabled "Connect to CRA My Account" button and "Coming soon" badge.
+- 36 new bilingual i18n keys (EN/FR) for YoY comparison, PDF, dark mode, import stubs.
+
+### Changed
+- `tax-return-service.ts`: Added `getYearOverYearComparison()` service function with field-level diff and summary comparison.
+- Return form now includes DocumentPanel, TaxSlipImportStub, NoaImportStub, and PDF download button.
+- Return detail page includes YoyComparison component below the form.
+- `.gitignore`: Added Playwright artifacts (`test-results/`, `playwright-report/`) and `.uploads/`.
+- Plan file updated: Phase 7 marked COMPLETE (v0.13.0), Phase 8+9 IN PROGRESS.
+- 207 tests (19 files). Quality gates: typecheck ✓ lint ✓ tests ✓ build ✓.
+
 ## [0.13.0] - 2026-03-05
 ### Added
 - **Email infrastructure via Resend**: Transactional email system with three bilingual (EN/FR) templates:

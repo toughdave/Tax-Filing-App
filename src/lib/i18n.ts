@@ -374,7 +374,26 @@ const en: TextDictionary = {
   homeTrustAudit: "Complete audit trail for every action",
   homeTrustMfa: "Two-factor authentication available",
   homeTrustOpenSource: "Open-source and transparent",
-  homeTrustNoTracking: "No third-party tracking or ads"
+  homeTrustNoTracking: "No third-party tracking or ads",
+  documentsSaveFirst: "Save your return first to upload documents.",
+  yoyTitle: "Year-over-Year Comparison",
+  yoySubtitle: "See how your return changed from last year.",
+  yoyNoData: "No prior-year return found for comparison.",
+  yoyField: "Field",
+  yoyPrior: "Prior Year",
+  yoyCurrent: "Current Year",
+  yoyChange: "Change",
+  yoyUnchanged: "Unchanged",
+  pdfDownload: "Download PDF Summary",
+  pdfGenerating: "Generating PDF...",
+  darkModeToggle: "Toggle dark mode",
+  importSlipsTitle: "Import Tax Slips",
+  importSlipsDescription: "Auto-import T4, T5, and other slips from CRA My Account or by uploading scanned documents.",
+  importSlipsDropzone: "Drag & drop tax slips here, or click to browse (coming soon)",
+  importComingSoon: "Coming soon",
+  importNoaTitle: "Notice of Assessment",
+  importNoaDescription: "Import your prior-year Notice of Assessment to verify carry-forward amounts and RRSP contribution room.",
+  importNoaConnect: "Connect to CRA My Account"
 };
 
 const fr: TextDictionary = {
@@ -749,7 +768,26 @@ const fr: TextDictionary = {
   homeTrustAudit: "Piste d'audit complète pour chaque action",
   homeTrustMfa: "Authentification à deux facteurs disponible",
   homeTrustOpenSource: "Code source ouvert et transparent",
-  homeTrustNoTracking: "Aucun suivi tiers ni publicité"
+  homeTrustNoTracking: "Aucun suivi tiers ni publicité",
+  documentsSaveFirst: "Enregistrez votre déclaration d'abord pour téléverser des documents.",
+  yoyTitle: "Comparaison année par année",
+  yoySubtitle: "Voyez comment votre déclaration a changé par rapport à l'an dernier.",
+  yoyNoData: "Aucune déclaration de l'année précédente trouvée pour comparaison.",
+  yoyField: "Champ",
+  yoyPrior: "Année précédente",
+  yoyCurrent: "Année actuelle",
+  yoyChange: "Changement",
+  yoyUnchanged: "Inchangé",
+  pdfDownload: "Télécharger le résumé PDF",
+  pdfGenerating: "Génération du PDF...",
+  darkModeToggle: "Basculer le mode sombre",
+  importSlipsTitle: "Importer les feuillets fiscaux",
+  importSlipsDescription: "Importez automatiquement vos T4, T5 et autres feuillets depuis Mon dossier ARC ou en téléversant des documents numérisés.",
+  importSlipsDropzone: "Glissez-déposez vos feuillets ici, ou cliquez pour parcourir (bientôt disponible)",
+  importComingSoon: "Bientôt disponible",
+  importNoaTitle: "Avis de cotisation",
+  importNoaDescription: "Importez votre avis de cotisation de l'année précédente pour vérifier les montants reportés et les droits de cotisation REER.",
+  importNoaConnect: "Se connecter à Mon dossier ARC"
 };
 
 export const translations: Record<Locale, TextDictionary> = { en, fr };

@@ -91,6 +91,75 @@ export async function getReturnForUser(userId: string, returnId: string) {
   return record;
 }
 
+export interface YoyComparisonRow {
+  key: string;
+  priorValue: unknown;
+  currentValue: unknown;
+  change: "added" | "removed" | "changed" | "unchanged";
+}
+
+export interface YoyComparison {
+  currentYear: number;
+  priorYear: number;
+  filingMode: string;
+  rows: YoyComparisonRow[];
+  currentSummary: CalculationResult | null;
+  priorSummary: CalculationResult | null;
+}
+
+export async function getYearOverYearComparison(
+  userId: string,
+  returnId: string
+): Promise<YoyComparison | null> {
+  const current = await getReturnForUser(userId, returnId);
+  if (!current) return null;
+
+  const prior = await prisma.taxReturn.findFirst({
+    where: {
+      userId,
+      filingMode: current.filingMode,
+      taxYear: current.taxYear - 1
+    },
+    orderBy: { updatedAt: "desc" },
+    select: { data: true, taxSummary: true, taxYear: true }
+  });
+
+  const currentData = (current.data as Record<string, unknown>) ?? {};
+  let priorData: Record<string, unknown> = {};
+  if (prior?.data && typeof prior.data === "object" && !Array.isArray(prior.data)) {
+    priorData = decryptPiiFields(prior.data as Record<string, unknown>);
+  }
+
+  const allKeys = new Set([...Object.keys(currentData), ...Object.keys(priorData)]);
+  const rows: YoyComparisonRow[] = [];
+
+  for (const key of allKeys) {
+    const cv = currentData[key] ?? null;
+    const pv = priorData[key] ?? null;
+    const cvEmpty = cv === null || cv === "" || cv === undefined;
+    const pvEmpty = pv === null || pv === "" || pv === undefined;
+
+    if (cvEmpty && pvEmpty) continue;
+
+    let change: YoyComparisonRow["change"];
+    if (pvEmpty && !cvEmpty) change = "added";
+    else if (!pvEmpty && cvEmpty) change = "removed";
+    else if (String(cv) !== String(pv)) change = "changed";
+    else change = "unchanged";
+
+    rows.push({ key, priorValue: pv, currentValue: cv, change });
+  }
+
+  return {
+    currentYear: current.taxYear,
+    priorYear: current.taxYear - 1,
+    filingMode: current.filingMode,
+    rows,
+    currentSummary: (current.taxSummary as unknown as CalculationResult) ?? null,
+    priorSummary: prior ? ((prior.taxSummary as unknown as CalculationResult) ?? null) : null
+  };
+}
+
 export async function saveReturnForUser(userId: string, input: SaveReturnInput) {
   const sanitizedPayload = sanitizePayload(input.payload);
   const mode = input.filingMode;
