@@ -56,8 +56,20 @@ function allSectionFields(section: WizardSection): TaxField[] {
   return fields;
 }
 
-function isSectionComplete(section: WizardSection, values: Record<string, string>): boolean {
-  const required = allSectionFields(section).filter((f) => f.required);
+function visibleSectionFields(section: WizardSection, mode: FilingMode, flags: Record<string, boolean>): TaxField[] {
+  const fields = [...section.fields];
+  if (section.subsections) {
+    for (const sub of section.subsections) {
+      if (sub.mode && !sub.mode.includes(mode)) continue;
+      if (sub.profileFlag && !flags[sub.profileFlag]) continue;
+      fields.push(...sub.fields);
+    }
+  }
+  return fields;
+}
+
+function isSectionComplete(section: WizardSection, values: Record<string, string>, mode: FilingMode, flags: Record<string, boolean>): boolean {
+  const required = visibleSectionFields(section, mode, flags).filter((f) => f.required);
   if (required.length === 0) return true;
   return required.every((f) => {
     const v = values[f.key];
@@ -65,8 +77,8 @@ function isSectionComplete(section: WizardSection, values: Record<string, string
   });
 }
 
-function countMissingRequired(section: WizardSection, values: Record<string, string>): number {
-  return allSectionFields(section).filter((f) => f.required).filter((f) => {
+function countMissingRequired(section: WizardSection, values: Record<string, string>, mode: FilingMode, flags: Record<string, boolean>): number {
+  return visibleSectionFields(section, mode, flags).filter((f) => f.required).filter((f) => {
     const v = values[f.key];
     return !v || v.trim() === "";
   }).length;
@@ -147,7 +159,7 @@ export function ReturnForm({
     const raw = getValues();
     const payload: Record<string, string | number | boolean | null> = {};
     for (const section of activeSections) {
-      for (const field of allSectionFields(section)) {
+      for (const field of visibleSectionFields(section, filingMode, profileFlags)) {
         const value = raw[field.key];
         if (value === undefined || value === "") { payload[field.key] = null; continue; }
         if (field.type === "number") {
@@ -162,7 +174,7 @@ export function ReturnForm({
       payload[flag.key] = profileFlags[flag.key] ?? false;
     }
     return payload;
-  }, [activeSections, getValues, profileFlags]);
+  }, [activeSections, filingMode, getValues, profileFlags]);
 
   async function saveDraft(): Promise<SaveResponse | null> {
     setIsSaving(true);
@@ -270,14 +282,14 @@ export function ReturnForm({
   async function handleSectionContinue() {
     if (!currentSection) return;
 
-    const sectionFieldKeys = currentSection.fields.map((f) => f.key);
+    const sectionFieldKeys = visibleSectionFields(currentSection, filingMode, profileFlags).map((f) => f.key);
     const valid = await trigger(sectionFieldKeys);
     if (!valid) {
       setErrorMessage(t.wizardSectionIncomplete);
       return;
     }
 
-    const missing = countMissingRequired(currentSection, getValues());
+    const missing = countMissingRequired(currentSection, getValues(), filingMode, profileFlags);
     if (missing > 0) {
       setErrorMessage(`${t.wizardSectionIncomplete} (${missing} ${t.wizardMissingFields})`);
       return;
@@ -600,10 +612,10 @@ export function ReturnForm({
           <p className="timeline-desc">{t.wizardReviewDesc}</p>
           <div style={{ display: "grid", gap: "0.4rem" }}>
             {activeSections.map((section) => {
-              const fieldsFilled = isSectionComplete(section, watchedValues);
+              const fieldsFilled = isSectionComplete(section, watchedValues, filingMode, profileFlags);
               const wasSaved = completedSections.has(section.id);
               const complete = wasSaved && fieldsFilled;
-              const missingCount = countMissingRequired(section, watchedValues);
+              const missingCount = countMissingRequired(section, watchedValues, filingMode, profileFlags);
               return (
                 <div
                   key={section.id}
@@ -785,14 +797,14 @@ export function ReturnForm({
             (step.id === "setup" && wizardStep !== "setup") ||
             (step.id === "profile" && wizardStep !== "setup" && wizardStep !== "profile") ||
             (step.id === "documents" && (wizardStep === "section" || wizardStep === "review")) ||
-            (matchingSection ? isSectionComplete(matchingSection, watchedValues) && completedSections.has(step.id) : completedSections.has(step.id));
+            (matchingSection ? isSectionComplete(matchingSection, watchedValues, filingMode, profileFlags) && completedSections.has(step.id) : completedSections.has(step.id));
           const isActive =
             (step.id === "setup" && wizardStep === "setup") ||
             (step.id === "profile" && wizardStep === "profile") ||
             (step.id === "documents" && wizardStep === "documents") ||
             (step.id === "review" && wizardStep === "review") ||
             (wizardStep === "section" && currentSection?.id === step.id);
-          const missing = matchingSection ? countMissingRequired(matchingSection, watchedValues) : 0;
+          const missing = matchingSection ? countMissingRequired(matchingSection, watchedValues, filingMode, profileFlags) : 0;
 
           return (
             <div

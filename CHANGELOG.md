@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.22.4] - 2026-03-06
+### Fixed
+- **Subsection mode/profileFlag filtering in payload assembly** — `payloadFromValues()`, `countMissingRequired()`, `isSectionComplete()`, and section validation trigger now filter subsections by `mode` and `profileFlag`, matching the render logic. Previously, mode-gated subsection fields (e.g. `cppSelfEmployedContributions`) leaked into INDIVIDUAL payloads and were rejected by backend validation.
+- **COMPANY required fields** — `requiredFieldsForMode('COMPANY')` no longer includes personal identity fields (`legalName`, `sinLast4`, `birthDate`, `residencyProvince`) that the company wizard doesn't collect, allowing company returns to reach READY_TO_REVIEW status.
+
 ## [0.22.3] - 2026-03-06
 ### Changed
 - Version bump.

@@ -688,8 +688,13 @@ export function getWizardSections(mode: FilingMode, profileFlags: Record<string,
   return filtered;
 }
 
+const PERSONAL_ONLY_GROUPS = new Set(["identity", "residency"]);
+
 export function requiredFieldsForMode(mode: FilingMode): string[] {
-  const allGroups = [...baseFieldGroups, ...(modeSpecificFieldGroups[mode] ?? [])];
+  const base = mode === "COMPANY"
+    ? baseFieldGroups.filter((g) => !PERSONAL_ONLY_GROUPS.has(g.id))
+    : baseFieldGroups;
+  const allGroups = [...base, ...(modeSpecificFieldGroups[mode] ?? [])];
   return allGroups.flatMap((g) => g.fields).filter((f) => f.required).map((f) => f.key);
 }
 
