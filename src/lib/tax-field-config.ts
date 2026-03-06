@@ -188,6 +188,7 @@ export const baseFieldGroups: FieldGroup[] = [
     titleKey: "groupCredits",
     fields: [
       { key: "tuition", labelKey: "fieldTuition", helpKey: "fieldTuitionHelp", type: "number" },
+      { key: "educationCarryForward", labelKey: "fieldEducationCarryForward", helpKey: "fieldEducationCarryForwardHelp", type: "number" },
       { key: "medical", labelKey: "fieldMedical", helpKey: "fieldMedicalHelp", type: "number" },
       { key: "donations", labelKey: "fieldDonations", helpKey: "fieldDonationsHelp", type: "number" },
       { key: "ageAmount", labelKey: "fieldAgeAmount", helpKey: "fieldAgeAmountHelp", type: "number" },
@@ -196,10 +197,23 @@ export const baseFieldGroups: FieldGroup[] = [
       { key: "canadaCaregiverAmount", labelKey: "fieldCanadaCaregiverAmount", helpKey: "fieldCanadaCaregiverAmountHelp", type: "number" },
       { key: "disabilityAmount", labelKey: "fieldDisabilityAmount", helpKey: "fieldDisabilityAmountHelp", type: "number" },
       { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number" },
+      { key: "cppPensionableEarnings", labelKey: "fieldCppPensionableEarnings", helpKey: "fieldCppPensionableEarningsHelp", type: "number" },
+      { key: "cppEmployeeContributions", labelKey: "fieldCppEmployeeContributions", helpKey: "fieldCppEmployeeContributionsHelp", type: "number" },
       { key: "canadaEmploymentAmount", labelKey: "fieldCanadaEmploymentAmount", helpKey: "fieldCanadaEmploymentAmountHelp", type: "number" },
       { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number" },
       { key: "pensionIncomeAmount", labelKey: "fieldPensionIncomeAmount", helpKey: "fieldPensionIncomeAmountHelp", type: "number" },
       { key: "studentLoanInterest", labelKey: "fieldStudentLoanInterest", helpKey: "fieldStudentLoanInterestHelp", type: "number" }
+    ]
+  },
+  {
+    id: "provincial-credits",
+    titleKey: "groupProvincialCredits",
+    fields: [
+      { key: "onBasicPersonal", labelKey: "fieldOnBasicPersonal", helpKey: "fieldOnBasicPersonalHelp", type: "number" },
+      { key: "onSpouseAmount", labelKey: "fieldOnSpouseAmount", helpKey: "fieldOnSpouseAmountHelp", type: "number" },
+      { key: "onAgeAmount", labelKey: "fieldOnAgeAmount", helpKey: "fieldOnAgeAmountHelp", type: "number" },
+      { key: "onDonations", labelKey: "fieldOnDonations", helpKey: "fieldOnDonationsHelp", type: "number" },
+      { key: "onSurtax", labelKey: "fieldOnSurtax", helpKey: "fieldOnSurtaxHelp", type: "number" }
     ]
   },
   {
@@ -209,6 +223,10 @@ export const baseFieldGroups: FieldGroup[] = [
       { key: "canadaWorkersAmount", labelKey: "fieldCanadaWorkersAmount", helpKey: "fieldCanadaWorkersAmountHelp", type: "number" },
       { key: "canadaTrainingCredit", labelKey: "fieldCanadaTrainingCredit", helpKey: "fieldCanadaTrainingCreditHelp", type: "number" },
       { key: "refundableMedical", labelKey: "fieldRefundableMedical", helpKey: "fieldRefundableMedicalHelp", type: "number" },
+      { key: "onPropertyTax", labelKey: "fieldOnPropertyTax", helpKey: "fieldOnPropertyTaxHelp", type: "number" },
+      { key: "onEnergyCredit", labelKey: "fieldOnEnergyCredit", helpKey: "fieldOnEnergyCreditHelp", type: "number" },
+      { key: "onRent", labelKey: "fieldOnRent", helpKey: "fieldOnRentHelp", type: "number" },
+      { key: "onNorthernEnergy", labelKey: "fieldOnNorthernEnergy", helpKey: "fieldOnNorthernEnergyHelp", type: "number" },
       { key: "taxPaidByInstalments", labelKey: "fieldTaxPaidByInstalments", helpKey: "fieldTaxPaidByInstalmentsHelp", type: "number" },
       { key: "totalIncomeTaxDeducted", labelKey: "fieldTotalIncomeTaxDeducted", helpKey: "fieldTotalIncomeTaxDeductedHelp", type: "number" }
     ]
@@ -241,6 +259,12 @@ export const modeSpecificFieldGroups: Record<FilingMode, FieldGroup[]> = {
           key: "businessUseHome",
           labelKey: "fieldBusinessUseHome",
           helpKey: "fieldBusinessUseHomeHelp",
+          type: "number"
+        },
+        {
+          key: "cppSelfEmployedContributions",
+          labelKey: "fieldCppSelfEmployedContributions",
+          helpKey: "fieldCppSelfEmployedContributionsHelp",
           type: "number"
         }
       ]

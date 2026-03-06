@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.22.1] - 2026-03-06
+### Changed
+- Version bump.
+
 ## [0.22.0] - 2026-03-05
 ### Added
 - **CPP/EI individual calculation**: New `computeCppEi()` helper computes employee CPP credits, self-employed CPP deduction/credit split (half deductible, half as credit), and EI overpayment handling.
