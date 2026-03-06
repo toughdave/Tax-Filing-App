@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   baseFieldGroups,
   modeSpecificFieldGroups,
+  PROFILE_FLAGS,
   type FilingMode,
   type TaxField
 } from "@/lib/tax-field-config";
@@ -22,6 +23,9 @@ function buildSchemaForFields(fields: TaxField[]) {
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const field of fields) {
     shape[field.key] = zodTypeForField(field);
+  }
+  for (const flag of PROFILE_FLAGS) {
+    shape[flag.key] = z.boolean().nullable();
   }
   return z.object(shape).partial();
 }
@@ -49,5 +53,9 @@ export function allowedKeysForMode(mode: FilingMode): Set<string> {
     ...baseFieldGroups.flatMap((g) => g.fields),
     ...(modeSpecificFieldGroups[mode] ?? []).flatMap((g) => g.fields)
   ];
-  return new Set(fields.map((f) => f.key));
+  const keys = fields.map((f) => f.key);
+  for (const flag of PROFILE_FLAGS) {
+    keys.push(flag.key);
+  }
+  return new Set(keys);
 }

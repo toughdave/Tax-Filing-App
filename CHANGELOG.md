@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.22.3] - 2026-03-06
+### Changed
+- Version bump.
+
 ## [0.22.2] - 2026-03-06
 ### Security
 - **JWT session expiration** — Enforce `maxAge` of 7 days on JWT sessions.

@@ -1,6 +1,6 @@
 {
   "name": "canada-tax-filing-app",
-  "version": "0.22.2",
+  "version": "0.22.3",
   "private": true,
   "description": "Security-first CRA-oriented filing app for individual, self-employed, and company workflows.",
   "scripts": {
