@@ -6,6 +6,14 @@ import path from "path";
 
 const UPLOAD_DIR = process.env.DOCUMENT_STORAGE_PATH ?? path.join(process.cwd(), ".uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+function safeLocalPath(storageName: string): string {
+  const resolved = path.resolve(UPLOAD_DIR, storageName);
+  if (!resolved.startsWith(path.resolve(UPLOAD_DIR) + path.sep) && resolved !== path.resolve(UPLOAD_DIR)) {
+    throw new Error("PATH_TRAVERSAL_BLOCKED");
+  }
+  return resolved;
+}
 const ALLOWED_MIME_TYPES = [
   "application/pdf",
   "image/jpeg",
@@ -67,6 +75,8 @@ export async function uploadDocument(input: UploadInput): Promise<DocumentRecord
   const error = validateUpload(input.mimeType, input.data.length);
   if (error) throw new Error(error);
 
+  input.fileName = path.basename(input.fileName).replace(/[\x00-\x1f]/g, "_");
+
   if (input.returnId) {
     const owned = await verifyReturnOwnership(input.returnId, input.userId);
     if (!owned) throw new Error("RETURN_NOT_OWNED");
@@ -84,7 +94,7 @@ export async function uploadDocument(input: UploadInput): Promise<DocumentRecord
     storagePath = blob.url;
   } else {
     await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    const localPath = path.join(UPLOAD_DIR, storageName);
+    const localPath = safeLocalPath(storageName);
     await fs.writeFile(localPath, input.data);
     storagePath = storageName;
   }
@@ -142,7 +152,7 @@ export async function getDocumentForDownload(
   if (!doc) return null;
 
   const isBlob = doc.storagePath.startsWith("http");
-  const resolvedPath = isBlob ? doc.storagePath : path.join(UPLOAD_DIR, doc.storagePath);
+  const resolvedPath = isBlob ? doc.storagePath : safeLocalPath(doc.storagePath);
   return { storagePath: resolvedPath, fileName: doc.fileName, mimeType: doc.mimeType, isBlob };
 }
 
@@ -159,7 +169,7 @@ export async function deleteDocument(docId: string, userId: string): Promise<boo
       // Blob may already be deleted
     }
   } else {
-    const filePath = path.join(UPLOAD_DIR, doc.storagePath);
+    const filePath = safeLocalPath(doc.storagePath);
     try {
       await fs.unlink(filePath);
     } catch {

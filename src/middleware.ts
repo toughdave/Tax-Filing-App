@@ -38,7 +38,10 @@ export function middleware(request: NextRequest) {
 
   if (isProtectedRoute(pathname) && !hasSessionToken(request)) {
     const signInUrl = new URL("/sign-in", request.url);
-    signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname + request.nextUrl.search);
+    const callbackPath = request.nextUrl.pathname + request.nextUrl.search;
+    if (callbackPath.startsWith("/") && !callbackPath.startsWith("//")) {
+      signInUrl.searchParams.set("callbackUrl", callbackPath);
+    }
     if (locale === "fr") {
       signInUrl.searchParams.set("lang", "fr");
     }

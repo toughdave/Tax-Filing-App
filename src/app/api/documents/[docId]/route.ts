@@ -32,6 +32,14 @@ export async function GET(
   }
 
   if (doc.isBlob) {
+    try {
+      const blobUrl = new URL(doc.storagePath);
+      if (blobUrl.protocol !== "https:") {
+        return NextResponse.json({ message: "INVALID_STORAGE_URL" }, { status: 500 });
+      }
+    } catch {
+      return NextResponse.json({ message: "INVALID_STORAGE_URL" }, { status: 500 });
+    }
     return NextResponse.redirect(doc.storagePath);
   }
 
@@ -41,7 +49,7 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": doc.mimeType,
-        "Content-Disposition": `attachment; filename="${doc.fileName}"`,
+        "Content-Disposition": `attachment; filename="${doc.fileName.replace(/["\r\n]/g, "_")}"`,
         "Content-Length": String(fileBuffer.length)
       }
     });

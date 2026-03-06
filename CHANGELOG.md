@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.22.2] - 2026-03-06
+### Security
+- **JWT session expiration** — Enforce `maxAge` of 7 days on JWT sessions.
+- **Path traversal prevention** — Add `safeLocalPath()` guard to all document storage file operations; sanitize uploaded file names (strip path separators and null bytes).
+- **Open redirect protection** — Validate middleware callback URLs as relative paths only (reject `//`-prefixed).
+- **Blob redirect validation** — Verify `https:` protocol before redirecting to blob storage URLs.
+- **Content-Disposition sanitisation** — Escape `"`, `\r`, `\n` in file names used in download headers.
+- **XSS in email templates** — Apply HTML entity escaping to all user-provided values interpolated into email HTML (name, status, provider, returnId, confirmationNumber).
+- **Security headers** — Add `X-Download-Options: noopen` and `Cross-Origin-Opener-Policy: same-origin` to response headers.
+
+### Changed
+- **AGENTS.md** — Expanded Section 4 from 4 high-level rules to a full 35-point security checklist (10 subsections) for ongoing agent assessments and pre-release auditing.
+
 ## [0.22.1] - 2026-03-06
 ### Changed
 - Version bump.

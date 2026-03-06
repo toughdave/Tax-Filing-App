@@ -69,11 +69,11 @@ const filingConfirmationTemplates: Record<Locale, (vars: FilingConfirmationVars)
     subject: `Your ${vars.taxYear} tax return has been saved`,
     html: wrapHtml(`
       <h2>Draft saved successfully</h2>
-      <p>Hi${vars.name ? ` ${vars.name}` : ""},</p>
-      <p>Your <strong>${vars.taxYear} ${vars.filingMode.toLowerCase()}</strong> tax return has been saved as a draft.</p>
+      <p>Hi${vars.name ? ` ${esc(vars.name)}` : ""},</p>
+      <p>Your <strong>${vars.taxYear} ${esc(vars.filingMode.toLowerCase())}</strong> tax return has been saved as a draft.</p>
       <table role="presentation" style="margin:16px 0;border-collapse:collapse">
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Status</td><td style="padding:4px 0">${vars.status}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Return ID</td><td style="padding:4px 0;font-family:monospace;font-size:13px">${vars.returnId}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Status</td><td style="padding:4px 0">${esc(vars.status)}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Return ID</td><td style="padding:4px 0;font-family:monospace;font-size:13px">${esc(vars.returnId)}</td></tr>
       </table>
       ${vars.missingFields > 0 ? `<p style="color:#d97706"><strong>${vars.missingFields}</strong> required field(s) still need values before you can submit.</p>` : '<p style="color:#059669">All required fields are complete — your return is ready for review.</p>'}
       <p style="margin-top:24px"><a href="${vars.appUrl}/returns/${vars.returnId}" style="display:inline-block;padding:10px 20px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:500">Continue your return</a></p>
@@ -86,11 +86,11 @@ const filingConfirmationTemplates: Record<Locale, (vars: FilingConfirmationVars)
     subject: `Votre déclaration ${vars.taxYear} a été enregistrée`,
     html: wrapHtml(`
       <h2>Brouillon enregistré avec succès</h2>
-      <p>Bonjour${vars.name ? ` ${vars.name}` : ""},</p>
+      <p>Bonjour${vars.name ? ` ${esc(vars.name)}` : ""},</p>
       <p>Votre déclaration <strong>${vars.taxYear} ${vars.filingMode === "INDIVIDUAL" ? "particulier" : vars.filingMode === "SELF_EMPLOYED" ? "travailleur autonome" : "entreprise"}</strong> a été enregistrée comme brouillon.</p>
       <table role="presentation" style="margin:16px 0;border-collapse:collapse">
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Statut</td><td style="padding:4px 0">${vars.status}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">ID de déclaration</td><td style="padding:4px 0;font-family:monospace;font-size:13px">${vars.returnId}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Statut</td><td style="padding:4px 0">${esc(vars.status)}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">ID de déclaration</td><td style="padding:4px 0;font-family:monospace;font-size:13px">${esc(vars.returnId)}</td></tr>
       </table>
       ${vars.missingFields > 0 ? `<p style="color:#d97706"><strong>${vars.missingFields}</strong> champ(s) requis doivent encore être remplis avant la soumission.</p>` : '<p style="color:#059669">Tous les champs requis sont remplis — votre déclaration est prête pour révision.</p>'}
       <p style="margin-top:24px"><a href="${vars.appUrl}/returns/${vars.returnId}?lang=fr" style="display:inline-block;padding:10px 20px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:500">Continuer votre déclaration</a></p>
@@ -126,11 +126,11 @@ const submissionConfirmationTemplates: Record<Locale, (vars: SubmissionConfirmat
     subject: `Your ${vars.taxYear} tax return has been submitted`,
     html: wrapHtml(`
       <h2>Submission confirmed</h2>
-      <p>Hi${vars.name ? ` ${vars.name}` : ""},</p>
-      <p>Your <strong>${vars.taxYear}</strong> tax return has been submitted to the CRA via <strong>${vars.provider}</strong>.</p>
+      <p>Hi${vars.name ? ` ${esc(vars.name)}` : ""},</p>
+      <p>Your <strong>${vars.taxYear}</strong> tax return has been submitted to the CRA via <strong>${esc(vars.provider)}</strong>.</p>
       <table role="presentation" style="margin:16px 0;border-collapse:collapse">
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Confirmation</td><td style="padding:4px 0;font-family:monospace">${vars.confirmationNumber ?? "Pending"}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Status</td><td style="padding:4px 0">${vars.status}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Confirmation</td><td style="padding:4px 0;font-family:monospace">${esc(vars.confirmationNumber ?? "Pending")}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Status</td><td style="padding:4px 0">${esc(vars.status)}</td></tr>
       </table>
       <p>You can check your return status anytime from your dashboard.</p>
       <p style="margin-top:24px"><a href="${vars.appUrl}/dashboard" style="display:inline-block;padding:10px 20px;background:#059669;color:#fff;border-radius:6px;text-decoration:none;font-weight:500">View dashboard</a></p>
@@ -143,11 +143,11 @@ const submissionConfirmationTemplates: Record<Locale, (vars: SubmissionConfirmat
     subject: `Votre déclaration ${vars.taxYear} a été soumise`,
     html: wrapHtml(`
       <h2>Soumission confirmée</h2>
-      <p>Bonjour${vars.name ? ` ${vars.name}` : ""},</p>
-      <p>Votre déclaration <strong>${vars.taxYear}</strong> a été soumise à l'ARC via <strong>${vars.provider}</strong>.</p>
+      <p>Bonjour${vars.name ? ` ${esc(vars.name)}` : ""},</p>
+      <p>Votre déclaration <strong>${vars.taxYear}</strong> a été soumise à l'ARC via <strong>${esc(vars.provider)}</strong>.</p>
       <table role="presentation" style="margin:16px 0;border-collapse:collapse">
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Confirmation</td><td style="padding:4px 0;font-family:monospace">${vars.confirmationNumber ?? "En attente"}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Statut</td><td style="padding:4px 0">${vars.status}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Confirmation</td><td style="padding:4px 0;font-family:monospace">${esc(vars.confirmationNumber ?? "En attente")}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Statut</td><td style="padding:4px 0">${esc(vars.status)}</td></tr>
       </table>
       <p>Vous pouvez vérifier l'état de votre déclaration à tout moment depuis votre tableau de bord.</p>
       <p style="margin-top:24px"><a href="${vars.appUrl}/dashboard?lang=fr" style="display:inline-block;padding:10px 20px;background:#059669;color:#fff;border-radius:6px;text-decoration:none;font-weight:500">Voir le tableau de bord</a></p>
@@ -182,7 +182,7 @@ const welcomeTemplates: Record<Locale, (vars: WelcomeVars) => EmailPayload> = {
     subject: vars.isNewUser ? "Welcome to Canada Tax Filing" : "New sign-in to Canada Tax Filing",
     html: wrapHtml(vars.isNewUser ? `
       <h2>Welcome to Canada Tax Filing</h2>
-      <p>Hi${vars.name ? ` ${vars.name}` : ""},</p>
+      <p>Hi${vars.name ? ` ${esc(vars.name)}` : ""},</p>
       <p>Your account has been created successfully. You can now start your first tax return.</p>
       <ul style="color:#475569;line-height:1.8">
         <li>Guided, plain-language filing for individuals and self-employed</li>
@@ -194,11 +194,11 @@ const welcomeTemplates: Record<Locale, (vars: WelcomeVars) => EmailPayload> = {
       <p style="margin-top:24px;font-size:13px;color:#94a3b8">This is an automated message from Canada Tax Filing.</p>
     ` : `
       <h2>New sign-in detected</h2>
-      <p>Hi${vars.name ? ` ${vars.name}` : ""},</p>
+      <p>Hi${vars.name ? ` ${esc(vars.name)}` : ""},</p>
       <p>A new sign-in to your Canada Tax Filing account was detected.</p>
       <table role="presentation" style="margin:16px 0;border-collapse:collapse">
         <tr><td style="padding:4px 12px 4px 0;color:#64748b">Time</td><td style="padding:4px 0">${new Date().toISOString()}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Provider</td><td style="padding:4px 0">${vars.provider ?? "Unknown"}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Provider</td><td style="padding:4px 0">${esc(vars.provider ?? "Unknown")}</td></tr>
       </table>
       <p>If this was not you, please <a href="${vars.appUrl}/account" style="color:#1d4ed8">review your account security settings</a> immediately.</p>
       <p style="margin-top:24px;font-size:13px;color:#94a3b8">This is an automated message from Canada Tax Filing.</p>
@@ -212,7 +212,7 @@ const welcomeTemplates: Record<Locale, (vars: WelcomeVars) => EmailPayload> = {
     subject: vars.isNewUser ? "Bienvenue à Déclaration fiscale Canada" : "Nouvelle connexion à Déclaration fiscale Canada",
     html: wrapHtml(vars.isNewUser ? `
       <h2>Bienvenue à Déclaration fiscale Canada</h2>
-      <p>Bonjour${vars.name ? ` ${vars.name}` : ""},</p>
+      <p>Bonjour${vars.name ? ` ${esc(vars.name)}` : ""},</p>
       <p>Votre compte a été créé avec succès. Vous pouvez maintenant commencer votre première déclaration.</p>
       <ul style="color:#475569;line-height:1.8">
         <li>Déclaration guidée en langage clair pour particuliers et travailleurs autonomes</li>
@@ -224,11 +224,11 @@ const welcomeTemplates: Record<Locale, (vars: WelcomeVars) => EmailPayload> = {
       <p style="margin-top:24px;font-size:13px;color:#94a3b8">Ceci est un message automatisé de Déclaration fiscale Canada.</p>
     ` : `
       <h2>Nouvelle connexion détectée</h2>
-      <p>Bonjour${vars.name ? ` ${vars.name}` : ""},</p>
+      <p>Bonjour${vars.name ? ` ${esc(vars.name)}` : ""},</p>
       <p>Une nouvelle connexion à votre compte Déclaration fiscale Canada a été détectée.</p>
       <table role="presentation" style="margin:16px 0;border-collapse:collapse">
         <tr><td style="padding:4px 12px 4px 0;color:#64748b">Heure</td><td style="padding:4px 0">${new Date().toISOString()}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Fournisseur</td><td style="padding:4px 0">${vars.provider ?? "Inconnu"}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#64748b">Fournisseur</td><td style="padding:4px 0">${esc(vars.provider ?? "Inconnu")}</td></tr>
       </table>
       <p>Si ce n'était pas vous, veuillez <a href="${vars.appUrl}/account?lang=fr" style="color:#1d4ed8">vérifier vos paramètres de sécurité</a> immédiatement.</p>
       <p style="margin-top:24px;font-size:13px;color:#94a3b8">Ceci est un message automatisé de Déclaration fiscale Canada.</p>
@@ -255,6 +255,15 @@ export async function sendWelcomeOrSignInNotification(vars: WelcomeVars, locale:
 // ---------------------------------------------------------------------------
 // Shared HTML wrapper
 // ---------------------------------------------------------------------------
+
+function esc(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 function wrapHtml(body: string): string {
   return `<!DOCTYPE html>
