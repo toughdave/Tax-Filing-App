@@ -173,10 +173,11 @@ function computePersonalTax(
       }
     }
   }
-  const basicPersonalCredit = round2(bpa * 0.15);
+  const lowestRate = params.federalBrackets[0]?.rate ?? 0.15;
+  const basicPersonalCredit = round2(bpa * lowestRate);
 
   const totalCreditAmounts = Object.values(creditItems).reduce((a, b) => a + b, 0);
-  const nonRefundableCredits = round2(basicPersonalCredit + totalCreditAmounts * 0.15);
+  const nonRefundableCredits = round2(basicPersonalCredit + totalCreditAmounts * lowestRate);
 
   let netFederalTax = Math.max(round2(federalTax - nonRefundableCredits), 0);
   
@@ -223,7 +224,8 @@ interface CppEiResult {
   cppEmployeeCredit: number;
   cppSelfEmployedDeduction: number;
   cppSelfEmployedCredit: number;
-  eiCredit: number;
+  eiPremiumCredit: number;
+  eiOverpaymentCredit: number;
 }
 
 function computeCppEi(
@@ -245,34 +247,25 @@ function computeCppEi(
     cppSelfEmployedCredit = round2(cppSelfEmployedContributions / 2);
   }
 
-  // EI premiums: T4 box 18, full amount is a credit
-  // Max EI = insurable earnings * employee rate (1.66% for 2024)
-  const eiMaxPremium = round2(params.eiMaxInsurableEarnings * 0.0166);
-  const eiPaid = Math.min(num(payload.eiPremiums ?? payload.eiBenefits ?? 0), eiMaxPremium);
-  // For individuals, the EI credit is based on premiums paid (from T4), not benefits received
-  const eiCredit = num(payload.cppEiOverpayment) > 0 ? num(payload.cppEiOverpayment) : 0;
+  // EI premiums paid (T4 box 18): full amount is a non-refundable credit.
+  // Employee rate: 1.66% for 2024, 1.64% for 2025+
+  const eiRate = params.taxYear >= 2025 ? 0.0164 : 0.0166;
+  const eiMaxPremium = round2(params.eiMaxInsurableEarnings * eiRate);
+  const eiPremiumCredit = Math.min(num(payload.eiPremiums), eiMaxPremium);
 
-  return { cppEmployeeCredit, cppSelfEmployedDeduction, cppSelfEmployedCredit, eiCredit };
+  // CPP/EI overpayment (line 44800) — separate from base EI premiums
+  const eiOverpaymentCredit = Math.max(num(payload.cppEiOverpayment), 0);
+
+  return { cppEmployeeCredit, cppSelfEmployedDeduction, cppSelfEmployedCredit, eiPremiumCredit, eiOverpaymentCredit };
 }
 
 export function calculateIndividualTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
   const params = resolveParams(taxYear);
 
+  // Capital gains: 1/2 inclusion rate for all amounts, all years.
+  // The proposed 2/3 increase was cancelled by PM Carney on Mar 21, 2025.
   const capitalGainsRaw = Math.max(num(payload.capitalGains), 0);
-  
-  // 2024+ Capital Gains Inclusion Rate rules (effective June 25, 2024, but simplified for full year in this app):
-  // Individuals: 1/2 on first $250,000; 2/3 on amounts over $250,000.
-  // For pre-2024, it's 1/2 on everything. We apply this rule for 2024+ years.
-  let taxableCapitalGains = 0;
-  if (params.taxYear >= 2024) {
-    if (capitalGainsRaw <= 250000) {
-      taxableCapitalGains = round2(capitalGainsRaw * 0.5);
-    } else {
-      taxableCapitalGains = round2(250000 * 0.5 + (capitalGainsRaw - 250000) * (2 / 3));
-    }
-  } else {
-    taxableCapitalGains = round2(capitalGainsRaw * 0.5);
-  }
+  const taxableCapitalGains = round2(capitalGainsRaw * 0.5);
 
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
@@ -308,8 +301,9 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
     eligibleDependantAmount: num(payload.eligibleDependantAmount),
     canadaCaregiverAmount: num(payload.canadaCaregiverAmount),
     disabilityAmount: num(payload.disabilityAmount),
-    cppEiOverpayment: num(payload.cppEiOverpayment),
+    cppEiOverpayment: cppEi.eiOverpaymentCredit,
     cppEmployeeCredit: cppEi.cppEmployeeCredit,
+    eiPremiumCredit: cppEi.eiPremiumCredit,
     canadaEmploymentAmount: num(payload.canadaEmploymentAmount),
     homeBuyersAmount: num(payload.homeBuyersAmount),
     pensionIncomeAmount: num(payload.pensionIncomeAmount),
@@ -340,18 +334,9 @@ export function calculateIndividualTax(payload: Record<string, unknown>, taxYear
 export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYear?: number): TaxSummary {
   const params = resolveParams(taxYear);
 
+  // Capital gains: 1/2 inclusion rate for all amounts, all years.
   const capitalGainsRaw = Math.max(num(payload.capitalGains), 0);
-  
-  let taxableCapitalGains = 0;
-  if (params.taxYear >= 2024) {
-    if (capitalGainsRaw <= 250000) {
-      taxableCapitalGains = round2(capitalGainsRaw * 0.5);
-    } else {
-      taxableCapitalGains = round2(250000 * 0.5 + (capitalGainsRaw - 250000) * (2 / 3));
-    }
-  } else {
-    taxableCapitalGains = round2(capitalGainsRaw * 0.5);
-  }
+  const taxableCapitalGains = round2(capitalGainsRaw * 0.5);
 
   const incomeItems: Record<string, number> = {
     employmentIncome: num(payload.employmentIncome),
@@ -395,8 +380,9 @@ export function calculateSelfEmployedTax(payload: Record<string, unknown>, taxYe
     eligibleDependantAmount: num(payload.eligibleDependantAmount),
     canadaCaregiverAmount: num(payload.canadaCaregiverAmount),
     disabilityAmount: num(payload.disabilityAmount),
-    cppEiOverpayment: num(payload.cppEiOverpayment),
+    cppEiOverpayment: cppEi.eiOverpaymentCredit,
     cppEmployeeCredit: cppEi.cppEmployeeCredit,
+    eiPremiumCredit: cppEi.eiPremiumCredit,
     cppSelfEmployedCredit: cppEi.cppSelfEmployedCredit,
     canadaEmploymentAmount: num(payload.canadaEmploymentAmount),
     homeBuyersAmount: num(payload.homeBuyersAmount),
@@ -466,14 +452,9 @@ export function calculateCompanyTax(payload: Record<string, unknown>, taxYear?: 
   const capitalCostAllowance = num(payload.capitalCostAllowance);
   const retainedEarnings = num(payload.retainedEarnings);
   
+  // Capital gains: 1/2 inclusion rate for all amounts, all years.
   const capitalGainsRaw = Math.max(num(payload.capitalGains), 0);
-  let taxableCapitalGains = 0;
-  if (params.taxYear >= 2024) {
-    // Corporations pay 2/3 on all capital gains in 2024+
-    taxableCapitalGains = round2(capitalGainsRaw * (2 / 3));
-  } else {
-    taxableCapitalGains = round2(capitalGainsRaw * 0.5);
-  }
+  const taxableCapitalGains = round2(capitalGainsRaw * 0.5);
 
   const deductionItems: Record<string, number> = {
     corporatePayroll: num(payload.corporatePayroll),
@@ -482,7 +463,9 @@ export function calculateCompanyTax(payload: Record<string, unknown>, taxYear?: 
   };
 
   const totalDeductions = Object.values(deductionItems).reduce((a, b) => a + b, 0);
-  const taxableIncome = Math.max(corporateRevenue - totalDeductions, 0);
+  // Corporate income includes revenue + taxable capital gains
+  const grossIncome = corporateRevenue + taxableCapitalGains;
+  const taxableIncome = Math.max(grossIncome - totalDeductions, 0);
 
   const smallBusinessPortion = Math.min(taxableIncome, params.smallBusinessLimit);
   const generalPortion = Math.max(taxableIncome - params.smallBusinessLimit, 0);

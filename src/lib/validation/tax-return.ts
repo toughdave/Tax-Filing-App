@@ -22,8 +22,8 @@ export const saveReturnSchema = z
       .number()
       .int()
       .min(2010)
-      .refine((y) => y <= new Date().getFullYear(), {
-        message: "Tax year cannot be in the future"
+      .refine((y) => y < new Date().getFullYear(), {
+        message: "Tax year must be a completed calendar year"
       }),
     filingMode: filingModeSchema,
     payload: primitivePayload

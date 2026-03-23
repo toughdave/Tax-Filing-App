@@ -386,14 +386,20 @@ html[data-theme="dark"] body {
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.2s ease;
+  transition: max-height 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease, padding 0.24s ease;
   padding: 0 0.9rem;
+  will-change: max-height, opacity;
 }
 
 .timeline-body-open {
   max-height: 3000px;
   opacity: 1;
   padding: 0.6rem 0.9rem 1rem;
+}
+
+.timeline-panel-enter {
+  animation: timelinePanelEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: top center;
 }
 
 .timeline-desc {
@@ -449,6 +455,270 @@ html[data-theme="dark"] body {
 
 /* Legacy horizontal stepper kept for backwards compat */
 .wizard-stepper { display: none; }
+
+/* Live refund banner */
+.refund-banner {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  transition: background 0.3s, border-color 0.3s;
+  overflow: hidden;
+}
+
+.refund-banner-neutral {
+  background: rgba(244, 247, 251, 0.85);
+  border-color: var(--line);
+}
+
+.refund-banner-positive {
+  background: rgba(232, 248, 239, 0.88);
+  border-color: rgba(31, 107, 87, 0.3);
+}
+
+.refund-banner-negative {
+  background: rgba(252, 239, 233, 0.88);
+  border-color: rgba(202, 90, 47, 0.3);
+}
+
+.refund-banner-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.refund-banner-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.refund-banner-neutral .refund-banner-icon {
+  background: rgba(56, 81, 106, 0.1);
+  color: var(--ink-soft);
+}
+
+.refund-banner-positive .refund-banner-icon {
+  background: rgba(31, 107, 87, 0.12);
+  color: var(--brand);
+}
+
+.refund-banner-negative .refund-banner-icon {
+  background: rgba(202, 90, 47, 0.12);
+  color: var(--alert);
+}
+
+.refund-banner-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.refund-banner-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.refund-banner-amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: var(--font-title);
+  line-height: 1.1;
+  transition: color 0.3s;
+}
+
+.refund-banner-positive .refund-banner-amount { color: var(--brand); }
+.refund-banner-negative .refund-banner-amount { color: var(--alert); }
+
+.refund-banner-delta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  animation: deltaFade 3s ease forwards;
+}
+
+.refund-banner-delta-good {
+  color: var(--brand);
+  background: rgba(31, 107, 87, 0.1);
+}
+
+.refund-banner-delta-bad {
+  color: var(--alert);
+  background: rgba(202, 90, 47, 0.1);
+}
+
+@keyframes deltaFade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.refund-banner-rate {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.refund-banner-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  color: var(--ink-soft);
+}
+
+.refund-banner-chevron-open {
+  transform: rotate(180deg);
+}
+
+.refund-banner-body {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.refund-banner-body-open {
+  max-height: 300px;
+  opacity: 1;
+}
+
+.refund-banner-breakdown {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0 1rem 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 0.5rem;
+}
+
+.refund-banner-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.refund-banner-row-total {
+  font-weight: 700;
+  color: var(--ink);
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 0.15rem;
+}
+
+/* Dark mode refund banner */
+[data-theme="dark"] .refund-banner-neutral {
+  background: rgba(30, 41, 59, 0.88);
+}
+
+[data-theme="dark"] .refund-banner-positive {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+[data-theme="dark"] .refund-banner-negative {
+  background: rgba(251, 146, 60, 0.08);
+  border-color: rgba(251, 146, 60, 0.25);
+}
+
+[data-theme="dark"] .refund-banner-rate {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .refund-banner-breakdown {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .refund-banner-row-total {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Chart containers */
+.chart-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.chart-card h4 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .chart-card {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes timelinePanelEnter {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Hover card effect */
+.hover-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Button micro-animation */
+.btn {
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refund-banner-delta { animation: none; opacity: 1; }
+  .animate-fade-in { animation: none; }
+  .refund-banner-chevron { transition: none; }
+  .hover-card { transition: none; }
+  .hover-card:hover { transform: none; }
+  .btn { transition: none; }
+  .btn:active { transform: none; }
+}
 
 /* Mobile-responsive enhancements */
 @media (max-width: 640px) {

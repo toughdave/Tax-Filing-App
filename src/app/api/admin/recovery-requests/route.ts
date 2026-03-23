@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/admin-guard";
 import { guardApiRoute } from "@/lib/api-guard";
 import { listRecoveryRequests } from "@/lib/services/recovery-service";
-import { maskEmail, maskName, maskIp } from "@/lib/pii-mask";
+import { maskEmail, maskName } from "@/lib/pii-mask";
 
 export async function GET(request: Request) {
   const blocked = guardApiRoute(request);

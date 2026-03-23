@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { LucideIcon } from "@/components/lucide-icon";
 import { filingModes } from "@/lib/tax-field-config";
 import { resolveLocale, textFor, withLang } from "@/lib/i18n";
 import { getAuthSession } from "@/lib/session";
@@ -51,13 +52,13 @@ export default async function HomePage({
       <section className="container" style={{ marginTop: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.6rem" }}>
           {[
-            { icon: "🍁", text: t.homeStatsProvinces },
-            { icon: "📅", text: t.homeStatsTaxYears },
-            { icon: "📋", text: t.homeStatsFields },
-            { icon: "🔐", text: t.homeStatsEncryption }
+            { icon: "map-pin", text: t.homeStatsProvinces },
+            { icon: "calendar", text: t.homeStatsTaxYears },
+            { icon: "clipboard-list", text: t.homeStatsFields },
+            { icon: "shield", text: t.homeStatsEncryption }
           ].map((stat) => (
-            <div key={stat.text} className="surface" style={{ padding: "0.9rem", textAlign: "center", display: "grid", gap: "0.25rem" }}>
-              <span style={{ fontSize: "1.3rem" }}>{stat.icon}</span>
+            <div key={stat.text} className="surface hover-card" style={{ padding: "0.9rem", textAlign: "center", display: "grid", gap: "0.25rem" }}>
+              <span style={{ display: "flex", justifyContent: "center", color: "var(--brand)" }}><LucideIcon name={stat.icon} size={22} /></span>
               <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--ink)" }}>{stat.text}</span>
             </div>
           ))}
@@ -108,19 +109,19 @@ export default async function HomePage({
       {/* Feature highlights */}
       <section className="container" style={{ marginTop: "1rem" }}>
         <div className="grid-cards">
-          <article className="surface" style={{ padding: "1.2rem" }}>
+          <article className="surface hover-card" style={{ padding: "1.2rem" }}>
             <h3 style={{ marginTop: 0, fontSize: "1.02rem" }}>{t.homeFeatureGuidedTitle}</h3>
             <p className="muted" style={{ marginBottom: 0, fontSize: "0.9rem", lineHeight: 1.5 }}>
               {t.homeFeatureGuidedBody}
             </p>
           </article>
-          <article className="surface" style={{ padding: "1.2rem" }}>
+          <article className="surface hover-card" style={{ padding: "1.2rem" }}>
             <h3 style={{ marginTop: 0, fontSize: "1.02rem" }}>{t.homeFeatureCarryTitle}</h3>
             <p className="muted" style={{ marginBottom: 0, fontSize: "0.9rem", lineHeight: 1.5 }}>
               {t.homeFeatureCarryBody}
             </p>
           </article>
-          <article className="surface" style={{ padding: "1.2rem" }}>
+          <article className="surface hover-card" style={{ padding: "1.2rem" }}>
             <h3 style={{ marginTop: 0, fontSize: "1.02rem" }}>{t.homeFeatureSecureTitle}</h3>
             <p className="muted" style={{ marginBottom: 0, fontSize: "0.9rem", lineHeight: 1.5 }}>
               {t.homeFeatureSecureBody}

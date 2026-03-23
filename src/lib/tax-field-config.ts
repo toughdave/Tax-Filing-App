@@ -83,6 +83,12 @@ export const MARITAL_STATUSES: SelectOption[] = [
   { value: "widowed", labelKey: "maritalWidowed" }
 ];
 
+/**
+ * Fileable tax years — only completed calendar years are valid for T1 filing.
+ * CRA rule: you file for a year after it ends (e.g. file 2025 in early 2026).
+ * 2026 bracket params are kept in tax-year-config for future readiness but
+ * are NOT listed here until 2026 is a completed year.
+ */
 export const TAX_YEARS: SelectOption[] = [
   { value: "2025", labelKey: "year2025" },
   { value: "2024", labelKey: "year2024" },
@@ -199,6 +205,7 @@ export const baseFieldGroups: FieldGroup[] = [
       { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number" },
       { key: "cppPensionableEarnings", labelKey: "fieldCppPensionableEarnings", helpKey: "fieldCppPensionableEarningsHelp", type: "number" },
       { key: "cppEmployeeContributions", labelKey: "fieldCppEmployeeContributions", helpKey: "fieldCppEmployeeContributionsHelp", type: "number" },
+      { key: "eiPremiums", labelKey: "fieldEiPremiumsPaid", helpKey: "fieldEiPremiumsPaidHelp", type: "number" },
       { key: "canadaEmploymentAmount", labelKey: "fieldCanadaEmploymentAmount", helpKey: "fieldCanadaEmploymentAmountHelp", type: "number" },
       { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number" },
       { key: "pensionIncomeAmount", labelKey: "fieldPensionIncomeAmount", helpKey: "fieldPensionIncomeAmountHelp", type: "number" },
@@ -512,6 +519,7 @@ export const individualWizardSections: WizardSection[] = [
         fields: [
           { key: "cppPensionableEarnings", labelKey: "fieldCppPensionableEarnings", helpKey: "fieldCppPensionableEarningsHelp", type: "number", craLine: "30800", friendlyLabelKey: "friendlyCppPensionableEarnings" },
           { key: "cppEmployeeContributions", labelKey: "fieldCppEmployeeContributions", helpKey: "fieldCppEmployeeContributionsHelp", type: "number", craLine: "30800", friendlyLabelKey: "friendlyCppEmployeeContributions" },
+          { key: "eiPremiums", labelKey: "fieldEiPremiumsPaid", helpKey: "fieldEiPremiumsPaidHelp", type: "number", craLine: "31200", friendlyLabelKey: "friendlyEiPremiumsPaid" },
           { key: "cppSelfEmployedContributions", labelKey: "fieldCppSelfEmployedContributions", helpKey: "fieldCppSelfEmployedContributionsHelp", type: "number", craLine: "31000", friendlyLabelKey: "friendlyCppSelfEmployed" }
         ],
         mode: ["SELF_EMPLOYED"]
@@ -587,6 +595,7 @@ export const individualWizardSections: WizardSection[] = [
     craFormRef: "T1-Step5B",
     fields: [
       { key: "canadaEmploymentAmount", labelKey: "fieldCanadaEmploymentAmount", helpKey: "fieldCanadaEmploymentAmountHelp", type: "number", craLine: "31260", friendlyLabelKey: "friendlyCanadaEmployment" },
+      { key: "eiPremiums", labelKey: "fieldEiPremiumsPaid", helpKey: "fieldEiPremiumsPaidHelp", type: "number", craLine: "31200", friendlyLabelKey: "friendlyEiPremiumsPaid" },
       { key: "cppEiOverpayment", labelKey: "fieldCppEiOverpayment", helpKey: "fieldCppEiOverpaymentHelp", type: "number", craLine: "44800", friendlyLabelKey: "friendlyCppEiOverpayment", promptType: "yesno" },
       { key: "homeBuyersAmount", labelKey: "fieldHomeBuyersAmount", helpKey: "fieldHomeBuyersAmountHelp", type: "number", craLine: "31270", friendlyLabelKey: "friendlyHomeBuyers", promptType: "yesno" },
       { key: "canadaWorkersAmount", labelKey: "fieldCanadaWorkersAmount", helpKey: "fieldCanadaWorkersAmountHelp", type: "number", craLine: "45300", friendlyLabelKey: "friendlyCanadaWorkers", promptType: "yesno" }

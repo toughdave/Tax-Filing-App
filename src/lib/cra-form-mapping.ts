@@ -114,13 +114,24 @@ const formConfig2025: TaxYearFormConfig = {
   }
 };
 
+const formConfig2026: TaxYearFormConfig = {
+  taxYear: 2026,
+  forms: formConfig2025.forms,
+  mappings: {
+    INDIVIDUAL: formConfig2025.mappings.INDIVIDUAL,
+    SELF_EMPLOYED: formConfig2025.mappings.SELF_EMPLOYED,
+    COMPANY: formConfig2025.mappings.COMPANY
+  }
+};
+
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
 
 const formConfigsByYear: Record<number, TaxYearFormConfig> = {
   2024: formConfig2024,
-  2025: formConfig2025
+  2025: formConfig2025,
+  2026: formConfig2026
 };
 
 export function getFormConfig(taxYear: number): TaxYearFormConfig | null {

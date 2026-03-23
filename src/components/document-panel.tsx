@@ -132,6 +132,7 @@ export function DocumentPanel({ locale, returnId }: DocumentPanelProps) {
       <section className="surface" style={{ padding: "1rem", display: "grid", gap: "0.6rem" }}>
         <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{t.documentsTitle}</h3>
         <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t.documentsDescription}</p>
+        <p className="muted" style={{ margin: 0, fontSize: "0.88rem" }}>{t.documentsManualOnly}</p>
         <p className="muted" style={{ margin: 0, fontSize: "0.85rem", fontStyle: "italic" }}>
           {t.documentsSaveFirst ?? "Save your return first to upload documents."}
         </p>
@@ -143,6 +144,7 @@ export function DocumentPanel({ locale, returnId }: DocumentPanelProps) {
     <section className="surface" style={{ padding: "1rem", display: "grid", gap: "0.8rem" }}>
       <h3 style={{ margin: 0, fontFamily: "var(--font-title)", fontSize: "1.05rem" }}>{t.documentsTitle}</h3>
       <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t.documentsDescription}</p>
+      <p className="muted" style={{ margin: 0, fontSize: "0.88rem" }}>{t.documentsManualOnly}</p>
 
       {/* Upload controls */}
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>

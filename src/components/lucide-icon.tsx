@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  User, Home, Briefcase, TrendingUp, Building, Award, FileText,
+  User, Home, Briefcase, TrendingUp, TrendingDown, Building, Award, FileText,
   ClipboardList, GraduationCap, Heart, Sparkles, CreditCard,
   Landmark, DollarSign, Users, Calculator, Settings, Target,
   Paperclip, CheckSquare, ChevronDown, ChevronRight, Check,
-  AlertCircle, Circle, Leaf, type LucideProps
+  AlertCircle, Circle, Leaf, MapPin, Calendar, Shield, type LucideProps
 } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<LucideProps>> = {
@@ -34,7 +34,11 @@ const iconMap: Record<string, React.ComponentType<LucideProps>> = {
   check: Check,
   "alert-circle": AlertCircle,
   circle: Circle,
-  leaf: Leaf
+  leaf: Leaf,
+  "trending-down": TrendingDown,
+  "map-pin": MapPin,
+  calendar: Calendar,
+  shield: Shield
 };
 
 interface LucideIconProps extends LucideProps {

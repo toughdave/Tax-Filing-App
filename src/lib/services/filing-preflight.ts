@@ -27,6 +27,7 @@ export function runPreflightChecks(
   hasDocuments: boolean
 ): PreflightResult {
   const checks: PreflightCheck[] = [];
+  const isCompany = filingMode === "COMPANY";
 
   // 1. Tax year supported
   const yearParams = getTaxYearParams(taxYear);
@@ -56,20 +57,24 @@ export function runPreflightChecks(
   });
 
   // 4. Identity fields present
-  const hasIdentity = Boolean(payload.legalName && payload.sinLast4 && payload.birthDate);
+  const hasIdentity = isCompany
+    ? Boolean(payload.corporationName && payload.businessNumber && payload.fiscalYearEnd)
+    : Boolean(payload.legalName && payload.sinLast4 && payload.birthDate);
   checks.push({
     id: "identity_complete",
-    label: "Taxpayer identification complete",
+    label: isCompany ? "Corporation identification complete" : "Taxpayer identification complete",
     passed: hasIdentity
   });
 
   // 5. Province of residence
-  const hasProvince = Boolean(payload.residencyProvince);
-  checks.push({
-    id: "province_present",
-    label: "Province of residence specified",
-    passed: hasProvince
-  });
+  if (!isCompany) {
+    const hasProvince = Boolean(payload.residencyProvince);
+    checks.push({
+      id: "province_present",
+      label: "Province of residence specified",
+      passed: hasProvince
+    });
+  }
 
   // 6. Income reported (at least one source > 0)
   const incomeKeys = [

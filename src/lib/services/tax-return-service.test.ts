@@ -154,7 +154,8 @@ describe("missingRequiredFields", () => {
 // Integration-style tests for saveReturnForUser (mocked Prisma)
 // ---------------------------------------------------------------------------
 
-const { mockPrisma } = vi.hoisted(() => ({
+const { mockPrisma, mockPrepare } = vi.hoisted(() => ({
+  mockPrepare: vi.fn(),
   mockPrisma: {
     taxReturn: {
       findMany: vi.fn(),
@@ -163,7 +164,13 @@ const { mockPrisma } = vi.hoisted(() => ({
       update: vi.fn()
     },
     document: {
-      count: vi.fn().mockResolvedValue(0)
+      count: vi.fn().mockResolvedValue(0),
+      findMany: vi.fn().mockResolvedValue([])
+    },
+    taxProfile: {
+      findFirst: vi.fn().mockResolvedValue(null),
+      update: vi.fn().mockResolvedValue({ id: "profile-1" }),
+      create: vi.fn().mockResolvedValue({ id: "profile-1" })
     }
   }
 }));
@@ -175,11 +182,7 @@ vi.mock("@/lib/db", () => ({
 vi.mock("@/lib/submission-providers", () => ({
   getSubmissionProvider: () => ({
     name: "test-provider",
-    prepare: vi.fn().mockResolvedValue({
-      status: "SUBMISSION_PENDING",
-      externalReference: "TEST-REF-001",
-      message: "Test submission queued."
-    })
+    prepare: mockPrepare
   })
 }));
 
@@ -192,6 +195,15 @@ describe("saveReturnForUser", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockPrepare.mockResolvedValue({
+      status: "SUBMISSION_PENDING",
+      externalReference: "TEST-REF-001",
+      message: "Test submission queued."
+    });
+    mockPrisma.document.findMany.mockResolvedValue([]);
+    mockPrisma.taxProfile.findFirst.mockResolvedValue(null);
+    mockPrisma.taxProfile.create.mockResolvedValue({ id: "profile-1" });
+    mockPrisma.taxProfile.update.mockResolvedValue({ id: "profile-1" });
     const mod = await import("./tax-return-service");
     saveReturnForUser = mod.saveReturnForUser;
   });
@@ -256,7 +268,7 @@ describe("saveReturnForUser", () => {
       }
     });
     mockPrisma.taxReturn.upsert.mockImplementation(
-      async (args: { create: { data: unknown } }) => ({
+      async () => ({
         id: "ret-3",
         taxYear: 2024,
         filingMode: "INDIVIDUAL",
@@ -297,7 +309,7 @@ describe("saveReturnForUser", () => {
       data: { legalName: "Alice", residencyProvince: "ON", birthDate: "1990-01-01" }
     });
     mockPrisma.taxReturn.upsert.mockImplementation(
-      async (args: { create: { data: unknown } }) => ({
+      async () => ({
         id: "ret-diff",
         taxYear: 2024,
         filingMode: "INDIVIDUAL",
@@ -341,7 +353,7 @@ describe("saveReturnForUser", () => {
       data: { legalName: "Old Name", residencyProvince: "ON" }
     });
     mockPrisma.taxReturn.upsert.mockImplementation(
-      async (args: { create: { data: unknown } }) => ({
+      async () => ({
         id: "ret-4",
         taxYear: 2024,
         filingMode: "INDIVIDUAL",
@@ -361,6 +373,39 @@ describe("saveReturnForUser", () => {
     expect(typeof upsertCall.create.data.legalName).toBe("string");
     expect(upsertCall.create.data.legalName.startsWith("enc:")).toBe(true);
   });
+
+  it("syncs stable personal fields into TaxProfile when saving", async () => {
+    mockPrisma.taxReturn.findFirst.mockResolvedValue(null);
+    mockPrisma.taxReturn.upsert.mockResolvedValue({
+      id: "ret-profile",
+      taxYear: 2024,
+      filingMode: "INDIVIDUAL",
+      status: "READY_TO_REVIEW",
+      updatedAt: new Date()
+    });
+
+    await saveReturnForUser("user-1", {
+      taxYear: 2024,
+      filingMode: "INDIVIDUAL",
+      payload: {
+        legalName: "Alice Example",
+        sinLast4: "1234",
+        birthDate: "1990-01-01",
+        residencyProvince: "ON",
+        maritalStatus: "single",
+        dependants: 2
+      }
+    });
+
+    expect(mockPrisma.taxProfile.create).toHaveBeenCalledTimes(1);
+    const createCall = mockPrisma.taxProfile.create.mock.calls[0][0];
+    expect(createCall.data.userId).toBe("user-1");
+    expect(createCall.data.residencyProvince).toBe("ON");
+    expect(createCall.data.maritalStatus).toBe("single");
+    expect(createCall.data.dependants).toBe(2);
+    expect(typeof createCall.data.sinLast4).toBe("string");
+    expect(createCall.data.sinLast4.startsWith("enc:")).toBe(true);
+  });
 });
 
 describe("prepareSubmissionForUser", () => {
@@ -368,6 +413,12 @@ describe("prepareSubmissionForUser", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockPrepare.mockResolvedValue({
+      status: "SUBMISSION_PENDING",
+      externalReference: "TEST-REF-001",
+      message: "Test submission queued."
+    });
+    mockPrisma.document.findMany.mockResolvedValue([]);
     const mod = await import("./tax-return-service");
     prepareSubmissionForUser = mod.prepareSubmissionForUser;
   });
@@ -412,10 +463,20 @@ describe("prepareSubmissionForUser", () => {
       updatedAt: new Date()
     });
 
+    mockPrisma.document.findMany.mockResolvedValue([
+      { id: "doc-1", category: "T4_SLIP", storagePath: "/docs/doc-1.pdf" }
+    ]);
+
     const result = await prepareSubmissionForUser("user-1", "ret-6");
 
     expect(result.status).toBe("SUBMISSION_PENDING");
     expect(result.externalSubmissionRef).toBe("TEST-REF-001");
     expect(result.provider).toBe("test-provider");
+    expect(mockPrepare).toHaveBeenCalledTimes(1);
+    const prepareCall = mockPrepare.mock.calls[0][0];
+    expect(prepareCall.documents).toEqual([
+      { id: "doc-1", category: "T4_SLIP", storagePath: "/docs/doc-1.pdf" }
+    ]);
+    expect(prepareCall.taxYear).toBe(2024);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   filingModes, parseFilingMode, getWizardSections,
@@ -10,12 +10,17 @@ import {
 } from "@/lib/tax-field-config";
 import { textFor, type Locale } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/format";
-import type { TaxSummary, CorporateTaxSummary, CalculationResult } from "@/lib/services/tax-calculation-engine";
+import { calculateTax, type TaxSummary, type CorporateTaxSummary, type CalculationResult } from "@/lib/services/tax-calculation-engine";
 import type { CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import { DocumentPanel } from "@/components/document-panel";
 import { TaxSlipImportStub, NoaImportStub } from "@/components/import-stubs";
 import { LucideIcon } from "@/components/lucide-icon";
 import { getProvincialSections } from "@/lib/provincial-forms";
+import { LiveRefundBanner } from "@/components/live-refund-banner";
+import { IncomeDonut, DeductionsBar, FedProvDonut } from "@/components/tax-charts";
+import { TaxBracketViz } from "@/components/tax-bracket-viz";
+import { IncomeWaterfall } from "@/components/income-waterfall";
+import { getTaxYearParams } from "@/lib/tax-year-config";
 
 interface ReturnFormProps {
   locale: Locale;
@@ -44,16 +49,6 @@ function formDefaultsFromPayload(payload: Record<string, unknown> | undefined): 
     if (typeof value === "number" || typeof value === "boolean") { defaults[key] = String(value); }
   }
   return defaults;
-}
-
-function allSectionFields(section: WizardSection): TaxField[] {
-  const fields = [...section.fields];
-  if (section.subsections) {
-    for (const sub of section.subsections) {
-      fields.push(...sub.fields);
-    }
-  }
-  return fields;
 }
 
 function visibleSectionFields(section: WizardSection, mode: FilingMode, flags: Record<string, boolean>): TaxField[] {
@@ -108,6 +103,7 @@ export function ReturnForm({
 
   const [wizardStep, setWizardStep] = useState<WizardStep>(initialReturnId ? "section" : "setup");
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [visitedSections, setVisitedSections] = useState<Set<string>>(new Set());
   const [profileFlags, setProfileFlags] = useState<Record<string, boolean>>(() => {
     if (!initialPayload) return {};
     const flags: Record<string, boolean> = {};
@@ -176,6 +172,50 @@ export function ReturnForm({
     return payload;
   }, [activeSections, filingMode, getValues, profileFlags]);
 
+  useEffect(() => {
+    if (!initialReturnId || activeSections.length === 0) {
+      return;
+    }
+
+    setCompletedSections((prev) => {
+      if (prev.size > 0) {
+        return prev;
+      }
+
+      return new Set(
+        activeSections
+          .filter((section) => isSectionComplete(section, formDefaults, filingMode, profileFlags))
+          .map((section) => section.id)
+      );
+    });
+  }, [activeSections, filingMode, formDefaults, initialReturnId, profileFlags]);
+
+  useEffect(() => {
+    if (wizardStep !== "section" || !currentSection) {
+      return;
+    }
+
+    setVisitedSections((prev) => {
+      if (prev.has(currentSection.id)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(currentSection.id);
+      return next;
+    });
+  }, [currentSection, wizardStep]);
+
+  const liveEstimate = useMemo<CalculationResult | null>(() => {
+    if (wizardStep === "setup") return null;
+    try {
+      const payload = payloadFromValues();
+      return calculateTax(filingMode, payload, Number(taxYear));
+    } catch {
+      return null;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedValues, filingMode, taxYear, wizardStep, payloadFromValues]);
+
   async function saveDraft(): Promise<SaveResponse | null> {
     setIsSaving(true);
     setInfoMessage(null);
@@ -186,7 +226,10 @@ export function ReturnForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taxYear, filingMode, payload: payloadFromValues() })
       });
-      if (!response.ok) throw new Error("SAVE_FAILED");
+      if (!response.ok) {
+        const error = (await response.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(error?.message ?? "SAVE_FAILED");
+      }
       const data = (await response.json()) as SaveResponse;
       setReturnId(data.record.id);
       setCarryForwardYear(data.carryForwardFromYear);
@@ -198,8 +241,13 @@ export function ReturnForm({
         setInfoMessage(t.filingSaved);
       }
       return data;
-    } catch {
-      setErrorMessage(t.filingSaveError);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (message === "CSRF_VALIDATION_FAILED") setErrorMessage(t.filingSaveBlocked ?? t.filingSaveError);
+      else if (message === "UNAUTHORIZED") setErrorMessage(t.filingSessionExpired ?? t.filingSaveError);
+      else if (message === "INVALID_PAYLOAD") setErrorMessage(t.filingPayloadInvalid ?? t.filingSaveError);
+      else if (message === "RATE_LIMIT_EXCEEDED") setErrorMessage(t.filingSaveRateLimited ?? t.filingSaveError);
+      else setErrorMessage(t.filingSaveError);
       return null;
     } finally {
       setIsSaving(false);
@@ -250,6 +298,7 @@ export function ReturnForm({
     setInfoMessage(null);
     setErrorMessage(null);
     setProfileFlags({});
+    setVisitedSections(new Set());
     setCompletedSections(new Set());
     setActiveSectionIndex(0);
   }
@@ -790,7 +839,11 @@ export function ReturnForm({
     ];
 
     return (
-      <div className="timeline surface" style={{ padding: "1rem 1rem 0.5rem" }}>
+      <div style={{ display: "grid", gap: "0" }}>
+        {wizardStep !== "setup" && (
+          <LiveRefundBanner locale={locale} estimate={liveEstimate} />
+        )}
+        <div className="timeline surface" style={{ padding: "1rem 1rem 0.5rem" }}>
         {allSteps.map((step) => {
           const matchingSection = activeSections.find((s) => s.id === step.id);
           const isCompleted =
@@ -805,6 +858,7 @@ export function ReturnForm({
             (step.id === "review" && wizardStep === "review") ||
             (wizardStep === "section" && currentSection?.id === step.id);
           const missing = matchingSection ? countMissingRequired(matchingSection, watchedValues, filingMode, profileFlags) : 0;
+          const showMissing = !!matchingSection && missing > 0 && (visitedSections.has(step.id) || wizardStep === "review");
 
           return (
             <div
@@ -838,7 +892,7 @@ export function ReturnForm({
                     {t.wizardStepComplete}
                   </span>
                 )}
-                {!isCompleted && missing > 0 && (
+                {!isCompleted && showMissing && (
                   <span className="timeline-header-status timeline-header-status-missing">
                     {missing} {t.wizardMissingFields}
                   </span>
@@ -850,37 +904,138 @@ export function ReturnForm({
                 />
               </button>
               <div className={`timeline-body ${isActive ? "timeline-body-open" : ""}`}>
-                {isActive && renderStepContent(step.id)}
+                {isActive && (
+                  <div key={step.id} className="timeline-panel-enter">
+                    {renderStepContent(step.id)}
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+      </div>
     );
   }
 
   function renderIndividualSummary(s: TaxSummary) {
+    const params = getTaxYearParams(Number(taxYear));
+    const isRefund = s.balanceOwing < 0;
+    const effectiveRate = s.totalIncome > 0 ? ((s.totalTax / s.totalIncome) * 100).toFixed(1) : "0.0";
+
     return (
-      <div style={{ display: "grid", gap: "0.4rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>{t.taxSummaryTotalIncome}</span><strong>{formatCurrency(s.totalIncome, locale)}</strong>
+      <div style={{ display: "grid", gap: "1rem" }}>
+        {/* Hero metrics */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          alignItems: "center",
+          gap: "1rem",
+          padding: "1rem 1.2rem",
+          borderRadius: "12px",
+          background: isRefund ? "rgba(31, 107, 87, 0.06)" : s.balanceOwing > 0 ? "rgba(202, 90, 47, 0.06)" : "transparent",
+          border: `1px solid ${isRefund ? "rgba(31, 107, 87, 0.2)" : s.balanceOwing > 0 ? "rgba(202, 90, 47, 0.2)" : "var(--line)"}`
+        }}>
+          <div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)" }}>
+              {isRefund ? t.liveBannerEstimatedRefund : t.liveBannerBalanceOwing}
+            </div>
+            <div style={{
+              fontSize: "1.8rem",
+              fontWeight: 700,
+              fontFamily: "var(--font-title)",
+              color: isRefund ? "var(--brand)" : s.balanceOwing > 0 ? "var(--alert)" : "var(--ink)"
+            }}>
+              {isRefund ? "+" : s.balanceOwing > 0 ? "−" : ""}{formatCurrency(Math.abs(s.balanceOwing), locale)}
+            </div>
+          </div>
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "0.15rem",
+            padding: "0.5rem 0.8rem",
+            borderRadius: "10px",
+            background: "rgba(0, 0, 0, 0.03)",
+            border: "1px solid var(--line)"
+          }}>
+            <span style={{ fontSize: "1.3rem", fontWeight: 700, fontFamily: "var(--font-title)" }}>{effectiveRate}%</span>
+            <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+              {t.liveBannerEffectiveRate}
+            </span>
+          </div>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>{t.taxSummaryTotalDeductions}</span><strong>{formatCurrency(s.totalDeductions, locale)}</strong>
+
+        {/* Charts grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "0.75rem" }}>
+          <IncomeDonut summary={s} locale={locale} />
+          {s.provincial && (
+            <FedProvDonut federalTax={s.netFederalTax} provincialTax={s.provincial.netProvincialTax} locale={locale} />
+          )}
+          <DeductionsBar summary={s} locale={locale} />
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>{t.taxSummaryNetIncome}</span><strong>{formatCurrency(s.netIncome, locale)}</strong>
-        </div>
-        <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "0.3rem 0" }} />
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>{t.taxSummaryFederalTax}</span><span>{formatCurrency(s.federalTax, locale)}</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>{t.taxSummaryPersonalCredit}</span><span>−{formatCurrency(s.basicPersonalCredit, locale)}</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: "1.05rem" }}>
-          <span>{t.taxSummaryNetFederalTax}</span><span>{formatCurrency(s.netFederalTax, locale)}</span>
-        </div>
+
+        {/* Bracket visualizer */}
+        {params && s.taxableIncome > 0 && (
+          <TaxBracketViz brackets={params.federalBrackets} taxableIncome={s.taxableIncome} locale={locale} />
+        )}
+
+        {/* Waterfall */}
+        <IncomeWaterfall summary={s} locale={locale} />
+
+        {/* Collapsible detailed breakdown */}
+        <details style={{ cursor: "pointer" }}>
+          <summary style={{ fontWeight: 600, fontSize: "0.92rem", padding: "0.5rem 0", color: "var(--ink-soft)" }}>
+            {t.dashboardDetailedBreakdown}
+          </summary>
+          <div style={{ display: "grid", gap: "0.4rem", padding: "0.5rem 0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>{t.taxSummaryTotalIncome}</span><strong>{formatCurrency(s.totalIncome, locale)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>{t.taxSummaryTotalDeductions}</span><strong>{formatCurrency(s.totalDeductions, locale)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>{t.taxSummaryNetIncome}</span><strong>{formatCurrency(s.netIncome, locale)}</strong>
+            </div>
+            <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "0.3rem 0" }} />
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>{t.taxSummaryFederalTax}</span><span>{formatCurrency(s.federalTax, locale)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>{t.taxSummaryPersonalCredit}</span><span>−{formatCurrency(s.basicPersonalCredit, locale)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+              <span>{t.taxSummaryNetFederalTax}</span><span>{formatCurrency(s.netFederalTax, locale)}</span>
+            </div>
+            {s.provincial && (
+              <>
+                <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "0.3rem 0" }} />
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>{t.taxSummaryProvincialTax}</span><span>{formatCurrency(s.provincial.provincialTax, locale)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>{t.taxSummaryProvincialBasicCredit}</span><span>−{formatCurrency(s.provincial.provincialBasicPersonalCredit, locale)}</span>
+                </div>
+                {s.provincial.provincialSurtax > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>{t.taxSummaryProvincialSurtax}</span><span>{formatCurrency(s.provincial.provincialSurtax, locale)}</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+                  <span>{t.taxSummaryNetProvincialTax}</span><span>{formatCurrency(s.provincial.netProvincialTax, locale)}</span>
+                </div>
+              </>
+            )}
+            <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "0.3rem 0" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: "1.05rem" }}>
+              <span>{t.taxSummaryBalanceOwing}</span>
+              <span style={{ color: s.balanceOwing < 0 ? "var(--brand)" : s.balanceOwing > 0 ? "var(--alert)" : undefined }}>
+                {s.balanceOwing < 0 ? "+" : ""}{formatCurrency(Math.abs(s.balanceOwing), locale)}
+              </span>
+            </div>
+          </div>
+        </details>
       </div>
     );
   }

@@ -106,6 +106,7 @@ export function computeCarryForwardDiff(
   currentPayload: Record<string, unknown>,
   _mode: FilingMode
 ): CarryForwardDiffEntry[] {
+  void _mode;
   const diff: CarryForwardDiffEntry[] = [];
   const prior = priorYearData ?? {};
 

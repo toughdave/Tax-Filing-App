@@ -20,6 +20,13 @@ describe("cra-form-mapping", () => {
     expect(getFormConfig(2010)).toBeNull();
   });
 
+  it("returns config for 2026 once the tax year is supported", () => {
+    const config = getFormConfig(2026);
+    expect(config).not.toBeNull();
+    expect(config!.taxYear).toBe(2026);
+    expect(config!.forms.T1).toBeDefined();
+  });
+
   it("returns INDIVIDUAL mappings with correct CRA line numbers", () => {
     const mappings = getFormMappings(2024, "INDIVIDUAL");
     expect(mappings.length).toBeGreaterThan(0);
@@ -50,7 +57,9 @@ describe("cra-form-mapping", () => {
 
   it("getSupportedTaxYears returns descending order", () => {
     const years = getSupportedTaxYears();
-    expect(years.length).toBeGreaterThanOrEqual(2);
+    expect(years.length).toBeGreaterThanOrEqual(3);
+    expect(years).toContain(2026);
+    expect(years[0]).toBe(2026);
     expect(years[0]).toBeGreaterThan(years[years.length - 1]);
   });
 
@@ -58,6 +67,12 @@ describe("cra-form-mapping", () => {
     const line = getFormLineForField(2024, "INDIVIDUAL", "rrsp");
     expect(line).not.toBeNull();
     expect(line!.lineNumber).toBe("20800");
+  });
+
+  it("getFormLineForField resolves 2026 mappings", () => {
+    const line = getFormLineForField(2026, "SELF_EMPLOYED", "businessIncome");
+    expect(line).not.toBeNull();
+    expect(line!.formId).toBe("T2125");
   });
 
   it("getFormLineForField returns null for unknown field", () => {

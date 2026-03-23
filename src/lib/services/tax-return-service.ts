@@ -6,7 +6,7 @@ import { calculateTax, type CalculationResult } from "@/lib/services/tax-calcula
 import { runPreflightChecks } from "@/lib/services/filing-preflight";
 import { buildCarryForwardData, computeCarryForwardDiff, type CarryForwardDiffEntry } from "@/lib/carry-forward-config";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
-import { encryptPiiFields, decryptPiiFields } from "@/lib/pii-crypto";
+import { encryptPiiFields, decryptPiiFields, encryptPiiValue, decryptPiiValue } from "@/lib/pii-crypto";
 
 export function sanitizePayload(payload: Record<string, unknown>) {
   const sanitized: Record<string, string | number | boolean | null> = {};
@@ -29,6 +29,144 @@ export function sanitizePayload(payload: Record<string, unknown>) {
   }
 
   return sanitized;
+}
+
+function asProfileMetadata(metadata: unknown): Record<string, unknown> {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return {};
+  }
+
+  return { ...(metadata as Record<string, unknown>) };
+}
+
+function asNonEmptyString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function asBirthDate(value: unknown): Date | null {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function asDependants(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+    return Math.trunc(value);
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return Math.trunc(parsed);
+    }
+  }
+
+  return null;
+}
+
+export async function getTaxProfilePrefillForUser(userId: string): Promise<Record<string, string | number>> {
+  const profile = await prisma.taxProfile.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    select: {
+      legalFirstName: true,
+      legalLastName: true,
+      dateOfBirth: true,
+      sinLast4: true,
+      residencyProvince: true,
+      maritalStatus: true,
+      dependants: true,
+      metadata: true
+    }
+  });
+
+  if (!profile) {
+    return {};
+  }
+
+  const metadata = asProfileMetadata(profile.metadata);
+  const fallbackName = [profile.legalFirstName, profile.legalLastName].filter(Boolean).join(" ").trim();
+  const encryptedLegalName = typeof metadata.legalName === "string" ? metadata.legalName : null;
+  const legalName = encryptedLegalName
+    ? decryptPiiValue(encryptedLegalName)
+    : (fallbackName.length > 0 ? fallbackName : null);
+  const payload: Record<string, string | number> = {};
+
+  if (legalName) {
+    payload.legalName = legalName;
+  }
+  if (profile.sinLast4) {
+    payload.sinLast4 = decryptPiiValue(profile.sinLast4);
+  }
+  if (profile.dateOfBirth) {
+    payload.birthDate = profile.dateOfBirth.toISOString().slice(0, 10);
+  }
+  if (profile.residencyProvince) {
+    payload.residencyProvince = profile.residencyProvince;
+  }
+  if (profile.maritalStatus) {
+    payload.maritalStatus = profile.maritalStatus;
+  }
+  if (typeof profile.dependants === "number" && profile.dependants > 0) {
+    payload.dependants = profile.dependants;
+  }
+
+  return payload;
+}
+
+async function syncTaxProfileFromPayload(userId: string, payload: Record<string, unknown>) {
+  const legalName = asNonEmptyString(payload.legalName);
+  const sinLast4 = typeof payload.sinLast4 === "string" && /^\d{4}$/.test(payload.sinLast4.trim())
+    ? payload.sinLast4.trim()
+    : null;
+  const birthDate = asBirthDate(payload.birthDate);
+  const residencyProvince = asNonEmptyString(payload.residencyProvince);
+  const maritalStatus = asNonEmptyString(payload.maritalStatus);
+  const dependants = asDependants(payload.dependants);
+
+  if (!legalName && !sinLast4 && !birthDate && !residencyProvince && !maritalStatus && dependants === null) {
+    return;
+  }
+
+  const existing = await prisma.taxProfile.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, metadata: true }
+  });
+
+  const metadata = asProfileMetadata(existing?.metadata);
+  if (legalName) {
+    metadata.legalName = encryptPiiValue(legalName);
+  }
+
+  const data = {
+    ...(birthDate ? { dateOfBirth: birthDate } : {}),
+    ...(sinLast4 ? { sinLast4: encryptPiiValue(sinLast4) } : {}),
+    ...(residencyProvince ? { residencyProvince } : {}),
+    ...(maritalStatus ? { maritalStatus } : {}),
+    ...(dependants !== null ? { dependants } : {}),
+    metadata: metadata as InputJsonValue
+  };
+
+  if (existing) {
+    await prisma.taxProfile.update({ where: { id: existing.id }, data });
+    return;
+  }
+
+  await prisma.taxProfile.create({
+    data: {
+      userId,
+      ...data
+    }
+  });
 }
 
 export function missingRequiredFields(mode: FilingMode, payload: Record<string, unknown>) {
@@ -130,6 +268,9 @@ export async function getYearOverYearComparison(
     priorData = decryptPiiFields(prior.data as Record<string, unknown>);
   }
 
+  const currentSummary = calculateTax(current.filingMode, currentData, current.taxYear);
+  const priorSummary = prior ? calculateTax(current.filingMode, priorData, prior.taxYear) : null;
+
   const allKeys = new Set([...Object.keys(currentData), ...Object.keys(priorData)]);
   const rows: YoyComparisonRow[] = [];
 
@@ -155,8 +296,8 @@ export async function getYearOverYearComparison(
     priorYear: current.taxYear - 1,
     filingMode: current.filingMode,
     rows,
-    currentSummary: (current.taxSummary as unknown as CalculationResult) ?? null,
-    priorSummary: prior ? ((prior.taxSummary as unknown as CalculationResult) ?? null) : null
+    currentSummary,
+    priorSummary
   };
 }
 
@@ -185,7 +326,7 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
   const missing = missingRequiredFields(mode, mergedData);
   const nextStatus = missing.length === 0 ? "READY_TO_REVIEW" : "DRAFT";
 
-  const taxSummary: CalculationResult = calculateTax(mode, mergedData);
+  const taxSummary: CalculationResult = calculateTax(mode, mergedData, input.taxYear);
 
   const encryptedData = encryptPiiFields(mergedData);
 
@@ -220,6 +361,8 @@ export async function saveReturnForUser(userId: string, input: SaveReturnInput) 
       updatedAt: true
     }
   });
+
+  await syncTaxProfileFromPayload(userId, mergedData);
 
   const carryForwardDiff: CarryForwardDiffEntry[] = carryForwardSource
     ? computeCarryForwardDiff(priorData, mergedData, mode)
@@ -258,21 +401,26 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
     throw new Error(`RETURN_INCOMPLETE:${fields}`);
   }
 
-  const docCount = await prisma.document.count({
-    where: { returnId: taxReturn.id, userId }
+  const documents = await prisma.document.findMany({
+    where: { returnId: taxReturn.id, userId },
+    select: {
+      id: true,
+      category: true,
+      storagePath: true
+    }
   });
   const preflight = runPreflightChecks(
     taxReturn.taxYear,
     taxReturn.filingMode,
     payload,
-    docCount > 0
+    documents.length > 0
   );
   if (!preflight.passed) {
     const failedIds = preflight.checks.filter((c) => !c.passed).map((c) => c.id);
     throw new Error(`PREFLIGHT_FAILED:${failedIds.join(",")}`);
   }
 
-  const calcResult = calculateTax(taxReturn.filingMode, payload);
+  const calcResult = calculateTax(taxReturn.filingMode, payload, taxReturn.taxYear);
   const personalSummary = calcResult.mode !== "COMPANY" ? calcResult.summary : null;
 
   const provider = getSubmissionProvider();
@@ -281,6 +429,7 @@ export async function prepareSubmissionForUser(userId: string, returnId: string)
     taxYear: taxReturn.taxYear,
     filingMode: taxReturn.filingMode,
     payload,
+    documents,
     generatedAt: new Date().toISOString(),
     taxSummary: personalSummary
       ? {

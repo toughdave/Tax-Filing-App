@@ -66,7 +66,7 @@ export default async function ReturnByIdPage({
 
   const initialTaxSummary: CalculationResult | null = record.taxSummary
     ? { mode: record.filingMode, summary: record.taxSummary } as unknown as CalculationResult
-    : calculateTax(record.filingMode, payload);
+    : calculateTax(record.filingMode, payload, record.taxYear);
 
   return (
     <main style={{ paddingBottom: "3rem" }}>

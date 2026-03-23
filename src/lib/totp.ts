@@ -4,7 +4,6 @@ import crypto from "crypto";
 const APP_NAME = "Canada Tax Filing";
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
-const TAG_LENGTH = 16;
 
 function getEncryptionKey(): Buffer {
   const secret = process.env.NEXTAUTH_SECRET;

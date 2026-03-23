@@ -1,6 +1,40 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
+## [0.24.0] - 2026-03-24
+### Fixed
+- **Tax year 2026 incorrectly selectable** — CRA rules require a completed calendar year for T1 filing. Removed 2026 from the UI dropdown, updated `getDefaultTaxYear()` to always return the previous year, and tightened Zod validation to reject incomplete calendar years. 2026 bracket params remain in config for future readiness.
+- **EI premium credit missing from individual calculation** — `computeCppEi()` now returns `eiPremiumCredit` (from T4 box 18) as a separate non-refundable credit, distinct from `eiOverpaymentCredit` (line 44800). Added `eiPremiums` field to the wizard, base field groups, CRA form mapping, and i18n (en+fr).
+- **Corporate capital gains not included in taxable income** — `calculateCompanyTax()` now adds `taxableCapitalGains` (50% inclusion) to corporate revenue before deductions.
+- **All lint warnings resolved** — Removed unused imports (`maskIp`, `beforeEach`, `TAG_LENGTH`), added void expressions for intentionally unused stub parameters.
+
+### Added
+- **OCR & CRA My Account import service architecture** — New `ocr-import-service.ts` with `OcrProvider` and `CraImportProvider` interfaces, NoOp stub implementations, T4/T5 field maps, confidence-gated `mergeExtractedIntoPayload()` utility, and environment-variable-based provider factory (`OCR_PROVIDER`, `CRA_AFR_ENABLED`). 12 regression tests.
+- **Expanded document categories** — Added T4A, T4E, T3, T5008, T2200, T2202, and RENTAL_STATEMENT to the Prisma enum, document service type, and API route validation.
+- **EI premiums field** — New `eiPremiums` field (T4 box 18, CRA line 31200) in wizard other-credits section and Schedule 8 subsection, with bilingual labels.
+
+### Research & Audit
+- **CRA tax year rules** — Confirmed: T1 returns are filed for completed calendar years only. Exceptions (deceased, emigrant, corporate non-calendar fiscal year) documented.
+- **CRA form coverage audit** — Current coverage: T1 General, T2125, basic T2, Schedules 1/3/6/8/9/11, ON428/ON-BEN. Documented gaps: T776, T778, T2200, T2202, Schedule 5/7, info slip parsing, provincial forms beyond Ontario.
+- **Filing mode reconciliation** — Verified: INDIVIDUAL/SELF_EMPLOYED→NETFILE (T1), COMPANY→EFILE (T2). Provider routing correct; NETFILE blocks COMPANY mode.
+
+## [0.23.1] - 2026-03-23
+### Fixed
+- **Draft save reliability and feedback** — Save failures now map to specific user-facing states (session expiry, request validation, payload validation, rate limiting) instead of a single generic draft-save error.
+- **Persisted tax-year calculation drift** — `calculateTax()` now receives the stored `taxYear` in the service layer and return detail fallback path, preventing reopened or prepared returns from recalculating against the wrong year.
+- **Returning filer continuity** — New-return flow now surfaces resumable returns and pre-fills stable personal data from `TaxProfile` for signed-in returning filers.
+- **Premature required-field indicators** — Timeline missing-field badges now wait until a section has been visited or review is reached, reducing false-negative UX on untouched sections.
+- **Company preflight checks** — Submission readiness checks now validate corporation identity fields for `COMPANY` mode and skip personal province-of-residence requirements that do not apply.
+- **2026 CRA form mapping alignment** — CRA form registry now includes 2026 so preflight/form-mapping support stays aligned with the tax-year configuration layer.
+
+### Changed
+- **Supporting documents UX** — The UI now explicitly states that uploads are stored for manual review, PDF generation, and submission packaging, while OCR/CRA import connections remain inactive.
+- **Timeline transitions** — Accordion section bodies now use smoother enter/open animations for less abrupt section changes.
+
+## [0.23.0] - 2026-03-23
+### Changed
+- Version bump.
+
 ## [0.22.4] - 2026-03-06
 ### Fixed
 - **Subsection mode/profileFlag filtering in payload assembly** — `payloadFromValues()`, `countMissingRequired()`, `isSectionComplete()`, and section validation trigger now filter subsections by `mode` and `profileFlag`, matching the render logic. Previously, mode-gated subsection fields (e.g. `cppSelfEmployedContributions`) leaked into INDIVIDUAL payloads and were rejected by backend validation.

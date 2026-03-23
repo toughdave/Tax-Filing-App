@@ -79,4 +79,22 @@ describe("filing-preflight", () => {
     expect(bnCheck).toBeDefined();
     expect(bnCheck?.passed).toBe(false);
   });
+
+  it("company mode uses corporation identity fields and skips province checks", () => {
+    const companyPayload = {
+      corporationName: "ACME Inc",
+      businessNumber: "BN123456",
+      fiscalYearEnd: "2024-12-31",
+      corporateRevenue: 1000000,
+      corporateDeductions: 200000
+    };
+
+    const result = runPreflightChecks(2024, "COMPANY", companyPayload, true);
+    const identityCheck = result.checks.find((c) => c.id === "identity_complete");
+    const provinceCheck = result.checks.find((c) => c.id === "province_present");
+
+    expect(identityCheck?.passed).toBe(true);
+    expect(provinceCheck).toBeUndefined();
+    expect(result.passed).toBe(true);
+  });
 });

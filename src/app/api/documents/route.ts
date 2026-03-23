@@ -7,9 +7,16 @@ import { z } from "zod";
 
 const VALID_CATEGORIES: DocumentCategoryValue[] = [
   "T4_SLIP",
+  "T4A_SLIP",
+  "T4E_SLIP",
   "T5_SLIP",
+  "T3_SLIP",
+  "T5008_SLIP",
+  "T2200",
+  "T2202",
   "RECEIPT",
   "BUSINESS_STATEMENT",
+  "RENTAL_STATEMENT",
   "NOTICE_OF_ASSESSMENT",
   "OTHER"
 ];
